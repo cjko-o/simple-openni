@@ -1,10 +1,11 @@
 # -----------------------------------------------------------------------------
 # SimpleOpenNI 
 # -----------------------------------------------------------------------------
-# max.rheiner@zhdk.ch
+# Processing Wrapper for the OpenNI/Kinect library
+# prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
 # -----------------------------------------------------------------------------
 #
-#	this envVar should around:
+#	this envVar should be set:
 #		OPEN_NI_INCLUDE < set this on osx: export OPEN_NI_INCLUDE=...path
 #		OPEN_NI_LIB 
 #		JAVA_HOME
