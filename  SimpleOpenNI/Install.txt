@@ -1,0 +1,8 @@
+Install
+-------
+
+win32:
+
+osx:
+	- set the environment variable for the OpenNI include path
+	  export OPEN_NI_INCLUDE=...path
