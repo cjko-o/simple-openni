@@ -33,5 +33,7 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
   * Download the souces from the svn
   * Open a terminal and go into the 'SimpleOpenN' folder
   * Type those commands:
-    > cmake .
-    > make
+{{{
+> cmake .
+> make
+}}}
