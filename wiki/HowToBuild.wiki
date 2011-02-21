@@ -13,7 +13,7 @@ Before you can build the library you should install following tools:
 
 = Windows =
 
-On windows i only used VisualStudio 2008
+On windows i only used Visual Studio 2008
 
 
 = OSX =
