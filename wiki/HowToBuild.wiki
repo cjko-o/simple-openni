@@ -13,12 +13,24 @@ Before you can build the library you should install following tools:
 
 = Windows =
 
+On windows i only used VisualStudio 2008
+
 
 = OSX =
 
+On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in order to compile the sources
+
+  * Download the souces from the svn
+  * Open a terminal and go into the 'SimpleOpenN' folder
+  * Type those commands:
+    > cmake .
+    > make
+
+
 = UNIX/Linux =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+  * Download the souces from the svn
+  * Open a terminal and go into the 'SimpleOpenN' folder
+  * Type those commands:
+    > cmake .
+    > make
