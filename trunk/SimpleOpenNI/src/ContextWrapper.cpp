@@ -207,35 +207,6 @@ bool ContextWrapper::enableUser(int flags)
 	_userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(calibrationStartedCb, calibrationEndedCb, this, _hCalibrationCB);
 	_userGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(poseStartedCb, poseEndedCb, this, _hPoseCB);
 
-
-/*
-	XnCallbackHandle hUserCallbacks, hCalibrationCallbacks, hPoseCallbacks;
-	if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON))
-	{
-		printf("Supplied user generator doesn't support skeleton\n");
-		return 1;
-	}
-	g_UserGenerator.RegisterUserCallbacks(User_NewUser, User_LostUser, NULL, hUserCallbacks);
-	g_UserGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(UserCalibration_CalibrationStart, UserCalibration_CalibrationEnd, NULL, hCalibrationCallbacks);
-
-	if (g_UserGenerator.GetSkeletonCap().NeedPoseForCalibration())
-	{
-		g_bNeedPose = TRUE;
-		if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION))
-		{
-			printf("Pose required, but not supported\n");
-			return 1;
-		}
-		g_UserGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(UserPose_PoseDetected, NULL, NULL, hPoseCallbacks);
-		g_UserGenerator.GetSkeletonCap().GetCalibrationPose(g_strPose);
-	}
-
-	g_UserGenerator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
-
-	nRetVal = g_Context.StartGeneratingAll();
-	CHECK_RC(nRetVal, "StartGenerating");
-*/
-
 	return true;
 }
 
