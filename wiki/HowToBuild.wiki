@@ -14,6 +14,15 @@ Before you can build the library you should install following tools:
 = Windows =
 
 On windows i only used Visual Studio 2008
+  * Download the souces from the svn
+  * Open a terminal and go into the 'SimpleOpenN' folder
+  * Type those commands:
+{{{
+> mkdir vc
+> cd vc
+> cmake ..
+}}}
+  * Now you have a Visual Studio Project 'SimpleOpenNI.sln'
 
 
 = OSX =
