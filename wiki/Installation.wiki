@@ -7,9 +7,9 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 
 = Windows =
 
-  * Install OpenNI *
+  *Install OpenNI
 
-  * Install SimpleOpenNI *
+  *Install SimpleOpenNI
 
 = OSX =
 
