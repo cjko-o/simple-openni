@@ -1,4 +1,4 @@
-#Build instructions
+##summary Build instructions
 
 = Introduction =
 
