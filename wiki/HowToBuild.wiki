@@ -24,8 +24,8 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
   * Open a terminal and go into the 'SimpleOpenN' folder
   * Type those commands:
 {{{
-    > cmake .
-    > make
+> cmake .
+> make
 }}}
 
 = UNIX/Linux =
