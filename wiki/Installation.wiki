@@ -11,7 +11,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
-      C:\Users\[your user]\Documents\Processing\Libraries
+      C:\Users\\[your user\]\Documents\Processing\Libraries
   * If you don't have this folder then create it.
 
 = OSX =
