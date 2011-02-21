@@ -8,6 +8,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 = Windows =
 
 * Install OpenNI *
+  * ...
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
@@ -17,6 +18,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 = OSX =
 
 * Install OpenNI *
+  * ...
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
@@ -24,3 +26,5 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
   * If you don't have this folder then create it.
 
 = Linux =
+
+  * ...
