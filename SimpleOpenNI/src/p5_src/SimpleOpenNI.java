@@ -166,6 +166,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		{	// setup the var for depth calc
 			this._dataType |= DEPTH;
 			_depthImage = new PImage(depthWidth(), depthHeight(),PConstants.RGB);
+			_depthRaw 	= new int[depthWidth() * depthHeight()];
 			return true;
 		}
 		else
@@ -266,15 +267,17 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		super.update();
 		
-		// copy the depthImage map
+		// copy the depth map
 		if((_dataType & DEPTH) > 0)
 		{
 			_depthImage.loadPixels();
 				depthImage(_depthImage.pixels);
 			_depthImage.updatePixels();
+			
+			depthMap(_depthRaw);
 		}
 		
-		// copy the depthImage map
+		// copy the rgb map
 		if((_dataType & IMAGE) > 0)
 		{
 			_rgbImage.loadPixels();
@@ -282,7 +285,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			_rgbImage.updatePixels();
 		}
 		
-		// copy the depthImage map
+		// copy the ir map
 		if((_dataType & IR) > 0)
 		{
 			_irImage.loadPixels();
@@ -290,7 +293,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			_irImage.updatePixels();
 		}
 		
-		// copy the depthImage map
+		// copy the scene map
 		if((_dataType & SCENE) > 0)
 		{
 			_sceneImage.loadPixels();
