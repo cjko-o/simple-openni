@@ -26,11 +26,11 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
   * [http://www.cmake.org/files/v2.8/cmake-2.8.3-Darwin-universal.dmg  CMake](only if you plan to build the SimpleOpenNI library by yourself)
 
   * Install OpenNI
-    Open the terminal an type in those commands:
+Open the terminal and type in those commands:
 {{{
-    > sudo port install git-core 
-    > sudo port install libtool
-    > sudo port install libusb-devel +universal
+> sudo port install git-core 
+> sudo port install libtool
+> sudo port install libusb-devel +universal
 }}}
 
 
