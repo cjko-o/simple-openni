@@ -20,7 +20,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 
 * Install OpenNI *
   This programs need to be installed first:
-  * Xcode
+  * [http://developer.apple.com/technologies/tools/xcode.html Xcode] 
   * MacPorts
   * Java JDK
   * CMake(only if you plan to build the SimpleOpenNI library by yourself)
