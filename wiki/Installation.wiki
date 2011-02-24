@@ -19,7 +19,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 = OSX =
 
 * Install OpenNI *
-  This programs need to be installed first:
+  Those programs need to be in order to install OpenNI:
   * [http://developer.apple.com/technologies/tools/xcode.html Xcode] 
   * [http://distfiles.macports.org/MacPorts/MacPorts-1.9.2-10.6-SnowLeopard.dmg MacPorts]
   * Java JDK
@@ -28,7 +28,9 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
   * Install OpenNI
     > sudo port install git-core 
     > sudo port install libtool
-    > sudo port install libusb-devel +universal 
+    > sudo port install libusb-devel +universal
+
+
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
