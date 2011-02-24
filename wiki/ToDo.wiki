@@ -1,4 +1,9 @@
 #summary What is left to do
 
-= Introduction =
+= To Do =
 
+  * Finalize the programming interface
+  * Implement gestures
+  * Implement hand tracking
+
+  
