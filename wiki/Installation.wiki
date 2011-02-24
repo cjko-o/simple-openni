@@ -1,4 +1,5 @@
 #summary How to install.
+#labels Phase-Deploy
 
 = Introduction =
 
@@ -18,7 +19,16 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 = OSX =
 
 * Install OpenNI *
-  * ...
+  This programs need to be installed first:
+  * Xcode
+  * MacPorts
+  * Java JDK
+  * CMake(only if you plan to build the SimpleOpenNI library by yourself)
+
+  * Install OpenNI
+    > sudo port install git-core 
+    > sudo port install libtool
+    > sudo port install libusb-devel +universal 
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
