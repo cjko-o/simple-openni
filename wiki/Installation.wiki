@@ -21,9 +21,9 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 * Install OpenNI *
   This programs need to be installed first:
   * [http://developer.apple.com/technologies/tools/xcode.html Xcode] 
-  * MacPorts
+  * [http://distfiles.macports.org/MacPorts/MacPorts-1.9.2-10.6-SnowLeopard.dmg MacPorts]
   * Java JDK
-  * CMake(only if you plan to build the SimpleOpenNI library by yourself)
+  * [http://www.cmake.org/files/v2.8/cmake-2.8.3-Darwin-universal.dmg  CMake](only if you plan to build the SimpleOpenNI library by yourself)
 
   * Install OpenNI
     > sudo port install git-core 
