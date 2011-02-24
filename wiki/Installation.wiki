@@ -46,7 +46,7 @@ Those programs need to be installed in order to install OpenNI:
 > cd ~/Development/Kinect
 > mkdir OpenNI
 > mkdir Nite
-> cd ~/Development/Kinect/OpenNI
+> cd OpenNI
 }}}
 
 {{{
