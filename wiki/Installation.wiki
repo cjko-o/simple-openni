@@ -27,11 +27,31 @@ Those programs need to be installed in order to install OpenNI:
   * [http://www.cmake.org/files/v2.8/cmake-2.8.3-Darwin-universal.dmg  CMake](only if you plan to build the SimpleOpenNI library by yourself)
 
   * Install OpenNI
-   Open the terminal and type in those commands:
+  Open the terminal and type in those commands:
 {{{
 > sudo port install git-core 
 > sudo port install libtool
 > sudo port install libusb-devel +universal
+}}}
+
+{{{
+> mkdir ~/Development/Kinect
+> cd Kinect
+> tar xvf OpenNI-Bin-MacOSX-v1.0.0.25.tar.bz2
+> sudo ./install.sh
+}}}
+
+{{{
+> mkdir ~/Development/Kinect
+> cd ~/Development/Kinect
+> mkdir OpenNI
+> mkdir Nite
+> cd ~/Development/Kinect/OpenNI
+}}}
+
+{{{
+> tar xvf OpenNI-Bin-MacOSX-v1.0.0.25.tar.bz2
+> sudo ./install.sh
 }}}
 
 
