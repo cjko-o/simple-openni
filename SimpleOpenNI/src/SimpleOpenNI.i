@@ -18,7 +18,6 @@
 
 %apply int[] {int *};
 
-
 # ----------------------------------------------------------------------------/
 # Xn
 
@@ -58,6 +57,10 @@ namespace std {
 # ContextWrapper
 
 namespace sOpenNI{
+
+typedef XnPoint3D*	XnPoint3DArray;
+JAVA_ARRAYSOFCLASSES(XnPoint3DArray)
+%apply XnPoint3D[] {XnPoint3DArray};
 
 %constant int SKEL_PROFILE_NONE		= XN_SKEL_PROFILE_NONE;
 %constant int SKEL_PROFILE_ALL		= XN_SKEL_PROFILE_ALL;
@@ -117,8 +120,13 @@ public:
 	int depthWidth();
 	int	depthHeight();
 	int	depthImage(int* map);	
-	int	depthMap(int* map);	
-
+	void setDepthImageColor(int r,int g,int b);
+	
+	int depthMapSize();
+	int	depthMap(int* map);					
+	int depthMapRealWorld(XnPoint3D map[]);	
+	XnPoint3DArray depthMapRealWorldA();		
+	
 	int rgbWidth();
 	int rgbHeight();
 	int	rgbImage(int* map);	
