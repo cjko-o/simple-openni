@@ -53,7 +53,7 @@ Those programs need to be installed in order to install OpenNI:
 > tar xvf OpenNI-Bin-MacOSX-v1.0.0.25.tar.bz2
 > sudo ./install.sh
 }}}
-
+...
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
