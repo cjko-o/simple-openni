@@ -40,6 +40,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public static final int SCENE		 	= 1 << 4;
 	public static final int USER	 		= 1 << 5;
 	
+	
 	protected Method 			_userNewMethod;
 	protected Method 			_userLostMethod;
 	
@@ -55,6 +56,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	protected PImage			_depthImage;
 	protected int[]				_depthRaw;
+	protected PVector[]			_depthMapRealWorld;
+	XnVector3D[] 				_depthMapRealWorldXn;
 	
 	protected PImage			_rgbImage;
 
@@ -165,8 +168,16 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		if(super.enableDepth())
 		{	// setup the var for depth calc
 			this._dataType |= DEPTH;
-			_depthImage = new PImage(depthWidth(), depthHeight(),PConstants.RGB);
-			_depthRaw 	= new int[depthWidth() * depthHeight()];
+			_depthImage 		= new PImage(depthWidth(), depthHeight(),PConstants.RGB);
+			_depthRaw 			= new int[depthMapSize()];
+			_depthMapRealWorld 	= new PVector[depthMapSize()];
+			_depthMapRealWorldXn = new XnVector3D[depthMapSize()];
+			
+			for(int i=0;i < depthMapSize();i++ )
+			{
+				_depthMapRealWorld[i] 	= new PVector();
+				_depthMapRealWorldXn[i] = new XnVector3D();
+			}
 			return true;
 		}
 		else
@@ -179,11 +190,15 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return _depthImage;
 	}
 	
-	public int depthMap(int[] map)
+	public int[] depthMap()
 	{
-		return super.depthMap(map);
+		return _depthRaw;
 	}
-	
+
+	public PVector[] depthMapRealWorld()
+	{
+		return _depthMapRealWorld;
+	}	
 	/**
 	* Enable the camera image collection
 	*/  
@@ -275,6 +290,26 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			_depthImage.updatePixels();
 			
 			depthMap(_depthRaw);
+			
+			
+			depthMapRealWorld(_depthMapRealWorldXn);
+			for(int i=0;i < _depthMapRealWorldXn.length;i++)
+			{
+				_depthMapRealWorld[i].set(_depthMapRealWorldXn[i].getX(),
+										  _depthMapRealWorldXn[i].getY(),
+									      _depthMapRealWorldXn[i].getZ());
+			}
+					
+			/* still have to find out how i get an return array back with swig
+			XnVector3D[] depthMapRealWorld = depthMapRealWorldA();
+			for(int i=0;i < depthMapSize();i++)
+			{
+				_depthMapRealWorld[i].set(depthMapRealWorld[i].getX(),
+										  depthMapRealWorld[i].getY(),
+									      depthMapRealWorld[i].getZ());
+			}
+			*/
+			
 		}
 		
 		// copy the rgb map
@@ -368,6 +403,47 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 		return jointPos1.getFConfidence();
 	}
+
+	public void convertRealWorldToProjective(PVector world,PVector proj) 
+	{
+		XnVector3D w = new XnVector3D();
+		XnVector3D p = new XnVector3D();
+
+		w.setX(world.x);
+		w.setY(world.y);
+		w.setZ(world.z);
+		convertRealWorldToProjective(w,p);
+		world.set(p.getX(),
+				  p.getY(),
+				  p.getZ());
+	}
+
+	/*
+	public void convertRealWorldToProjective(Vector3D worldArray, Vector3D projArray) 
+	{
+	}
+	*/
+	
+	public void convertProjectiveToRealWorld(PVector proj, PVector world) 
+	{
+		XnVector3D p = new XnVector3D();
+		XnVector3D w = new XnVector3D();
+
+		p.setX( proj.x);
+		p.setY( proj.y);
+		p.setZ( proj.z);
+		convertProjectiveToRealWorld(p,w);
+		world.set(w.getX(),
+				  w.getY(),
+				  w.getZ());
+	}
+
+	/*
+	public void convertProjectiveToRealWorld(Vector3D projArray, Vector3D worldArray) 
+	{
+	}
+	*/
+ 
 
 	///////////////////////////////////////////////////////////////////////////
 	// callbacks

@@ -55,9 +55,15 @@ ContextWrapper::ContextWrapper():
 _pDepthImage(NULL),
 _pIrImage(NULL),
 _pSceneImage(NULL),
+_depthMapRealWorld(NULL),
 _initFlag(false),
 _generatingFlag(false)
 {
+	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
+		
+	_depthImageColor[0] = 1.0f;
+	_depthImageColor[1] = 1.0f;
+	_depthImageColor[2] = 1.0f;
 }
 
 ContextWrapper::~ContextWrapper()
@@ -82,10 +88,13 @@ void ContextWrapper::close()
 		free(_pIrImage);
 	if(_pSceneImage)
 		free(_pSceneImage);
+	if(_depthMapRealWorld)
+		free(_depthMapRealWorld),
 
 	_pDepthImage= NULL;
 	_pIrImage	= NULL;
 	_pSceneImage= NULL;
+	_depthMapRealWorld= NULL;
 
 	// shutdown the context
 	_context.Shutdown();
@@ -125,8 +134,9 @@ bool ContextWrapper::enableDepth()
 	_rc = _context.FindExistingNode(XN_NODE_TYPE_DEPTH, _depth);
 	_depth.GetMetaData(_depthMD);	
 
-	_depthBufSize = _depthMD.XRes() * _depthMD.YRes();
-	_pDepthImage  = (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
+	_depthBufSize		= _depthMD.XRes() * _depthMD.YRes();
+	_pDepthImage		= (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
+	_depthMapRealWorld	= (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
 
 	return true;
 }
@@ -241,6 +251,7 @@ void ContextWrapper::update()
 		_depth.GetMetaData(_depthMD);
 		calcHistogram();
 		createDepthImage();
+		calcDepthImageRealWorld();
 	}
 
 
@@ -298,7 +309,29 @@ void ContextWrapper::calcHistogram()
 	}
 
 }
-	
+
+void ContextWrapper::calcDepthImageRealWorld()
+{
+	const XnDepthPixel*	pDepth	= _depthMD.Data();
+	XnPoint3D*			map		= _depthMapRealWorld;
+	for(int y = 0; y < _depthMD.YRes(); ++y)
+	{
+		for(int x = 0; x < _depthMD.XRes(); ++x, ++pDepth,++map)
+		{
+			map->X = x;
+			//map->Y = _depthMD.YRes()-y;		// in the coordinatesystem of the image y points down, in the realword it points up
+			map->Y = y;		// in the coordinatesystem of the image y points down, in the realword it points up
+			map->Z = *pDepth;
+		}
+	}
+
+	// convert all point into realworld coord
+	_depth.ConvertProjectiveToRealWorld(_depthBufSize,
+										_depthMapRealWorld,
+										_depthMapRealWorld);
+}
+
+
 void ContextWrapper::createDepthImage()
 {
 	xnOSMemSet(_pDepthImage, 0, _depthMD.XRes()*_depthMD.YRes()*sizeof(XnRGB24Pixel));
@@ -314,10 +347,9 @@ void ContextWrapper::createDepthImage()
 			{
 				int nHistValue = (int)_pDepthHist[*pDepth];
 				
-				pPixel->nRed	= nHistValue;
-				pPixel->nGreen	= nHistValue;
-				//pPixel->nBlue	= nHistValue;
-				pPixel->nBlue	= 0;
+				pPixel->nRed	= nHistValue * _depthImageColor[0];
+				pPixel->nGreen	= nHistValue * _depthImageColor[1];
+				pPixel->nBlue	= nHistValue * _depthImageColor[2];
 			}
 		}
 	}
@@ -353,8 +385,58 @@ int ContextWrapper::depthMap(int* map)
 {
 	for(int i=0;i < _depthBufSize;i++)
 		map[i] = (int)(_depthMD.Data())[i]; 
+
 	return _depthBufSize;
 }
+
+int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
+{
+	// speed up the copy
+	memcpy((void*)map,(const void *)_depthMapRealWorld,_depthBufSize * sizeof(XnPoint3D));
+	
+	return _depthBufSize;
+}
+
+XnPoint3DArray ContextWrapper::depthMapRealWorldA()
+{
+	return _depthMapRealWorld;
+}
+
+int ContextWrapper::depthMapSize()
+{
+	return _depthBufSize;
+}
+
+
+
+int ContextWrapper::depthHistSize()
+{
+	return MAX_DEPTH;
+}
+
+int ContextWrapper::depthHistMap(float* histMap)
+{
+	memcpy((void*)histMap,(const void *)_pDepthHist,MAX_DEPTH * sizeof(float));
+/*
+	for(int i=0;i < MAX_DEPTH;i++)
+		histMap[i] = _pDepthHist[i];
+*/
+	return MAX_DEPTH;
+}
+
+void ContextWrapper::setDepthImageColor(int r,int g,int b)
+{
+	_depthImageColor[0] = r * 1.0f / 255.0f ;
+	_depthImageColor[1] = g * 1.0f / 255.0f ;
+	_depthImageColor[2] = b * 1.0f / 255.0f ;
+
+}
+
+void ContextWrapper::setDepthImageColorRange(XnRGB24Pixel* colors,int count)
+{
+
+}
+
 		
 ///////////////////////////////////////////////////////////////////////////////
 // rgb image methods

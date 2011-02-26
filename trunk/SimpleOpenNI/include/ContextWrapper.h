@@ -34,6 +34,8 @@ namespace sOpenNI{
 
 #define		MAX_DEPTH	10000	// 10m
 
+typedef XnPoint3D*	XnPoint3DArray;
+
 class ContextWrapper
 {
 public:
@@ -61,7 +63,16 @@ public:
 	int	depthHeight();
 
 	int	depthImage(int* map);		// argb 4-Bytes / alpha is not used
-	int	depthMap(int* map);			// in milimeters
+	void setDepthImageColor(int r,int g,int b);
+	void setDepthImageColorRange(XnRGB24Pixel* colors,int count);
+
+	int depthMapSize();
+	int	depthMap(int* map);					// in milimeters
+	int depthMapRealWorld(XnPoint3D map[]);	
+	XnPoint3DArray depthMapRealWorldA();	
+
+	int depthHistSize();
+	int depthHistMap(float* histMap);
 
 	// cam image
 	int rgbWidth();
@@ -144,6 +155,7 @@ protected:
 
 	void calcHistogram();
 	void createDepthImage();
+	void calcDepthImageRealWorld();
 	void createIrImage();
 	void calcSceneData();
 
@@ -158,6 +170,8 @@ protected:
 	float				_pDepthHist[MAX_DEPTH];
 	XnRGB24Pixel*		_pDepthImage;
 	int					_depthBufSize;
+	float				_depthImageColor[3];
+	XnPoint3D*			_depthMapRealWorld;
 
 	xn::ImageGenerator	_image;
 	xn::ImageMetaData	_imageMD;
