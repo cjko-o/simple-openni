@@ -6,5 +6,5 @@
   * Implement hand tracking
   * Implement gesture tracking
   * Implement NITE
-  * Use Multiple Threads
+  * Use multiple threads
   
