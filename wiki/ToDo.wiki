@@ -5,6 +5,8 @@
   * Finalize the programming interface
   * Implement hand tracking
   * Implement gesture tracking
+  * Read joint orientation
   * Implement NITE
   * Use multiple threads
+
   
