@@ -18,6 +18,9 @@ void setup()
 {
   context = new SimpleOpenNI(this,"SamplesConfig.xml");
    
+  // mirror is by default enabled
+  //context.setMirror(false);
+  
   // enable depthMap generation 
   context.enableDepth();
   
