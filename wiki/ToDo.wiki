@@ -3,7 +3,7 @@
 = To Do =
 
   * Finalize the programming interface
-  * Init openNI also without xml, only with the enable* functions
+  * Init openNI also without xml, only with the enable functions
   * ~~Track gesture and hands~~
   * Track multiple hands
   * Read joint orientation
