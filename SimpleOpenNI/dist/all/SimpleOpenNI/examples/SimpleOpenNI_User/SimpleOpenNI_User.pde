@@ -80,27 +80,27 @@ void drawSkeleton(int userId)
 // -----------------------------------------------------------------
 // SimpleOpenNI events
 
-void onUserNew(int userId)
+void onNewUser(int userId)
 {
-  println("onUserNewEvent - userId: " + userId);
+  println("onNewUser - userId: " + userId);
   println("  start pose detection");
   
   context.startPoseDetection("Psi",userId);
 }
 
-void onUserLost(int userId)
+void onLostUser(int userId)
 {
-  println("onUserLost - userId: " + userId);
+  println("onLostUser - userId: " + userId);
 }
 
-void onCalibrationStarted(int userId)
+void onStartCalibration(int userId)
 {
-  println("onCalibrationStarted - userId: " + userId);
+  println("onStartCalibration - userId: " + userId);
 }
 
-void onCalibrationEnded(int userId, boolean successfull)
+void onEndCalibration(int userId, boolean successfull)
 {
-  println("onCalibrationEnded - userId: " + userId + ", successfull: " + successfull);
+  println("onEndCalibration - userId: " + userId + ", successfull: " + successfull);
   
   if (successfull) 
   { 
@@ -115,9 +115,9 @@ void onCalibrationEnded(int userId, boolean successfull)
   }
 }
 
-void onPoseStarted(String pose,int userId)
+void onStartPose(String pose,int userId)
 {
-  println("onPoseStarted - userId: " + userId + ", pose: " + pose);
+  println("onStartPose - userId: " + userId + ", pose: " + pose);
   println(" stop pose detection");
   
   context.stopPoseDetection(userId); 
@@ -125,8 +125,8 @@ void onPoseStarted(String pose,int userId)
  
 }
 
-void onPoseEnded(String pose,int userId)
+void onEndPose(String pose,int userId)
 {
-  println("onPoseEnded - userId: " + userId + ", pose: " + pose);
+  println("onEndPose - userId: " + userId + ", pose: " + pose);
 }
 

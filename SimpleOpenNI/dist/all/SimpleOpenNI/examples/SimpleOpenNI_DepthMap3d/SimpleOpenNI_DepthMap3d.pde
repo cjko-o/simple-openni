@@ -8,29 +8,32 @@
  * date:  02/16/2011 (m/d/y)
  * ----------------------------------------------------------------------------
  */
+
 import SimpleOpenNI.*;
 
 SimpleOpenNI context;
-float        zoomF = 0.07f;
-float        rotX = radians(-30.0f);
-float        rotY = radians(-35.0f);
+float        zoomF =0.3f;
+float        rotX = radians(180);  // by default rotate the hole scene 180deg around the x-axis, 
+                                   // the data from openni comes upside down
+float        rotY = radians(0);
 
 void setup()
 {
+  size(1024,768,P3D);  // strange, get drawing error in the cameraFrustum if i use P3D, in opengl there is no problem
+
   context = new SimpleOpenNI(this,"SamplesConfig.xml");
-   
+
+  // disable mirror
+  context.setMirror(false);
+
   // enable depthMap generation 
   context.enableDepth();
-  // set the depthImage base color
-  context.setDepthImageColor(255,255,255);
- 
-  size(800,600,P3D); 
+
   stroke(255,255,255);
   smooth();
   perspective(95,
               float(width)/float(height), 
-              500,150000);
-
+              10,150000);
 }
 
 void draw()
@@ -39,62 +42,74 @@ void draw()
   context.update();
 
   background(0,0,0);
-  
+
   translate(width/2, height/2, 0);
   rotateX(rotX);
   rotateY(rotY);
   scale(zoomF);
-  
-  int[] depthMap = context.depthMap();
-  int   steps   = 2;
-  float xDist   = 5.0f;
-  float yDist   = 5.0f;
-  int depthV;
- 
-  translate(-context.depthWidth()  * xDist * 0.5f,
-            -context.depthHeight() * yDist * 0.5f);
-            
+
+  int[]   depthMap = context.depthMap();
+  int     steps   = 3;  // to speed up the drawing, draw every third point
+  int     index;
+  PVector realWorldPoint;
+
+  translate(0,0,-1000);  // set the rotation center of the scene 1000 infront of the camera
+
+  stroke(255);
+
   for(int y=0;y < context.depthHeight();y+=steps)
   {
     for(int x=0;x < context.depthWidth();x+=steps)
     {
-      depthV = depthMap[x + y * context.depthWidth()];
-      if(depthV > 0)
-      {
-        point(x * xDist,
-              y * yDist,
-              - depthMap[x + y * context.depthWidth()]);
+      index = x + y * context.depthWidth();
+      if(depthMap[index] > 0)
+      { 
+        // draw the projected point
+        realWorldPoint = context.depthMapRealWorld()[index];
+        point(realWorldPoint.x,realWorldPoint.y,realWorldPoint.z);  // make realworld z negative, in the 3d drawing coordsystem +z points in the direction of the eye
       }
-    } 
-  }  
+    }
+  } 
+
+  // draw the kinect cam
+  context.drawCamFrustum();
 }
+
 
 void keyPressed()
 {
+  switch(key)
+  {
+  case ' ':
+    context.setMirror(!context.mirror());
+    break;
+  }
+
   switch(keyCode)
   {
-    case LEFT:
-      rotY += 0.1f;
-      break;
-    case RIGHT:
-      // zoom out
-      rotY -= 0.1f;
-      break;
-    case UP:
-      if(keyEvent.isShiftDown())
-        zoomF += 0.01f;
-      else
-        rotX += 0.1f;
-      break;
-    case DOWN:
-      if(keyEvent.isShiftDown())
-      {
-        zoomF -= 0.01f;
-        if(zoomF < 0.01)
-          zoomF = 0.01;
-      }
-      else
-        rotX -= 0.1f;
-      break;
+  case LEFT:
+    rotY += 0.1f;
+    break;
+  case RIGHT:
+    // zoom out
+    rotY -= 0.1f;
+    break;
+  case UP:
+    if(keyEvent.isShiftDown())
+      zoomF += 0.02f;
+    else
+      rotX += 0.1f;
+    break;
+  case DOWN:
+    if(keyEvent.isShiftDown())
+    {
+      zoomF -= 0.02f;
+      if(zoomF < 0.01)
+        zoomF = 0.01;
+    }
+    else
+      rotX -= 0.1f;
+    break;
   }
 }
+
