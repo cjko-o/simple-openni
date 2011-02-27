@@ -3,6 +3,7 @@
 = To Do =
 
   * Finalize the programming interface
+  * ~~Track gesture and hands~~
   * Track multiple hands
   * Read joint orientation
   * Implement NITE
