@@ -3,7 +3,8 @@
 = To Do =
 
   * Finalize the programming interface
-  * Implement gestures
   * Implement hand tracking
-
+  * Implement gesture tracking
+  * Implement NITE
+  * Use Multiple Threads
   
