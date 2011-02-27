@@ -1,5 +1,6 @@
-ChangeLog
----------
+ChangeLog - SimpleOpenNI
+------------------------
+http://code.google.com/p/simple-openni/
 
 vx.xx, mm/dd/yyyy
 
