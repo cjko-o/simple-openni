@@ -4,7 +4,7 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
-v0.15 alpha, 02/xx/2011
+v0.12 alpha, 02/28/2011
 	New:
 		- Added handtracking
 		  3 new callbacks: 
