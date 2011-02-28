@@ -27,7 +27,7 @@ On windows i only used Visual Studio 2008
 
 = OSX =
 
-On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in order to compile the sources
+On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in order to compile the sources. Processing should be installed in the applications-folder.
 
   * Download the souces from the svn
   * Open a terminal and go into the 'SimpleOpenN' folder
@@ -40,6 +40,7 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
 = UNIX/Linux =
 
   * Download the souces from the svn
+  * Set the path to the processing jar files ...
   * Open a terminal and go into the 'SimpleOpenN' folder
   * Type those commands:
 {{{
