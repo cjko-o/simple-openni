@@ -109,13 +109,15 @@ public:
 	bool isInit();
 	void close();
 	
-	bool enableDepth();
-	bool enableRGB();
-	bool enableIR();
-	bool enableScene();
-	bool enableUser(int flags);
+	virtual bool enableDepth();
+	virtual bool enableRGB();
+	virtual bool enableIR();
+	virtual bool enableScene();
+	virtual bool enableUser(int flags);
+	virtual bool enableHands();
+	virtual bool enableGesture();
 
-	void update();
+	virtual void update();
 
 	int depthWidth();
 	int	depthHeight();
@@ -126,6 +128,9 @@ public:
 	int	depthMap(int* map);					
 	int depthMapRealWorld(XnPoint3D map[]);	
 	XnPoint3DArray depthMapRealWorldA();		
+
+	float hFieldOfView();
+	float vFieldOfView();
 	
 	int rgbWidth();
 	int rgbHeight();
@@ -156,6 +161,15 @@ public:
 	void	stopPoseDetection(int user);
 	
 	bool getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
+	
+	void	startTrackingHands(const XnVector3D& pos);
+	void	stopTrackingHands(int handId);
+	void	stopTrackingAllHands();
+	void	setSmoothingHands(float smoothingFactor);
+
+	void addGesture(const char* gesture);
+	void removeGesture(const char* gesture);
+	bool availableGesture(const char *strGesture);
 				   
 	void setMirror(bool flag);
 	bool mirror();
@@ -170,12 +184,18 @@ protected:
 	virtual void onNewUserCb(unsigned int userId);
 	virtual void onLostUserCb(unsigned int userId);
 	
-	virtual void onCalibrationStartedCb(unsigned int userId);
-	virtual void onCalibrationEndedCb(unsigned int userId,bool successFlag);
+	virtual void onStartCalibrationCb(unsigned int userId);
+	virtual void onEndCalibrationCb(unsigned int userId,bool successFlag);
 
-	virtual void onPoseStartedCb(const char* strPose, unsigned int user);
-	virtual void onPoseEndedCb(const char* strPose, unsigned int user);
+	virtual void onStartPoseCb(const char* strPose, unsigned int user);
+	virtual void onEndPoseCb(const char* strPose, unsigned int user);
 
+	virtual void onCreateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
+	virtual void onUpdateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
+	virtual void onDestroyHandsCb(unsigned int nId, float fTime);
+
+	virtual void onRecognizeGestureCb(const char* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
+	virtual void onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress);
 	
 };
 

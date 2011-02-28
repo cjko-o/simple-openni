@@ -64,7 +64,6 @@ ELSEIF(APPLE)
 	SET(P5_JAR "/Applications/Processing.app/Contents/Resources/Java/core.jar")
 ELSE()
 	# unix/linux
-	EchoString("Error: Set the path to the Processing core.jar")
 	# SET(P5_JAR "/?")
 ENDIF()
 
@@ -85,6 +84,7 @@ SWIG_LINK_LIBRARIES(SimpleOpenNI ${JAVA_LIBRARIES} ${JNI_LIBRARIES} ${LIBS})
 
 ADD_CUSTOM_COMMAND(TARGET SimpleOpenNI
 				   POST_BUILD
+				   COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Compiling Java files..."
 				   COMMAND cmake -E make_directory ./SimpleOpenNI
 				   COMMAND cmake -E make_directory ${CMAKE_SWIG_OUTDIR}
@@ -94,8 +94,10 @@ ADD_CUSTOM_COMMAND(TARGET SimpleOpenNI
 				   COMMAND cp "${P5_WRAPPER}*.java" "${CMAKE_SWIG_OUTDIR}"
 				   #COMMAND cmake -E copy ${P5_WRAPPER_FILE} ${CMAKE_SWIG_OUTDIR}
 				   COMMAND ${JAVA_COMPILE2} -classpath ${P5_JAR} ${CMAKE_SWIG_OUTDIR}/*.java -d ./
+				   COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Creating jar file..."
 				   COMMAND ${JAVA_ARCHIVE2} cvf SimpleOpenNI.jar SimpleOpenNI
+				   COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Creating doc files..."
 				   COMMAND cmake -E make_directory ./doc
-				   COMMAND ${JAVA_DOC} -author -public -nodeprecated -nohelp -d ./doc  -version ${P5_WRAPPER}/*.java -version ${CMAKE_SWIG_OUTDIR}/ContextWrapper.java)
+				   COMMAND ${JAVA_DOC} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${P5_WRAPPER}/*.java -version ${CMAKE_SWIG_OUTDIR}/ContextWrapper.java)

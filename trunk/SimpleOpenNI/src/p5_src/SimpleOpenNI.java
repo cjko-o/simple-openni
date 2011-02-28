@@ -39,16 +39,30 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public static final int IR 				= 1 << 3;
 	public static final int SCENE		 	= 1 << 4;
 	public static final int USER	 		= 1 << 5;
+	public static final int HANDS	 		= 1 << 6;
+	public static final int GESTURE	 		= 1 << 7;
 	
+	///////////////////////////////////////////////////////////////////////////
+	// callback vars
+	protected Method 			_newUserMethod;
+	protected Method 			_lostUserMethod;
 	
-	protected Method 			_userNewMethod;
-	protected Method 			_userLostMethod;
+	protected Method 			_startCalibrationMethod;
+	protected Method 			_endCalibrationMethod;
 	
-	protected Method 			_calibrationStartedMethod;
-	protected Method 			_calibrationEndedMethod;
+	protected Method 			_startPoseMethod;
+	protected Method 			_endPoseMethod;
+
+	// hands cb
+	protected Method 			_createHandsMethod;
+	protected Method 			_updateHandsMethod;
+	protected Method 			_destroyHandsMethod;
 	
-	protected Method 			_poseStartedMethod;
-	protected Method 			_poseEndedMethod;
+	// gesture cb
+	protected Method 			_recognizeGestureMethod;
+	protected Method 			_progressGestureMethod;
+
+	
 	
 	protected String 			_filename;	
 	protected PApplet			_parent;
@@ -78,70 +92,98 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		this._parent 	= parent;
 		parent.registerDispose(this);
 		
-		this._dataType 					= 0;
-		this._userNewMethod				= null;
-		this._userLostMethod 			= null;
-		this._calibrationStartedMethod 	= null;
-		this._calibrationEndedMethod	= null;
-		this._poseStartedMethod 		= null;
-		this._poseEndedMethod			= null;
+		// setup the callbacks
+		setupCallbackFunc();
 		
-		// user callbacks
-		try {
-			/*
-			_userMethod = parent.getClass().getMethod("userEvent",
-														new Class[] { UserEvent.class });																									
-			*/
-			_userNewMethod = parent.getClass().getMethod("onUserNew",new Class[] { int.class });																									
-		} 
-		catch (Exception e) 
-		{
-		// no such method, or an error.. which is fine, just ignore
-		}
-		
-		try {
-			_userLostMethod = parent.getClass().getMethod("onUserLost",new Class[] { int.class });																									
-		} 
-		catch (Exception e) 
-		{
-		// no such method, or an error.. which is fine, just ignore
-		}
-		
-		// calibrations callbacks
-		try {
-			_calibrationStartedMethod = parent.getClass().getMethod("onCalibrationStarted",new Class[] { int.class });																									
-		} 
-		catch (Exception e) 
-		{
-		// no such method, or an error.. which is fine, just ignore
-		}
-		try {
-			_calibrationEndedMethod = parent.getClass().getMethod("onCalibrationEnded",new Class[] { int.class, boolean.class });																									
-		} 
-		catch (Exception e) 
-		{
-		// no such method, or an error.. which is fine, just ignore
-		}
-		
-		// pose callbacks
-		try {
-			_poseStartedMethod = parent.getClass().getMethod("onPoseStarted",new Class[] { String.class,int.class });																									
-		} 
-		catch (Exception e) 
-		{
-		// no such method, or an error.. which is fine, just ignore
-		}
-		try {
-			_poseEndedMethod = parent.getClass().getMethod("onPoseEnded",new Class[] { String.class,int.class });																									
-		} 
-		catch (Exception e) 
-		{
-		// no such method, or an error.. which is fine, just ignore
-		}
-		
+		// load the initfile
 		this.init(parent.dataPath(initXMLFile));
 	}
 
+	protected void setupCallbackFunc()
+	{
+		this._dataType 					= 0;
+		
+		this._newUserMethod				= null;
+		this._lostUserMethod 			= null;
+		
+		this._startCalibrationMethod 	= null;
+		this._endCalibrationMethod		= null;
+		
+		this._startPoseMethod 			= null;
+		this._endPoseMethod				= null;
+
+		this._createHandsMethod			= null;
+		this._updateHandsMethod			= null;
+		this._destroyHandsMethod		= null;
+	
+		// user callbacks
+		try {
+			_newUserMethod = _parent.getClass().getMethod("onNewUser",new Class[] { int.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		
+		try {
+			_lostUserMethod = _parent.getClass().getMethod("onLostUser",new Class[] { int.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		
+		// calibrations callbacks
+		try {
+			_startCalibrationMethod = _parent.getClass().getMethod("onStartCalibration",new Class[] { int.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		try {
+			_endCalibrationMethod = _parent.getClass().getMethod("onEndCalibration",new Class[] { int.class, boolean.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		
+		// pose callbacks
+		try {
+			_startPoseMethod = _parent.getClass().getMethod("onStartPose",new Class[] { String.class,int.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		try {
+			_endPoseMethod = _parent.getClass().getMethod("onEndPose",new Class[] { String.class,int.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		
+		// hands
+		try {
+			_createHandsMethod = _parent.getClass().getMethod("onCreateHands",new Class[] { int.class,PVector.class,float.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		try {
+			_updateHandsMethod = _parent.getClass().getMethod("onUpdateHands",new Class[] { int.class,PVector.class,float.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		try {
+			_destroyHandsMethod = _parent.getClass().getMethod("onDestroyHands",new Class[] { int.class,float.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		
+		// gesture
+		try {
+			_recognizeGestureMethod = _parent.getClass().getMethod("onRecognizeGesture",new Class[] { String.class,PVector.class,PVector.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+		try {
+			_progressGestureMethod = _parent.getClass().getMethod("onProgressGesture",new Class[] { String.class,PVector.class,float.class });																									
+		} 
+		catch (Exception e) 
+		{/* no such method, or an error.. which is fine, just ignore*/}
+	}
+	
+	
 	/**
 	* 
 	*/  
@@ -272,12 +314,60 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		normal.set(n.getX(),n.getY(),n.getZ());
 	}
 	
+	/**
+	* Enable user 
+	*/  
+	public boolean enableUser(int flags) 
+	{
+		if(super.enableUser(flags))
+		{	
+			this._dataType |= USER;
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	/**
+	* Enable hands  
+	*/  
+	public boolean enableHands() 
+	{
+		if(super.enableHands())
+		{	
+			this._dataType |= HANDS;
+			return true;
+		}
+		else
+			return false;
+	}	
 
+	public void	startTrackingHands(PVector pos)
+	{
+		XnVector3D vec = new XnVector3D();
+		vec.setX(pos.x);
+		vec.setY(pos.y);
+		vec.setZ(pos.z);
+		super.startTrackingHands(vec);
+	}
+
+	/**
+	* Enable gesture  
+	*/  
+	public boolean enableGesture() 
+	{
+		if(super.enableGesture())
+		{	
+			this._dataType |= GESTURE;
+			return true;
+		}
+		else
+			return false;
+	}	
+	
 	/**
 	* Enable the user data collection
 	*/  
-
-
 	public void update() 
 	{
 		super.update();
@@ -291,13 +381,14 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			
 			depthMap(_depthRaw);
 			
-			
+			XnVector3D vec;
 			depthMapRealWorld(_depthMapRealWorldXn);
 			for(int i=0;i < _depthMapRealWorldXn.length;i++)
 			{
-				_depthMapRealWorld[i].set(_depthMapRealWorldXn[i].getX(),
-										  _depthMapRealWorldXn[i].getY(),
-									      _depthMapRealWorldXn[i].getZ());
+				vec = _depthMapRealWorldXn[i];
+				_depthMapRealWorld[i].set(vec.getX(),
+										  vec.getY(),
+									      vec.getZ());
 			}
 					
 			/* still have to find out how i get an return array back with swig
@@ -444,13 +535,79 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 	*/
  
-
+	///////////////////////////////////////////////////////////////////////////
+	// helper methods
+	public void drawCamFrustum()
+	{
+		_parent.g.pushStyle();
+		
+			// draw cam case
+			_parent.stroke(200,200,0);  
+			_parent.noFill();
+			_parent.g.beginShape();
+				_parent.g.vertex(270 * .5f,40 * .5f,0.0f);
+				_parent.g.vertex(-270 * .5f,40 * .5f,0.0f);
+				_parent.g.vertex(-270 * .5f,-40 * .5f,0.0f);
+				_parent.g.vertex(270 * .5f,-40 * .5f,0.0f);
+			_parent.g.endShape(PConstants.CLOSE);
+			
+			_parent.g.beginShape();
+				_parent.g.vertex(220 * .5f,40 * .5f,-50.0f);
+				_parent.g.vertex(-220 * .5f,40 * .5f,-50.0f);
+				_parent.g.vertex(-220 * .5f,-40 * .5f,-50.0f);
+				_parent.g.vertex(220 * .5f,-40 * .5f,-50.0f);
+			_parent.g.endShape(PConstants.CLOSE);
+			
+			_parent.g.beginShape(PConstants.LINES);
+				_parent.g.vertex(270 * .5f,40 * .5f,0.0f);
+				_parent.g.vertex(220 * .5f,40 * .5f,-50.0f);
+				
+				_parent.g.vertex(-270 * .5f,40 * .5f,0.0f);
+				_parent.g.vertex(-220 * .5f,40 * .5f,-50.0f);
+				
+				_parent.g.vertex(-270 * .5f,-40 * .5f,0.0f);
+				_parent.g.vertex(-220 * .5f,-40 * .5f,-50.0f);
+				
+				_parent.g.vertex(270 * .5f,-40 * .5f,0.0f);
+				_parent.g.vertex(220 * .5f,-40 * .5f,-50.0f);
+			_parent.g.endShape();
+			
+			// draw cam opening angles
+			_parent.stroke(200,200,0,50);  
+			_parent.g.line(0.0f,0.0f,0.0f,
+						   0.0f,0.0f,1000.0f);
+			
+			// calculate the angles of the cam, values are in radians, radius is 10m
+			float distDepth = 10000;
+			
+			float valueH = distDepth * _parent.tan(hFieldOfView() * .5f); 
+			float valueV = distDepth * _parent.tan(vFieldOfView() * .5f);       
+			
+			_parent.stroke(200,200,0,100);  
+			_parent.g.line(0.0f,0.0f,0.0f,
+						 valueH,valueV,distDepth);
+			_parent.g.line(0.0f,0.0f,0.0f,
+						 -valueH,valueV,distDepth);
+			_parent.g.line(0.0f,0.0f,0.0f,
+						 valueH,-valueV,distDepth);
+			_parent.g.line(0.0f,0.0f,0.0f,
+						 -valueH,-valueV,distDepth);
+			_parent.g.beginShape();
+				_parent.g.vertex(valueH,valueV,distDepth);
+				_parent.g.vertex(-valueH,valueV,distDepth);
+				_parent.g.vertex(-valueH,-valueV,distDepth);
+				_parent.g.vertex(valueH,-valueV,distDepth);
+			_parent.g.endShape(PConstants.CLOSE);
+		
+		_parent.g.popStyle();	
+	}
+	
 	///////////////////////////////////////////////////////////////////////////
 	// callbacks
 	protected void onNewUserCb(long userId) 
 	{
 		try {
-			_userNewMethod.invoke(_parent, new Object[] { (int)userId });
+			_newUserMethod.invoke(_parent, new Object[] { (int)userId });
 		} 
 		catch (Exception e) 
 		{
@@ -460,52 +617,103 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onLostUserCb(long userId)
 	{
 		try {
-			_userLostMethod.invoke(_parent, new Object[] { (int)userId });		
+			_lostUserMethod.invoke(_parent, new Object[] { (int)userId });		
 		} 
 		catch (Exception e) 
 		{
 		}	
 	}
 
-	protected void onCalibrationStartedCb(long userId) 
+	protected void onStartCalibrationCb(long userId) 
 	{
 		try {
-			_calibrationStartedMethod.invoke(_parent, new Object[] { (int)userId });	
+			_startCalibrationMethod.invoke(_parent, new Object[] { (int)userId });	
 		} 
 		catch (Exception e) 
 		{
 		}	
 	}
 
-	protected void onCalibrationEndedCb(long userId, boolean successFlag) 
+	protected void onEndCalibrationCb(long userId, boolean successFlag) 
 	{
 		try {
-			_calibrationEndedMethod.invoke(_parent, new Object[] { (int)userId, successFlag});
+			_endCalibrationMethod.invoke(_parent, new Object[] { (int)userId, successFlag});
 		} 
 		catch (Exception e) 
 		{
 		}	
 	}
 
-	protected void onPoseStartedCb(String strPose, long userId) 
+	protected void onStartPoseCb(String strPose, long userId) 
 	{
 		try {
-			_poseStartedMethod.invoke(_parent, new Object[] { strPose,(int)userId });
+			_startPoseMethod.invoke(_parent, new Object[] { strPose,(int)userId });
 		} 
 		catch (Exception e) 
 		{
 		}	
 	}
 
-	protected void onPoseEndedCb(String strPose, long userId)
+	protected void onEndPoseCb(String strPose, long userId)
 	{
 		try {
-			_poseEndedMethod.invoke(_parent, new Object[] { strPose,(int)userId });
+			_endPoseMethod.invoke(_parent, new Object[] { strPose,(int)userId });
 		} 
 		catch (Exception e) 
 		{
 		}	
 	}
 
+	// hands
+	protected void onCreateHandsCb(long nId, XnVector3D pPosition, float fTime)
+	{
+		try {
+			_createHandsMethod.invoke(_parent, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
+		} 
+		catch (Exception e) 
+		{}	
+	}	
+	
+	protected void onUpdateHandsCb(long nId, XnVector3D pPosition, float fTime)
+	{
+		try {
+			_updateHandsMethod.invoke(_parent, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
+		} 
+		catch (Exception e) 
+		{}	
+	}	
+	
+	protected void onDestroyHandsCb(long nId, float fTime)
+	{
+		try {
+			_destroyHandsMethod.invoke(_parent, new Object[] { (int)nId,fTime});
+		} 
+		catch (Exception e) 
+		{}	
+	}	
+  
+	protected void onRecognizeGestureCb(String strGesture, XnVector3D pIdPosition, XnVector3D pEndPosition) 
+	{
+		try {
+			_recognizeGestureMethod.invoke(_parent, new Object[] { strGesture,
+																   new PVector(pIdPosition.getX(),pIdPosition.getY(),pIdPosition.getZ()),
+																   new PVector(pEndPosition.getX(),pEndPosition.getY(),pEndPosition.getZ())
+																 });
+		} 
+		catch (Exception e) 
+		{}	
+	}
+
+	protected void onProgressGestureCb(String strGesture, XnVector3D pPosition, float fProgress) 
+	{
+		try {
+			_progressGestureMethod.invoke(_parent, new Object[] { strGesture,
+																  new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),
+																  fProgress
+																 });
+		} 
+		catch (Exception e) 
+		{}	
+	}	
 }
 
