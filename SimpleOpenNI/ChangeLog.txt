@@ -13,8 +13,8 @@ v0.12 alpha, 02/28/2011
 			onDestroyHands(long nId, float fTime)
 		- Added gesturetracking
 		  2 new callbacks: 
-			onUpdateHands(long nId, PVector pPosition, float fTime)
-			onUpdateHands(long nId, PVector pPosition, float fTime)
+			onRecognizeGesture(String strGesture, PVector idPosition, PVector endPosition)
+			onProgressGesture(String strGesture, PVector position,float progress)
 		- Export now the realworld depthMap, see the function depthMapRealWorld
 		- Added functions to get the horizontal and the vertical field of view of the camera
 		  hFieldOfView
