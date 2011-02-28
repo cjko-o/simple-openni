@@ -30,7 +30,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	10		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	12		// 1234 = 12.24
 
 XnFloat Colors[][3] =
 {
@@ -106,6 +106,38 @@ int ContextWrapper::version()
 	return SIMPLEOPENNI_VERSION; 
 }
 
+void ContextWrapper::logOut(int msgType,const char* msg,...)
+{
+	switch(msgType)
+	{
+	case MsgType_Error:
+		std::cout << "SimpleOpenNI Error: ";
+		break;
+	case MsgType_Info:
+	default:
+		std::cout << "SimpleOpenNI Info: ";
+		break;
+	};
+	
+	va_list args;
+	va_start(args, msg);
+	//vsprintf_s(_strBuffer,STRING_BUFFER,msg, args);
+	vsnprintf(_strBuffer,STRING_BUFFER,msg, args);
+	va_end(args);
+	/*
+	va_list vl;
+	va_start(vl,amount);
+	for(i=0;i<amount;i++)
+	{
+		val=va_arg(vl,double);
+		printf ("\t%.2f",val);
+	}
+	va_end(vl);
+	*/
+
+	std::cout << _strBuffer << std::endl;
+}
+
 bool ContextWrapper::init(const char* xmlInitFile)
 {
 	// init the cam with the xml setup file
@@ -115,7 +147,8 @@ bool ContextWrapper::init(const char* xmlInitFile)
 		return false;
 	else if (_rc != XN_STATUS_OK)
 	{
-		printf("ContextWrapper::init: Can't init %s\n",xmlInitFile);
+		logOut(MsgType_Error,"ContextWrapper::init: Can't init %s\n",xmlInitFile);
+		//printf("ContextWrapper::init: Can't init %s\n",xmlInitFile);
 		return false;
 	}
 
@@ -213,12 +246,155 @@ bool ContextWrapper::enableUser(int flags)
 	_userGenerator.GetSkeletonCap().SetSkeletonProfile((XnSkeletonProfile)flags);
 
 	// set the callbacks
-	_userGenerator.RegisterUserCallbacks(newUserCb, lostUserCb, this, _hUserCB);
-	_userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(calibrationStartedCb, calibrationEndedCb, this, _hCalibrationCB);
-	_userGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(poseStartedCb, poseEndedCb, this, _hPoseCB);
+	_userGenerator.RegisterUserCallbacks(newUserCb, lostUserCb, this, _hUserCb);
+	_userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(startCalibrationCb, endCalibrationCb, this, _hCalibrationCb);
+	_userGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(startPoseCb, endPoseCb, this, _hPoseCb);
 
 	return true;
 }
+
+// hands
+bool ContextWrapper::enableHands()
+{
+	if(!_initFlag)
+	{
+		logOut(MsgType_Error,"enableHands: context is not initialized!");
+		return false;
+	}
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_HANDS, _handsGenerator);
+	if(_rc != XN_STATUS_OK)
+	{	// it's not in the xml, create it
+		_rc = _handsGenerator.Create(_context);
+	}
+
+	// set the callbacks
+	_handsGenerator.RegisterHandCallbacks(createHandsCb,
+										  updateHandsCb,
+										  destroyHandsCb,
+										  this, 
+										  _hHandsCb);
+
+	return true;
+}
+
+void ContextWrapper::startTrackingHands(const XnVector3D& pos)
+{	
+	if(!_handsGenerator.IsValid())
+		return;
+
+	_handsGenerator.StartTracking(pos);
+}
+
+void ContextWrapper::stopTrackingHands(int handId)
+{	
+	if(!_handsGenerator.IsValid())
+		return;
+
+	_handsGenerator.StopTracking(handId);
+}
+
+void ContextWrapper::stopTrackingAllHands()
+{	
+	if(!_handsGenerator.IsValid())
+		return;
+
+	_handsGenerator.StopTrackingAll();
+}
+
+void ContextWrapper::setSmoothingHands(float smoothingFactor)
+{	
+	if(!_handsGenerator.IsValid())
+		return;
+
+	_handsGenerator.SetSmoothing(smoothingFactor);
+}
+
+
+// gesture
+bool ContextWrapper::enableGesture()
+{
+	if(!_initFlag)
+	{
+		logOut(MsgType_Error,"enableGesture: context is not initialized!");
+		return false;
+	}
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_GESTURE, _gestureGenerator);
+	if(_rc != XN_STATUS_OK)
+	{	// it's not in the xml, create it
+		_rc = _gestureGenerator.Create(_context);
+	}
+
+	// set the callbacks
+	_rc = _gestureGenerator.RegisterGestureCallbacks(recognizeGestureCb,
+													 progressGestureCb,
+													 this, 
+													 _hGestureCb);
+	/*
+	XnChar* strArray =(XnChar*) new XnChar[200][200];
+	XnUInt16 count=200;
+	_gestureGenerator.EnumerateGestures(strArray,count); 
+	for(int i=0;i<count;i++)
+		logOut(MsgType_Error,"gestures:%d %s",i,strArray[i]);
+	*/
+
+	return true;
+}
+
+void ContextWrapper::addGesture(const char* gesture)
+{
+	if(!_gestureGenerator.IsValid())
+		return;
+	
+/*
+	if(!_generatingFlag)
+	{
+		logOut(MsgType_Info,"_generatingFlag");
+		_context.StartGeneratingAll();
+		_generatingFlag = true;
+	}
+*/	
+
+	// default, no bounding box
+	/*
+	XnBoundingBox3D box;
+	box.LeftBottomNear.X = -5000;
+	box.LeftBottomNear.Y = -5000;
+	box.LeftBottomNear.Z = 0;
+
+	box.RightTopFar.X =   +5000;
+	box.RightTopFar.Y =   +5000;
+	box.RightTopFar.Z =   10000;
+
+	_rc = _gestureGenerator.AddGesture(gesture,&box);
+	*/
+
+	_rc = _gestureGenerator.AddGesture(gesture,NULL);
+	/*
+	if(_rc == XN_STATUS_OK)
+		logOut(MsgType_Info,"addGesture: %s",gesture);
+	*/
+}
+
+void ContextWrapper::removeGesture(const char* gesture)
+{
+	if(!_gestureGenerator.IsValid())
+		return;
+
+	_gestureGenerator.RemoveGesture(gesture);
+}
+
+bool ContextWrapper::availableGesture(const char* gesture)
+{
+	if(!_gestureGenerator.IsValid())
+		return false;
+
+	return _gestureGenerator.IsGestureAvailable(gesture)>0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// update
 
 void ContextWrapper::update()
 {
@@ -233,6 +409,7 @@ void ContextWrapper::update()
 
 	// Read a new frame
 	_rc = _context.WaitAnyUpdateAll();
+
 	if(_rc != XN_STATUS_OK)
 		return;
 
@@ -274,6 +451,13 @@ void ContextWrapper::update()
 		_sceneAnalyzer.GetMetaData(_sceneMD);
 		calcSceneData();
 	}	
+
+	// update the generator
+	// i don't know why, but it only works if i add 'WaitAndUpdateAll'
+	if(_gestureGenerator.IsValid() || _handsGenerator.IsValid())
+	{
+		_rc = _context.WaitAndUpdateAll();
+	}
 
 }
 
@@ -318,10 +502,10 @@ void ContextWrapper::calcDepthImageRealWorld()
 	{
 		for(int x = 0; x < _depthMD.XRes(); ++x, ++pDepth,++map)
 		{
-			map->X = x;
+			map->X = (float)x;
 			//map->Y = _depthMD.YRes()-y;		// in the coordinatesystem of the image y points down, in the realword it points up
-			map->Y = y;		// in the coordinatesystem of the image y points down, in the realword it points up
-			map->Z = *pDepth;
+			map->Y = (float)y;		// in the coordinatesystem of the image y points down, in the realword it points up
+			map->Z = (float)*pDepth;
 		}
 	}
 
@@ -347,9 +531,9 @@ void ContextWrapper::createDepthImage()
 			{
 				int nHistValue = (int)_pDepthHist[*pDepth];
 				
-				pPixel->nRed	= nHistValue * _depthImageColor[0];
-				pPixel->nGreen	= nHistValue * _depthImageColor[1];
-				pPixel->nBlue	= nHistValue * _depthImageColor[2];
+				pPixel->nRed	= (XnUInt8)(nHistValue * _depthImageColor[0]);
+				pPixel->nGreen	= (XnUInt8)(nHistValue * _depthImageColor[1]);
+				pPixel->nBlue	= (XnUInt8)(nHistValue * _depthImageColor[2]);
 			}
 		}
 	}
@@ -358,6 +542,24 @@ void ContextWrapper::createDepthImage()
 
 ///////////////////////////////////////////////////////////////////////////////
 // depth methods
+
+float ContextWrapper::hFieldOfView()
+{
+	XnFieldOfView fieldOfView;
+	_depth.GetFieldOfView(fieldOfView);
+
+	return fieldOfView.fHFOV;
+}
+
+float ContextWrapper::vFieldOfView()
+{
+	XnFieldOfView fieldOfView;
+	_depth.GetFieldOfView(fieldOfView);
+
+	return fieldOfView.fVFOV;
+}
+
+
 int ContextWrapper::depthWidth()
 {
 	return _depthMD.XRes();
@@ -372,10 +574,10 @@ int ContextWrapper::depthImage(int* map)
 {
 	for(int i=0;i < _depthBufSize;i++)
 	{
-		map[i] = 0xff	<< 24 | 
-				 _pDepthImage[i].nRed	<< 16| 
-				 _pDepthImage[i].nGreen << 8 |
-				 _pDepthImage[i].nBlue ;
+		map[i] = (0xff	<< 24) | 
+				 (_pDepthImage[i].nRed	<< 16) | 
+				 (_pDepthImage[i].nGreen << 8) |
+				 (_pDepthImage[i].nBlue) ;
 	}
 
 	return _depthBufSize;
@@ -393,7 +595,17 @@ int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
 {
 	// speed up the copy
 	memcpy((void*)map,(const void *)_depthMapRealWorld,_depthBufSize * sizeof(XnPoint3D));
-	
+
+	/*
+	for(int i=0;i < _depthBufSize;i++)
+	{	
+		map[i] = _depthMapRealWorld[i]; 
+		//logOut(MsgType_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", _depthMapRealWorld[i].X,_depthMapRealWorld[i].Y,_depthMapRealWorld[i].Z);
+		//logOut(MsgType_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", map[i].X,map[i].Y,map[i].Z);
+
+	}
+	*/
+
 	return _depthBufSize;
 }
 
@@ -816,36 +1028,36 @@ void XN_CALLBACK_TYPE ContextWrapper::lostUserCb(xn::UserGenerator& generator, X
 	context->onLostUserCb(generator,user);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::calibrationStartedCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::startCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
 {
 	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
 	if(context == NULL)
 		return;
-	context->onCalibrationStartedCb(skeleton,user);
+	context->onStartCalibrationCb(skeleton,user);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::calibrationEndedCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::endCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
 {
 	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
 	if(context == NULL)
 		return;
-	context->onCalibrationEndedCb(skeleton,user,bSuccess);
+	context->onEndCalibrationCb(skeleton,user,bSuccess);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::poseStartedCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt)
 {
 	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
 	if(context == NULL)
 		return;
-	context->onPoseStartedCb(pose,strPose,user);
+	context->onStartPoseCb(pose,strPose,user);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::poseEndedCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::endPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt)
 {
 	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
 	if(context == NULL)
 		return;
-	context->onPoseEndedCb(pose,strPose,user);
+	context->onEndPoseCb(pose,strPose,user);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -861,32 +1073,108 @@ void ContextWrapper::onLostUserCb(xn::UserGenerator& generator, XnUserID user)
 	onLostUserCb(user);
 }
 
-void ContextWrapper::onCalibrationStartedCb(xn::SkeletonCapability& skeleton, XnUserID user)
+void ContextWrapper::onStartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user)
 {
-	onCalibrationStartedCb(user);	
+	onStartCalibrationCb(user);	
 }
 
-void ContextWrapper::onCalibrationEndedCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
+void ContextWrapper::onEndCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
 {
-	onCalibrationEndedCb(user,bSuccess > 0);
+	onEndCalibrationCb(user,bSuccess > 0);
 }
 
-void ContextWrapper::onPoseStartedCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user)
+void ContextWrapper::onStartPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user)
 {
-	onPoseStartedCb(strPose,user);
+	onStartPoseCb(strPose,user);
 }
 
-void ContextWrapper::onPoseEndedCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user)
+void ContextWrapper::onEndPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user)
 {
-	onPoseEndedCb(strPose,user);
+	onEndPoseCb(strPose,user);
 }
 
 // virtual methods for the java class which inherits this class
 void  ContextWrapper::onNewUserCb(unsigned int userId){;}
 void  ContextWrapper::onLostUserCb(unsigned int userId){;}
 
-void  ContextWrapper::onCalibrationStartedCb(unsigned int userId){;}
-void  ContextWrapper::onCalibrationEndedCb(unsigned int userId,bool successFlag){;}
+void  ContextWrapper::onStartCalibrationCb(unsigned int userId){;}
+void  ContextWrapper::onEndCalibrationCb(unsigned int userId,bool successFlag){;}
 
-void  ContextWrapper::onPoseStartedCb(const char* strPose, unsigned int user){;}
-void  ContextWrapper::onPoseEndedCb(const char* strPose, unsigned int user){;}
+void  ContextWrapper::onStartPoseCb(const char* strPose, unsigned int user){;}
+void  ContextWrapper::onEndPoseCb(const char* strPose, unsigned int user){;}
+
+// callback hands
+void XN_CALLBACK_TYPE ContextWrapper::createHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onCreateHandsCb(generator, nId, pPosition, fTime);
+}
+
+void XN_CALLBACK_TYPE ContextWrapper::updateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onUpdateHandsCb(generator, nId, pPosition, fTime);
+}
+
+void XN_CALLBACK_TYPE ContextWrapper::destroyHandsCb(xn::HandsGenerator& generator, XnUserID nId,XnFloat fTime, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onDestroyHandsCb(generator, nId, fTime);
+}
+
+
+void ContextWrapper::onCreateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime)
+{
+	onCreateHandsCb(nId,pPosition,fTime);
+}
+void ContextWrapper::onCreateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime){;}
+
+void ContextWrapper::onUpdateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime)
+{
+	onUpdateHandsCb(nId,pPosition,fTime);
+}
+void ContextWrapper::onUpdateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime){;}
+
+void ContextWrapper::onDestroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime)
+{
+	onDestroyHandsCb(nId,fTime);
+}
+void ContextWrapper::onDestroyHandsCb(unsigned int nId, float fTime){;}
+
+
+// callback gesture
+void XN_CALLBACK_TYPE ContextWrapper::recognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+
+	context->onRecognizeGestureCb(generator,strGesture,pIdPosition,pEndPosition);
+}
+
+void XN_CALLBACK_TYPE ContextWrapper::progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onProgressGestureCb(generator,strGesture,pPosition,fProgress);
+}
+
+
+void ContextWrapper::onRecognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition)
+{
+	onRecognizeGestureCb(strGesture,pIdPosition,pEndPosition);
+}
+void ContextWrapper::onRecognizeGestureCb(const char* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition){;}
+
+void ContextWrapper::onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress)
+{
+	onProgressGestureCb(strGesture,pPosition,fProgress);
+}
+void ContextWrapper::onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress){;}

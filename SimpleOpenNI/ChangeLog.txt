@@ -2,11 +2,40 @@ ChangeLog - SimpleOpenNI
 ------------------------
 http://code.google.com/p/simple-openni/
 
-vx.xx, mm/dd/yyyy
+vx.xx status, mm/dd/yyyy
 
-v0.15, 02/
+v0.15 alpha, 02/xx/2011
+	New:
+		- Added handtracking
+		  3 new callbacks: 
+			onCreateHands(long nId, PVector pPosition, float fTime)
+			onUpdateHands(long nId, PVector pPosition, float fTime)
+			onDestroyHands(long nId, float fTime)
+		- Added gesturetracking
+		  2 new callbacks: 
+			onUpdateHands(long nId, PVector pPosition, float fTime)
+			onUpdateHands(long nId, PVector pPosition, float fTime)
+		- Export now the realworld depthMap, see the function depthMapRealWorld
+		- Added functions to get the horizontal and the vertical field of view of the camera
+		  hFieldOfView
+		  vFieldOfView
+		- Added new Examples: 
+			SimpleOpenNI_DepthMap3d
+			SimpleOpenNI_Hands3d
+		- Added camera frustum drawing function 'drawCamFrustum'
+		
+	Changes:
+		- Changed the names of the listed callbacks, just to have all over the same naming method
+		  onUserNew 			-> onNewUser
+		  onUserLost 			-> onLostUser
+		  onCalibrationStarted 	-> onStartCalibration
+		  onCalibrationEnded	-> onEndCalibration
+		  onPoseStarted	 		-> onStartPose
+		  onPoseEnded 			-> onEndPose
+		- Updated several examples
 
-v0.11, 02/22/2011
+		
+v0.11 alpha, 02/22/2011
+	- started the changeLog
+v0.10 alpha
 	-
-
-v0.10
