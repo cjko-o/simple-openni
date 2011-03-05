@@ -7,7 +7,7 @@ How to install:
 2. Go into the folder 'OpenNI_NITE_Installer-OSX' 
 	> cd ./OpenNI_NITE_Installer-OSX
 3. Start the installer
-	> sudo ./installer.sh
+	> sudo ./install.sh
 	
 
 
