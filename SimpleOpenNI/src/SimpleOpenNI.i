@@ -97,22 +97,58 @@ JAVA_ARRAYSOFCLASSES(XnPoint3DArray)
 %constant int SKEL_RIGHT_ANKLE		= XN_SKEL_RIGHT_ANKLE;		
 %constant int SKEL_RIGHT_FOOT		= XN_SKEL_RIGHT_FOOT;		
 
+
+%constant int NODE_NONE			= Node_None;		
+%constant int NODE_DEPTH		= Node_Depth;		
+%constant int NODE_IMAGE		= Node_Image;		
+%constant int NODE_IR			= Node_Ir;		
+%constant int NODE_SCENE		= Node_Scene;		
+%constant int NODE_USER			= Node_User;		
+%constant int NODE_HANDS		= Node_Hands;		
+%constant int NODE_GESTURE		= Node_Gesture;		
+%constant int NODE_RECORDER		= Node_Recorder;		
+%constant int NODE_PLAYER		= Node_Player;		
+
+%constant int CODEC_NONE			= XN_CODEC_NULL;		
+%constant int CODEC_UNCOMPRESSED	= XN_CODEC_UNCOMPRESSED;		
+%constant int CODEC_JPEG			= XN_CODEC_JPEG;		
+%constant int CODEC_16Z				= XN_CODEC_16Z;		
+%constant int CODEC_16Z_EMB_TABLES	= XN_CODEC_16Z_EMB_TABLES;		
+%constant int CODEC_CODEC_8Z		= XN_CODEC_8Z;		
+
+%constant int RECORD_MEDIUM_FILE	= XN_CODEC_NULL;		
+
 %feature("director") ContextWrapper;
 class ContextWrapper
 {
 public:
+
 	ContextWrapper();
 
 	int version();
 
 	bool init(const char* xmlInitFile);
+	bool init();
+
+	int nodes();
+
+	void addLicense(const char* vendor,const char* license);
+	
 	bool isInit();
 	void close();
 	
 	virtual bool enableDepth();
+	virtual bool enableDepth(int width,int height,int fps);
+
 	virtual bool enableRGB();
+	virtual bool enableRGB(int width,int height,int fps);
+	
 	virtual bool enableIR();
+	virtual bool enableIR(int width,int height,int fps);
+
 	virtual bool enableScene();
+	virtual bool enableScene(int width,int height,int fps);
+
 	virtual bool enableUser(int flags);
 	virtual bool enableHands();
 	virtual bool enableGesture();
@@ -170,6 +206,12 @@ public:
 	void addGesture(const char* gesture);
 	void removeGesture(const char* gesture);
 	bool availableGesture(const char *strGesture);
+	
+	virtual bool enableRecorder(int recordMedium,const char* filePath);
+	bool addNodeToRecording(int nodeType,int compression);
+	bool removeNodeFromRecording(int nodeType);	
+	
+	virtual bool openFileRecording(const char* filePath);
 				   
 	void setMirror(bool flag);
 	bool mirror();

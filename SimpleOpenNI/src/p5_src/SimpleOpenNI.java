@@ -31,17 +31,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	static 
 	{	// load the nativ shared lib
 		System.loadLibrary("SimpleOpenNI");
+	
 	}
-	
-	// constants
-	public static final int DEPTH 			= 1 << 1;
-	public static final int IMAGE 			= 1 << 2;
-	public static final int IR 				= 1 << 3;
-	public static final int SCENE		 	= 1 << 4;
-	public static final int USER	 		= 1 << 5;
-	public static final int HANDS	 		= 1 << 6;
-	public static final int GESTURE	 		= 1 << 7;
-	
 	///////////////////////////////////////////////////////////////////////////
 	// callback vars
 	protected Method 			_newUserMethod;
@@ -66,7 +57,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	protected String 			_filename;	
 	protected PApplet			_parent;
-	protected int				_dataType;
 	
 	protected PImage			_depthImage;
 	protected int[]				_depthRaw;
@@ -79,14 +69,15 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	protected PImage			_sceneImage;
   
-  /**
-   * Creates the OpenNI context ands inits the modules
-   * 
-   * @param parent
-   *          PApplet
-   * @param initXMLFile
-   *          String
-   */
+	/**
+	* Creates the OpenNI context ands inits the modules
+	* 
+	* @param parent
+	*          PApplet
+	* @param initXMLFile
+	*          String
+	* @return
+	*/
 	public SimpleOpenNI(PApplet parent, String initXMLFile)
 	{
 		this._parent 	= parent;
@@ -99,10 +90,27 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		this.init(parent.dataPath(initXMLFile));
 	}
 
+	/**
+	* Creates the OpenNI context ands inits the modules
+	* 
+	* @param parent
+	*          PApplet
+	* @return
+	*/
+	public SimpleOpenNI(PApplet parent)
+	{
+		this._parent 	= parent;
+		parent.registerDispose(this);
+		
+		// setup the callbacks
+		setupCallbackFunc();
+		
+		// load the initfile
+		this.init();
+	}
+	
 	protected void setupCallbackFunc()
 	{
-		this._dataType 					= 0;
-		
 		this._newUserMethod				= null;
 		this._lostUserMethod 			= null;
 		
@@ -117,72 +125,101 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		this._destroyHandsMethod		= null;
 	
 		// user callbacks
+		_newUserMethod = getMethodRef("onNewUser",new Class[] { int.class });
+		/*
 		try {
 			_newUserMethod = _parent.getClass().getMethod("onNewUser",new Class[] { int.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
+		*/
 		
 		try {
 			_lostUserMethod = _parent.getClass().getMethod("onLostUser",new Class[] { int.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		
 		// calibrations callbacks
 		try {
 			_startCalibrationMethod = _parent.getClass().getMethod("onStartCalibration",new Class[] { int.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		try {
 			_endCalibrationMethod = _parent.getClass().getMethod("onEndCalibration",new Class[] { int.class, boolean.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		
 		// pose callbacks
 		try {
 			_startPoseMethod = _parent.getClass().getMethod("onStartPose",new Class[] { String.class,int.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		try {
 			_endPoseMethod = _parent.getClass().getMethod("onEndPose",new Class[] { String.class,int.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		
 		// hands
+		_createHandsMethod = getMethodRef("onCreateHands",new Class[] { int.class,PVector.class,float.class });
+		_updateHandsMethod = getMethodRef("onUpdateHands",new Class[] { int.class,PVector.class,float.class });
+		_destroyHandsMethod = getMethodRef("onDestroyHands",new Class[] { int.class,float.class });
+/*		
 		try {
 			_createHandsMethod = _parent.getClass().getMethod("onCreateHands",new Class[] { int.class,PVector.class,float.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		try {
 			_updateHandsMethod = _parent.getClass().getMethod("onUpdateHands",new Class[] { int.class,PVector.class,float.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 		try {
 			_destroyHandsMethod = _parent.getClass().getMethod("onDestroyHands",new Class[] { int.class,float.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
-		
+		{// no such method, or an error.. which is fine, just ignore*
+		}		
+*/
 		// gesture
 		try {
 			_recognizeGestureMethod = _parent.getClass().getMethod("onRecognizeGesture",new Class[] { String.class,PVector.class,PVector.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}		
 		try {
 			_progressGestureMethod = _parent.getClass().getMethod("onProgressGesture",new Class[] { String.class,PVector.class,float.class });																									
 		} 
 		catch (Exception e) 
-		{/* no such method, or an error.. which is fine, just ignore*/}
+		{// no such method, or an error.. which is fine, just ignore*
+		}
 	}
 	
+	protected Method getMethodRef(String methodName,Class[] paraList)
+	{
+		Method	ret = null;
+		try {
+			ret = _parent.getClass().getMethod(methodName,paraList);																									
+		} 
+		catch (Exception e) 
+		{ // no such method, or an error.. which is fine, just ignore
+		}
+		return ret;
+	}
 	
 	/**
 	* 
@@ -196,10 +233,20 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		close();
 	}
-  
-	public int dataType()
+
+	private void setupDepth()
 	{
-		return _dataType;
+		
+		_depthImage 		= new PImage(depthWidth(), depthHeight(),PConstants.RGB);
+		_depthRaw 			= new int[depthMapSize()];
+		_depthMapRealWorld 	= new PVector[depthMapSize()];
+		_depthMapRealWorldXn = new XnVector3D[depthMapSize()];
+			
+		for(int i=0;i < depthMapSize();i++ )
+		{
+			_depthMapRealWorld[i] 	= new PVector();
+			_depthMapRealWorldXn[i] = new XnVector3D();
+		}
 	}
 	
 	/**
@@ -209,24 +256,35 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		if(super.enableDepth())
 		{	// setup the var for depth calc
-			this._dataType |= DEPTH;
-			_depthImage 		= new PImage(depthWidth(), depthHeight(),PConstants.RGB);
-			_depthRaw 			= new int[depthMapSize()];
-			_depthMapRealWorld 	= new PVector[depthMapSize()];
-			_depthMapRealWorldXn = new XnVector3D[depthMapSize()];
-			
-			for(int i=0;i < depthMapSize();i++ )
-			{
-				_depthMapRealWorld[i] 	= new PVector();
-				_depthMapRealWorldXn[i] = new XnVector3D();
-			}
+			setupDepth();
 			return true;
 		}
 		else
 			return false;
 	}
 	
-		
+	/**
+	* Enable the depthMap data collection
+	* 
+	* @param width
+	*          int
+	* @param height
+	*          int
+	* @param fps
+	*          int
+	* @return
+	*/
+	public boolean enableDepth(int width,int height,int fps) 
+	{
+		if(super.enableDepth(width,height,fps))
+		{	// setup the var for depth calc
+			setupDepth();
+			return true;
+		}
+		else
+			return false;
+	}	
+	
 	public PImage depthImage() 
 	{
 		return _depthImage;
@@ -241,6 +299,12 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		return _depthMapRealWorld;
 	}	
+	
+	private void setupRGB()
+	{
+		_rgbImage = new PImage(rgbWidth(), rgbHeight(),PConstants.RGB);
+	}
+	
 	/**
 	* Enable the camera image collection
 	*/  
@@ -248,8 +312,29 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		if(super.enableRGB())
 		{	// setup the var for depth calc
-			this._dataType |= IMAGE;
-			_rgbImage = new PImage(rgbWidth(), rgbHeight(),PConstants.RGB);
+			setupRGB();
+			return true;
+		}
+		else
+			return false;
+	}	
+
+	/**
+	* Enable the camera image collection
+	* 
+	* @param width
+	*          int
+	* @param height
+	*          int
+	* @param fps
+	*          int
+	* @return
+	*/
+	public boolean enableRGB(int width,int height,int fps) 
+	{
+		if(super.enableRGB(width,height,fps))
+		{	// setup the var for depth calc
+			setupRGB();
 			return true;
 		}
 		else
@@ -261,7 +346,11 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return _rgbImage;
 	}
 		
-
+	private void setupIR()
+	{
+		_irImage = new PImage(irWidth(), irHeight(),PConstants.RGB);
+	}
+		
 	/**
 	* Enable the irMap data collection
 	* ir is only available if there is no rgbImage activated at the same time 
@@ -270,20 +359,46 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		if(super.enableIR())
 		{	// setup the var for depth calc
-			this._dataType |= IR;
-			_irImage = new PImage(irWidth(), irHeight(),PConstants.RGB);
+			setupIR();
 			return true;
 		}
 		else
 			return false;
 	}
 	
-		
+	/**
+	* Enable the irMap data collection
+	* ir is only available if there is no rgbImage activated at the same time 
+	* 
+	* @param width
+	*          int
+	* @param height
+	*          int
+	* @param fps
+	*          int
+	* @return
+	*/
+	public boolean enableIR(int width,int height,int fps) 
+	{
+		if(super.enableIR(width,height,fps))
+		{	// setup the var for depth calc
+			setupIR();
+			return true;
+		}
+		else
+			return false;
+	}		
+	
 	public PImage irImage() 
 	{
 		return _irImage;
 	}
 
+	private void setupScene()
+	{
+		_sceneImage = new PImage(sceneWidth(), sceneHeight(),PConstants.RGB);
+	}
+	
 	/**
 	* Enable the scene data collection
 	*/  
@@ -291,13 +406,34 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		if(super.enableScene())
 		{	// setup the var for depth calc
-			this._dataType |= SCENE;
-			_sceneImage = new PImage(sceneWidth(), sceneHeight(),PConstants.RGB);
+			setupScene();
 			return true;
 		}
 		else
 			return false;
 	}
+	
+	/**
+	* Enable the scene data collection
+	* 
+	* @param width
+	*          int
+	* @param height
+	*          int
+	* @param fps
+	*          int
+	* @return
+	*/
+	public boolean enableScene(int width,int height,int fps) 
+	{
+		if(super.enableScene(width,height,fps))
+		{	// setup the var for depth calc
+			setupScene();
+			return true;
+		}
+		else
+			return false;
+	}	
 	
 	public PImage sceneImage()
 	{
@@ -314,19 +450,25 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		normal.set(n.getX(),n.getY(),n.getZ());
 	}
 	
+	private void setupUser()
+	{}
+	
 	/**
 	* Enable user 
 	*/  
 	public boolean enableUser(int flags) 
 	{
 		if(super.enableUser(flags))
-		{	
-			this._dataType |= USER;
+		{
+			setupUser();
 			return true;
 		}
 		else
 			return false;
 	}
+	
+	private void setupHands()
+	{}
 	
 	/**
 	* Enable hands  
@@ -334,8 +476,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public boolean enableHands() 
 	{
 		if(super.enableHands())
-		{	
-			this._dataType |= HANDS;
+		{
+			setupHands();
 			return true;
 		}
 		else
@@ -351,19 +493,69 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		super.startTrackingHands(vec);
 	}
 
+	private void setupGesture()
+	{}
+	
 	/**
 	* Enable gesture  
 	*/  
 	public boolean enableGesture() 
 	{
 		if(super.enableGesture())
-		{	
-			this._dataType |= GESTURE;
+		{
+			setupGesture();
 			return true;
 		}
 		else
 			return false;
 	}	
+	
+	/**
+	* Enable recorder	
+	*/
+	public boolean enableRecorder(int recordMedium,String filePath)
+	{
+		String path = _parent.dataPath(filePath);
+		_parent.createPath(path);
+
+		if(super.enableRecorder(recordMedium,path))
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	/**
+	* Enable the player
+	*/  
+	public boolean openFileRecording(String filePath)
+	{
+		String path = _parent.dataPath(filePath);
+		
+		if(super.openFileRecording(path))
+		{	// get all the nodes that are in use and init them
+
+			if((nodes() & NODE_DEPTH) > 0)
+				setupDepth();
+			if((nodes() & NODE_IMAGE) > 0)
+				setupRGB();
+			if((nodes() & NODE_IR) > 0)
+				setupIR();
+			if((nodes() & NODE_SCENE) > 0)
+				setupScene();
+			if((nodes() & NODE_USER) > 0)
+				setupUser();
+			if((nodes() & NODE_GESTURE) > 0)
+				setupGesture();
+			if((nodes() & NODE_HANDS) > 0)
+				setupHands();
+			
+			return true;
+		}
+		else
+			return false;
+	}
 	
 	/**
 	* Enable the user data collection
@@ -373,7 +565,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		super.update();
 		
 		// copy the depth map
-		if((_dataType & DEPTH) > 0)
+		if((nodes() & NODE_DEPTH) > 0)
 		{
 			_depthImage.loadPixels();
 				depthImage(_depthImage.pixels);
@@ -404,7 +596,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		}
 		
 		// copy the rgb map
-		if((_dataType & IMAGE) > 0)
+		if((nodes() & NODE_IMAGE) > 0)
 		{
 			_rgbImage.loadPixels();
 				rgbImage(_rgbImage.pixels);
@@ -412,7 +604,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		}
 		
 		// copy the ir map
-		if((_dataType & IR) > 0)
+		if((nodes() & NODE_IR) > 0)
 		{
 			_irImage.loadPixels();
 				irImage(_irImage.pixels);
@@ -420,7 +612,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		}
 		
 		// copy the scene map
-		if((_dataType & SCENE) > 0)
+		if((nodes() & NODE_SCENE) > 0)
 		{
 			_sceneImage.loadPixels();
 				sceneImage(_sceneImage.pixels);

@@ -33,6 +33,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 // defines
 
+#define		Node_None		(0)
+#define		Node_Depth		(1 << 0)
+#define		Node_Image		(1 << 1)
+#define		Node_Ir			(1 << 2)
+#define		Node_Scene		(1 << 3)
+#define		Node_User		(1 << 4)
+#define		Node_Hands		(1 << 5)
+#define		Node_Gesture	(1 << 6)
+#define		Node_Recorder	(1 << 7)
+#define		Node_Player		(1 << 8)
+
+
 #define		MAX_DEPTH		10000	// 10m
 #define		STRING_BUFFER	255
 
@@ -52,19 +64,31 @@ typedef XnPoint3D*	XnPoint3DArray;
 class ContextWrapper
 {
 public:
+
+
 	ContextWrapper();
 	~ContextWrapper();
 
 	int version();
 
+	// init methods
 	bool init(const char* xmlInitFile);
+	bool init();
+
+	int nodes();
+
+	void addLicense(const char* vendor,const char* license);
+
 	bool isInit(){	return _initFlag; }
 	void close();
 
 	virtual void update();
 
+	
+
 	// depth methods
 	virtual bool enableDepth();
+	virtual bool enableDepth(int width,int height,int fps);
 
 	int depthWidth();
 	int	depthHeight();
@@ -86,6 +110,7 @@ public:
 
 	// cam image
 	virtual bool enableRGB();
+	virtual bool enableRGB(int width,int height,int fps);
 
 	int rgbWidth();
 	int rgbHeight();
@@ -94,6 +119,7 @@ public:
 
 	// ir image
 	virtual bool enableIR();
+	virtual bool enableIR(int width,int height,int fps);
 
 	int irWidth();
 	int irHeight();
@@ -103,6 +129,7 @@ public:
 
 	// scene analyzer
 	virtual bool enableScene();
+	virtual bool enableScene(int width,int height,int fps);
 
 	int sceneWidth();
 	int	sceneHeight();
@@ -146,6 +173,13 @@ public:
 	// audio
 	//bool enableAudio();
 
+	// recorder
+	virtual bool enableRecorder(int recordMedium,const char* filePath);
+	bool addNodeToRecording(int nodeType,int compression);
+	bool removeNodeFromRecording(int nodeType);
+
+	virtual bool openFileRecording(const char* filePath);
+
 	// access methods
 	void setMirror(bool flag);
 	bool mirror();
@@ -181,12 +215,15 @@ public:
 	static void XN_CALLBACK_TYPE recognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition, void* cxt);
 	static void XN_CALLBACK_TYPE progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt);
 
+	static int getNodeType(int internalType);
+	xn::ProductionNode* ContextWrapper::getNode(int internalType);
+
 protected:
 	
 	enum LogOutMsg{
-		MsgType_End		= 0,
-		MsgType_Info	= 1,
-		MsgType_Error	= 2,
+		MsgNode_End		= 0,
+		MsgNode_Info	= 1,
+		MsgNode_Error	= 2,
 
 	};
 
@@ -231,6 +268,16 @@ protected:
 	virtual void	onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress);
 
 
+	//////////////////////////////////////////////////////////////////////////////
+	// create methods
+	bool createDepth(bool force = true);
+	bool createRgb(bool force = true);
+	bool createIr(bool force = true);
+	bool createScene(bool force = true);
+	bool createUser(int flags,bool force = true);
+	bool createGesture(bool force = true);
+	bool createHands(bool force = true);
+
 	void calcHistogram();
 	void createDepthImage();
 	void calcDepthImageRealWorld();
@@ -243,9 +290,12 @@ protected:
 	XnStatus			_rc;
 	xn::Context			_context;
 
+	int					_nodes;
+
 	// depht
 	xn::DepthGenerator	_depth;
 	xn::DepthMetaData	_depthMD;
+	XnMapOutputMode		_depthMapOutputMode;
 	float				_pDepthHist[MAX_DEPTH];
 	XnRGB24Pixel*		_pDepthImage;
 	int					_depthBufSize;
@@ -255,17 +305,21 @@ protected:
 	// cam image
 	xn::ImageGenerator	_image;
 	xn::ImageMetaData	_imageMD;
+	XnMapOutputMode		_imageMapOutputMode;
 	int					_rgbBufSize;
 
 	// ir
 	xn::IRGenerator		_ir;
 	xn::IRMetaData		_irMD;
+	XnMapOutputMode		_irMapOutputMode;
 	XnRGB24Pixel*		_pIrImage;
 	int					_irBufSize;
 
 	// scene
+	xn::DepthGenerator	_sceneDepth;
 	xn::SceneAnalyzer	_sceneAnalyzer;
 	xn::SceneMetaData	_sceneMD;
+	XnMapOutputMode		_sceneMapOutputMode;
 	XnRGB24Pixel*		_pSceneImage;
 	int					_sceneBufSize;
 
@@ -285,6 +339,8 @@ protected:
 		
 	// recorder / player
 	xn::Recorder		_recorder;
+
+	bool				_firstTimeUpdate;
 
 };
 
