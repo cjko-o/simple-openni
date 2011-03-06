@@ -6,7 +6,7 @@ vx.xx status, mm/dd/yyyy
 
 v0.13 alpha, 03/06/2011
 	New:
-		- Created an installer for osx
+		- Created an installer for osx, but just for testing purpose
 		- Removed the dependency of an xml init.file, added function, the normal enable... functions
 		  still work, they just use the default values:
 			init(PApplet parent)
