@@ -37,6 +37,12 @@ cp ./data/libXnVHandGenerator.dylib /usr/lib/
 cp ./data/libXnVNite.dylib /usr/lib/
 
 # libusb
+# this is a hack !!!!!!!!!!!!! Don't use it, just for testing
+echo "create the folders for libusb(macport)"
+mkdir /opt
+mkdir /opt/local
+mkdir /opt/local/lib
+
 echo "copy libusb dynamic libs into /opt/local/lib"
 cp ./data/libusb-1.0.0.dylib /opt/local/lib/
 
