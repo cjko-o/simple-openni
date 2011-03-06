@@ -4,6 +4,27 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.13 alpha, 03/06/2011
+	New:
+		- Created an installer for osx
+		- Removed the dependency of an xml init.file, added function, the normal enable... functions
+		  still work, they just use the default values:
+			init(PApplet parent)
+			enableDepth(int width,int height,int fps)
+			enableRGB(int width,int height,int fps)
+			enableIR(int width,int height,int fps)
+			enableScene(int width,int height,int fps)
+		- Added record + save ability
+			enableRecorder(int recordMedium,String filePath)
+			addNodeToRecording(int nodeType,int compression)
+			removeNodeFromRecording(int nodeType)
+			openFileRecording(String filePath)
+		- Added new Examples:
+			SimpleOpenNI_RecorderPlay
+		
+	Changes:
+		- All older exmaples where changed, now they are not using xml files anymore
+		
 v0.12 alpha, 02/28/2011
 	New:
 		- Added handtracking

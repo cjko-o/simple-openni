@@ -24,13 +24,17 @@
 
 #include <iostream>
 
+#include <XnTypes.h>
+
 #include "ContextWrapper.h"
 
 
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	12		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	13		// 1234 = 12.24
+
+xn::DepthGenerator tempDepth;
 
 XnFloat Colors[][3] =
 {
@@ -57,13 +61,32 @@ _pIrImage(NULL),
 _pSceneImage(NULL),
 _depthMapRealWorld(NULL),
 _initFlag(false),
-_generatingFlag(false)
+_generatingFlag(false),
+_firstTimeUpdate(true),
+_nodes(Node_None)
 {
 	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
 		
 	_depthImageColor[0] = 1.0f;
 	_depthImageColor[1] = 1.0f;
 	_depthImageColor[2] = 1.0f;
+
+	_depthMapOutputMode.nXRes = XN_VGA_X_RES; 
+	_depthMapOutputMode.nYRes = XN_VGA_Y_RES; 
+	_depthMapOutputMode.nFPS = 30; 
+
+	_imageMapOutputMode.nXRes = XN_VGA_X_RES; 
+	_imageMapOutputMode.nYRes = XN_VGA_Y_RES; 
+	_imageMapOutputMode.nFPS = 30; 
+
+	_irMapOutputMode.nXRes = XN_VGA_X_RES; 
+	_irMapOutputMode.nYRes = XN_VGA_Y_RES; 
+	_irMapOutputMode.nFPS = 30; 
+
+	_sceneMapOutputMode.nXRes = XN_VGA_X_RES; 
+	_sceneMapOutputMode.nYRes = XN_VGA_Y_RES; 
+	_sceneMapOutputMode.nFPS = 30; 
+
 }
 
 ContextWrapper::~ContextWrapper()
@@ -110,10 +133,10 @@ void ContextWrapper::logOut(int msgType,const char* msg,...)
 {
 	switch(msgType)
 	{
-	case MsgType_Error:
+	case MsgNode_Error:
 		std::cout << "SimpleOpenNI Error: ";
 		break;
-	case MsgType_Info:
+	case MsgNode_Info:
 	default:
 		std::cout << "SimpleOpenNI Info: ";
 		break;
@@ -147,12 +170,70 @@ bool ContextWrapper::init(const char* xmlInitFile)
 		return false;
 	else if (_rc != XN_STATUS_OK)
 	{
-		logOut(MsgType_Error,"ContextWrapper::init: Can't init %s\n",xmlInitFile);
-		//printf("ContextWrapper::init: Can't init %s\n",xmlInitFile);
+		logOut(MsgNode_Error,"ContextWrapper::init: Can't init %s\n",xmlInitFile);
 		return false;
 	}
 
 	_initFlag = true;
+	return true;
+}
+	
+bool ContextWrapper::init()
+{
+	// init the cam with the xml setup file
+	xn::EnumerationErrors errors;
+	_rc = _context.Init();
+	if (_rc == XN_STATUS_NO_NODE_PRESENT)
+		return false;
+	else if (_rc != XN_STATUS_OK)
+	{
+		logOut(MsgNode_Error,"ContextWrapper::init\n");
+		return false;
+	}
+
+	_initFlag = true;
+	return true;
+}
+	
+int ContextWrapper::nodes()
+{
+	return _nodes;
+}
+
+
+void ContextWrapper::addLicense(const char* vendor,const char* license)
+{
+	XnLicense lic;
+	strncpy(lic.strVendor,vendor,XN_MAX_NAME_LENGTH);
+	strncpy(lic.strKey,license,XN_MAX_LICENSE_LENGTH);
+
+	_rc = _context.AddLicense(lic);
+}
+
+bool ContextWrapper::createDepth(bool force)
+{
+	if(!_initFlag)
+		return false;
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_DEPTH, _depth);
+	if(_rc != XN_STATUS_OK)
+	{	// could not find the depth, create it by default
+		if(force == false)
+			return false;
+
+		_rc = _depth.Create(_context);
+
+		// set default data
+		_rc = _depth.SetMapOutputMode(_depthMapOutputMode);
+	}
+
+	_depth.GetMetaData(_depthMD);	
+
+	_depthBufSize		= _depthMD.XRes() * _depthMD.YRes();
+	_pDepthImage		= (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
+	_depthMapRealWorld	= (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
+
+	_nodes |= Node_Depth;
 	return true;
 }
 
@@ -163,13 +244,43 @@ bool ContextWrapper::enableDepth()
 		printf("SimpleOpenNI not initialised\n");
 		return false;
 	}
+	else if(_depth.IsValid())
+		// already init.
+		return true;
 
-	_rc = _context.FindExistingNode(XN_NODE_TYPE_DEPTH, _depth);
-	_depth.GetMetaData(_depthMD);	
+	return createDepth();
+}
 
-	_depthBufSize		= _depthMD.XRes() * _depthMD.YRes();
-	_pDepthImage		= (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
-	_depthMapRealWorld	= (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
+bool ContextWrapper::enableDepth(int width,int height,int fps)
+{
+	// set default data
+	_depthMapOutputMode.nXRes = width; 
+	_depthMapOutputMode.nYRes = height; 
+	_depthMapOutputMode.nFPS = fps; 
+
+	return ContextWrapper::enableDepth();
+}
+
+bool ContextWrapper::createRgb(bool force)
+{
+	if(!_initFlag)
+		return false;
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_IMAGE, _image);
+	if(_rc != XN_STATUS_OK)
+	{	// could not find the depth, create it by default
+		if(force == false)
+			return false;
+		_rc = _image.Create(_context);
+
+		// set default data
+		_rc = _image.SetMapOutputMode(_imageMapOutputMode);	
+	}
+	_image.GetMetaData(_imageMD);
+
+	_rgbBufSize = _imageMD.XRes() * _imageMD.YRes();
+
+	_nodes |= Node_Image;
 
 	return true;
 }
@@ -181,12 +292,44 @@ bool ContextWrapper::enableRGB()
 		printf("SimpleOpenNI not initialised\n");
 		return false;
 	}
+	else if(_image.IsValid())
+		// already init.
+		return true;
 
-	_rc = _context.FindExistingNode(XN_NODE_TYPE_IMAGE, _image);
-	_image.GetMetaData(_imageMD);
+	return createRgb();
+}
 
-	_rgbBufSize = _imageMD.XRes() * _imageMD.YRes();
+bool ContextWrapper::enableRGB(int width,int height,int fps)
+{
+	// set default data
+	_imageMapOutputMode.nXRes = width; 
+	_imageMapOutputMode.nYRes = height; 
+	_imageMapOutputMode.nFPS = fps; 
 
+	return ContextWrapper::enableRGB();
+}
+
+bool ContextWrapper::createIr(bool force)
+{
+	if(!_initFlag)
+		return false;
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_IR, _ir);
+	if(_rc != XN_STATUS_OK)
+	{	// could not find the depth, create it by default
+		if(force == false)
+			return false;
+		_rc = _ir.Create(_context);
+
+		// set default data
+		_rc = _ir.SetMapOutputMode(_irMapOutputMode);
+	}	
+	_ir.GetMetaData(_irMD);
+
+	_irBufSize = _irMD.XRes() * _irMD.YRes();
+	_pIrImage  = (XnRGB24Pixel*)malloc( _irBufSize * sizeof(XnRGB24Pixel));
+
+	_nodes |= Node_Ir;
 	return true;
 }
 
@@ -197,14 +340,59 @@ bool ContextWrapper::enableIR()
 		printf("SimpleOpenNI not initialised\n");
 		return false;
 	}
+	else if(_ir.IsValid())
+		// already init.
+		return true;
 
-	_rc = _context.FindExistingNode(XN_NODE_TYPE_IR, _ir);
-	_ir.GetMetaData(_irMD);
+	return createIr();
+}
 
-	_irBufSize = _irMD.XRes() * _irMD.YRes();
-	_pIrImage  = (XnRGB24Pixel*)malloc( _irBufSize * sizeof(XnRGB24Pixel));
+bool ContextWrapper::enableIR(int width,int height,int fps)
+{
+	// set default data
+	_irMapOutputMode.nXRes = width; 
+	_irMapOutputMode.nYRes = height; 
+	_irMapOutputMode.nFPS = fps; 
 
-	return true;
+	return ContextWrapper::enableIR();
+}
+
+bool ContextWrapper::createScene(bool force)
+{
+	if(!_initFlag)
+		return false;
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_SCENE, _sceneAnalyzer);
+	if(_rc != XN_STATUS_OK)
+	{	// could not find the depth, create it by default
+		if(force == false)
+			return false;
+
+		// depth has to be created before the scene, create a default depth
+		if(!_depth.IsValid())
+		{
+			_rc = _sceneDepth.Create(_context);
+			_rc = _sceneDepth.SetMapOutputMode(_depthMapOutputMode);
+		}
+
+		_rc = _sceneAnalyzer.Create(_context);
+
+		// set default data
+		_rc = _sceneAnalyzer.SetMapOutputMode(_sceneMapOutputMode);	
+	}	
+
+	if(_sceneAnalyzer.IsValid())
+	{
+		_sceneAnalyzer.GetMetaData(_sceneMD);
+	
+		_sceneBufSize = _sceneMD.XRes() * _sceneMD.YRes();
+		_pSceneImage  = (XnRGB24Pixel*)malloc( _sceneBufSize * sizeof(XnRGB24Pixel));
+
+		_nodes |= Node_Scene;
+		return true;
+	}
+	else
+		return false;
 }
 
 bool ContextWrapper::enableScene()
@@ -214,31 +402,34 @@ bool ContextWrapper::enableScene()
 		printf("SimpleOpenNI not initialised\n");
 		return false;
 	}
-
-	_rc = _context.FindExistingNode(XN_NODE_TYPE_SCENE, _sceneAnalyzer);
-	if(_sceneAnalyzer.IsValid())
-	{
-		_sceneAnalyzer.GetMetaData(_sceneMD);
-	
-		_sceneBufSize = _sceneMD.XRes() * _sceneMD.YRes();
-		_pSceneImage  = (XnRGB24Pixel*)malloc( _sceneBufSize * sizeof(XnRGB24Pixel));
+	else if(_sceneAnalyzer.IsValid())
+		// already init.
 		return true;
-	}
-	else
-		return false;
+
+	return createScene();
 }
 
-bool ContextWrapper::enableUser(int flags)
+
+bool ContextWrapper::enableScene(int width,int height,int fps)
+{
+	// set default data
+	_sceneMapOutputMode.nXRes = width; 
+	_sceneMapOutputMode.nYRes = height; 
+	_sceneMapOutputMode.nFPS = fps; 
+
+	return ContextWrapper::enableScene();
+}
+
+bool ContextWrapper::createUser(int flags,bool force)
 {
 	if(!_initFlag)
-	{
-		printf("SimpleOpenNI not initialised\n");
 		return false;
-	}
 
 	_rc = _context.FindExistingNode(XN_NODE_TYPE_USER, _userGenerator);
 	if(_rc != XN_STATUS_OK)
 	{
+		if(force == false)
+			return false;
 		_rc = _userGenerator.Create(_context);
 	}
 
@@ -250,21 +441,35 @@ bool ContextWrapper::enableUser(int flags)
 	_userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(startCalibrationCb, endCalibrationCb, this, _hCalibrationCb);
 	_userGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(startPoseCb, endPoseCb, this, _hPoseCb);
 
+	_nodes |= Node_User;
 	return true;
+
 }
 
-// hands
-bool ContextWrapper::enableHands()
+bool ContextWrapper::enableUser(int flags)
 {
 	if(!_initFlag)
 	{
-		logOut(MsgType_Error,"enableHands: context is not initialized!");
+		printf("SimpleOpenNI not initialised\n");
 		return false;
 	}
+	else if(_userGenerator.IsValid())
+		// already init.
+		return true;
+
+	return createUser(flags);
+}
+
+bool ContextWrapper::createHands(bool force)
+{
+	if(!_initFlag)
+		return false;
 
 	_rc = _context.FindExistingNode(XN_NODE_TYPE_HANDS, _handsGenerator);
 	if(_rc != XN_STATUS_OK)
 	{	// it's not in the xml, create it
+		if(force == false)
+			return false;
 		_rc = _handsGenerator.Create(_context);
 	}
 
@@ -275,7 +480,23 @@ bool ContextWrapper::enableHands()
 										  this, 
 										  _hHandsCb);
 
+	_nodes |= Node_Hands;
 	return true;
+}
+
+// hands
+bool ContextWrapper::enableHands()
+{
+	if(!_initFlag)
+	{
+		logOut(MsgNode_Error,"enableHands: context is not initialized!");
+		return false;
+	}
+	else if(_handsGenerator.IsValid())
+		// already init.
+		return true;
+
+	return createHands();
 }
 
 void ContextWrapper::startTrackingHands(const XnVector3D& pos)
@@ -310,19 +531,15 @@ void ContextWrapper::setSmoothingHands(float smoothingFactor)
 	_handsGenerator.SetSmoothing(smoothingFactor);
 }
 
-
-// gesture
-bool ContextWrapper::enableGesture()
+bool ContextWrapper::createGesture(bool force)
 {
 	if(!_initFlag)
-	{
-		logOut(MsgType_Error,"enableGesture: context is not initialized!");
 		return false;
-	}
-
 	_rc = _context.FindExistingNode(XN_NODE_TYPE_GESTURE, _gestureGenerator);
 	if(_rc != XN_STATUS_OK)
 	{	// it's not in the xml, create it
+		if(force == false)
+			return false;
 		_rc = _gestureGenerator.Create(_context);
 	}
 
@@ -336,10 +553,26 @@ bool ContextWrapper::enableGesture()
 	XnUInt16 count=200;
 	_gestureGenerator.EnumerateGestures(strArray,count); 
 	for(int i=0;i<count;i++)
-		logOut(MsgType_Error,"gestures:%d %s",i,strArray[i]);
+		logOut(MsgNode_Error,"gestures:%d %s",i,strArray[i]);
 	*/
+	_nodes |= Node_Gesture;
 
 	return true;
+}
+
+// gesture
+bool ContextWrapper::enableGesture()
+{
+	if(!_initFlag)
+	{
+		logOut(MsgNode_Error,"enableGesture: context is not initialized!");
+		return false;
+	}
+	else if(_gestureGenerator.IsValid())
+		// already init.
+		return true;
+
+	return createGesture();
 }
 
 void ContextWrapper::addGesture(const char* gesture)
@@ -350,7 +583,7 @@ void ContextWrapper::addGesture(const char* gesture)
 /*
 	if(!_generatingFlag)
 	{
-		logOut(MsgType_Info,"_generatingFlag");
+		logOut(MsgNode_Info,"_generatingFlag");
 		_context.StartGeneratingAll();
 		_generatingFlag = true;
 	}
@@ -373,7 +606,7 @@ void ContextWrapper::addGesture(const char* gesture)
 	_rc = _gestureGenerator.AddGesture(gesture,NULL);
 	/*
 	if(_rc == XN_STATUS_OK)
-		logOut(MsgType_Info,"addGesture: %s",gesture);
+		logOut(MsgNode_Info,"addGesture: %s",gesture);
 	*/
 }
 
@@ -392,6 +625,110 @@ bool ContextWrapper::availableGesture(const char* gesture)
 
 	return _gestureGenerator.IsGestureAvailable(gesture)>0;
 }
+	
+///////////////////////////////////////////////////////////////////////////////
+// recorder
+
+bool ContextWrapper::enableRecorder(int recordMedium,const char* filePath)
+{
+	if(!_initFlag)
+	{
+		logOut(MsgNode_Error,"enableRecorder: context is not initialized!");
+		return false;
+	}
+	else if(_recorder.IsValid())
+		// already init.
+		return true;
+
+	_rc = _context.FindExistingNode(XN_NODE_TYPE_RECORDER, _recorder);
+	if(_rc != XN_STATUS_OK)
+	{
+		_rc = _recorder.Create(_context);
+	}
+
+	// set the recording
+	_rc = _recorder.SetDestination((XnRecordMedium)recordMedium,filePath);
+	if(_rc != XN_STATUS_OK)
+	{
+		logOut(MsgNode_Error,"enableRecorder: %s",filePath);
+		return false;
+	}
+
+	_nodes |= Node_Recorder;
+	return true;
+}
+	
+bool ContextWrapper::addNodeToRecording(int nodeType,int compression)
+{
+	if(!_initFlag)
+	{
+		logOut(MsgNode_Error,"enableRecorder: context is not initialized!");
+		return false;
+	}
+	else if(!_recorder.IsValid())
+	{
+		logOut(MsgNode_Error,"removeNodeToRecording: recording is not enabled");
+		return false;
+	}
+
+	xn::ProductionNode* recordNode = getNode(nodeType);
+	if(recordNode != NULL)
+	{
+		_rc = _recorder.AddNodeToRecording(*recordNode, compression);
+		return _rc == XN_STATUS_OK;
+	}
+	return false;
+}
+
+bool ContextWrapper::removeNodeFromRecording(int nodeType)
+{
+	if(!_initFlag)
+	{
+		logOut(MsgNode_Error,"enableRecorder: context is not initialized!");
+		return false;
+	}
+	else if(!_recorder.IsValid())
+	{
+		logOut(MsgNode_Error,"removeNodeToRecording: recording is not enabled");
+		return false;
+	}
+
+
+	xn::ProductionNode* recordNode = getNode(nodeType);
+	if(recordNode != NULL)
+	{
+		_rc = _recorder.RemoveNodeFromRecording(*recordNode);
+		return _rc == XN_STATUS_OK;
+	}
+	
+	return false;
+}
+
+bool ContextWrapper::openFileRecording(const char* filePath)
+{
+	if(!_initFlag)
+	{
+		logOut(MsgNode_Error,"openFileRecording: context is not initialized!");
+		return false;
+	}
+
+	_rc = _context.OpenFileRecording(filePath);
+	if(_rc != XN_STATUS_OK)
+		return false;
+
+	// add all the nodes to the player line
+	createDepth(false);
+	createRgb(false);
+	createIr(false);
+	createScene(false);
+	createUser(false);
+	createGesture(false);
+	createHands(false);
+
+	_nodes |= Node_Player;
+
+	return true;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // update
@@ -401,8 +738,16 @@ void ContextWrapper::update()
 	if(!_initFlag)
 		return;
 
-	if(!_generatingFlag)
+	// check if everything is all right for the first round
+	/*
+	if(_firstTimeUpdate)
 	{
+		_firstTimeUpdate = false;
+	}
+	*/
+
+	if(!_generatingFlag)
+	{	
 		_context.StartGeneratingAll();
 		_generatingFlag = true;
 	}
@@ -548,7 +893,7 @@ float ContextWrapper::hFieldOfView()
 	XnFieldOfView fieldOfView;
 	_depth.GetFieldOfView(fieldOfView);
 
-	return fieldOfView.fHFOV;
+	return (float)fieldOfView.fHFOV;
 }
 
 float ContextWrapper::vFieldOfView()
@@ -556,7 +901,7 @@ float ContextWrapper::vFieldOfView()
 	XnFieldOfView fieldOfView;
 	_depth.GetFieldOfView(fieldOfView);
 
-	return fieldOfView.fVFOV;
+	return (float)fieldOfView.fVFOV;
 }
 
 
@@ -600,8 +945,8 @@ int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
 	for(int i=0;i < _depthBufSize;i++)
 	{	
 		map[i] = _depthMapRealWorld[i]; 
-		//logOut(MsgType_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", _depthMapRealWorld[i].X,_depthMapRealWorld[i].Y,_depthMapRealWorld[i].Z);
-		//logOut(MsgType_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", map[i].X,map[i].Y,map[i].Z);
+		//logOut(MsgNode_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", _depthMapRealWorld[i].X,_depthMapRealWorld[i].Y,_depthMapRealWorld[i].Z);
+		//logOut(MsgNode_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", map[i].X,map[i].Y,map[i].Z);
 
 	}
 	*/
@@ -1178,3 +1523,52 @@ void ContextWrapper::onProgressGestureCb(xn::GestureGenerator& generator,const X
 	onProgressGestureCb(strGesture,pPosition,fProgress);
 }
 void ContextWrapper::onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress){;}
+
+	
+int ContextWrapper::getNodeType(int internalType)
+{
+	if(internalType & Node_Depth)
+		return XN_NODE_TYPE_DEPTH;
+	else if(internalType & Node_Image)
+		return XN_NODE_TYPE_IMAGE;
+	else if(internalType & Node_Ir)
+		return XN_NODE_TYPE_IR;
+	else if(internalType & Node_Scene)
+		return XN_NODE_TYPE_SCENE;
+	else if(internalType & Node_User)
+		return XN_NODE_TYPE_USER;
+	else if(internalType & Node_Hands)
+		return XN_NODE_TYPE_HANDS;
+	else if(internalType & Node_Gesture)
+		return XN_NODE_TYPE_GESTURE;
+	else if(internalType & Node_Recorder)
+		return XN_NODE_TYPE_RECORDER;
+	else if(internalType & Node_Player)
+		return XN_NODE_TYPE_PLAYER;
+	else
+		return 0;
+}
+
+xn::ProductionNode* ContextWrapper::getNode(int internalType)
+{
+	if(internalType & Node_Depth)
+		return &_depth;
+	else if(internalType & Node_Image)
+		return &_image;
+	else if(internalType & Node_Ir)
+		return &_ir;
+	else if(internalType & Node_Scene)
+		return &_sceneAnalyzer;
+	else if(internalType & Node_User)
+		return &_userGenerator;
+	else if(internalType & Node_Hands)
+		return &_handsGenerator;
+	else if(internalType & Node_Gesture)
+		return &_gestureGenerator;
+	else if(internalType & Node_Recorder)
+		return &_recorder;
+	else if(internalType & Node_Player)
+		return NULL;
+	else
+		return NULL;
+}
