@@ -39,9 +39,19 @@ typedef XnFloat  XnConfidence;
 typedef struct XnSkeletonJointPosition
 {
 	XnVector3D		position;
-
 	XnConfidence	fConfidence;
 } XnSkeletonJointPosition;
+
+typedef struct XnMatrix3X3
+{
+	XnFloat elements[9];
+} XnMatrix3X3;
+
+typedef struct XnSkeletonJointOrientation
+{
+	XnMatrix3X3		orientation;
+	XnConfidence	fConfidence;
+} XnSkeletonJointOrientation;
 
 
 # ----------------------------------------------------------------------------/
@@ -196,7 +206,11 @@ public:
 	void	startPoseDetection(const char* pose,int user);
 	void	stopPoseDetection(int user);
 	
-	bool getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
+	bool	getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
+	bool	getJointOrientationSkeleton(int user,
+									    int joint,
+										XnSkeletonJointOrientation* jointOrientation);
+	
 	
 	void	startTrackingHands(const XnVector3D& pos);
 	void	stopTrackingHands(int handId);

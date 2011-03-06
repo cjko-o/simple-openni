@@ -661,14 +661,16 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 
 	/**
-	* get the coordinates of a joint
+	* gets the coordinates of a joint
 	* 
 	* @param userId
 	*          int
 	* @param joint
 	*          int
-	* @return jointPos
+	* @param jointPos
 	*          PVector
+	* @return The confidence of this joint
+	*          float
 	*/	
 	public float getJointPositionSkeleton(int userId,int joint,PVector jointPos)
 	{
@@ -687,6 +689,41 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return jointPos1.getFConfidence();
 	}
 
+	/**
+	* gets the orientation of a joint
+	* 
+	* @param userId
+	*          int
+	* @param joint
+	*          int
+	* @param jointOrientation
+	*          PMatrix3D
+	* @return The confidence of this joint
+	*          float
+	*/	
+	public float getJointOrientationSkeleton(int userId,int joint,PMatrix3D jointOrientation)
+	{
+		if (!isCalibratedSkeleton(userId))
+			return 0.0f;
+		if (!isTrackingSkeleton(userId))
+			return 0.0f;
+
+		XnSkeletonJointOrientation jointOrientation1 = new XnSkeletonJointOrientation();
+		
+		getJointOrientationSkeleton(userId, joint, jointOrientation1);
+		
+		// set the matrix by hand, openNI matrix is only 3*3(only rotation, no translation)
+		float[] mat = jointOrientation1.getOrientation().getElements();
+		jointOrientation.set(mat[0], mat[1], mat[2], 0,
+							 mat[3], mat[4], mat[5], 0,
+							 mat[6], mat[7], mat[8], 0,
+							 0,		 0,		 0, 	 1);
+
+		return jointOrientation1.getFConfidence();
+	}
+
+	
+	
 	public void convertRealWorldToProjective(PVector world,PVector proj) 
 	{
 		XnVector3D w = new XnVector3D();

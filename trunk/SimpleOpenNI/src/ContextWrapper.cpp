@@ -1287,6 +1287,18 @@ bool ContextWrapper::getJointPositionSkeleton(int user,int joint,XnSkeletonJoint
 	return(_rc == XN_STATUS_OK);
 }
  
+bool ContextWrapper::getJointOrientationSkeleton(int user,
+												 int joint,
+												 XnSkeletonJointOrientation* jointOrientation)
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	_rc = _userGenerator.GetSkeletonCap().GetSkeletonJointOrientation ( user, (XnSkeletonJoint)joint, *jointOrientation);
+	
+	return(_rc == XN_STATUS_OK);
+}
+
 
 void ContextWrapper::convertRealWorldToProjective(XnVector3D* world,XnVector3D* proj)
 {

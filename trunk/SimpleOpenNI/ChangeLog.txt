@@ -14,16 +14,21 @@ v0.13 alpha, 03/06/2011
 			enableRGB(int width,int height,int fps)
 			enableIR(int width,int height,int fps)
 			enableScene(int width,int height,int fps)
+		  not all width*height combinations are possible, depends on the hardware!!!
 		- Added record + save ability
 			enableRecorder(int recordMedium,String filePath)
 			addNodeToRecording(int nodeType,int compression)
 			removeNodeFromRecording(int nodeType)
 			openFileRecording(String filePath)
+		- Added a function to get the orientation of a skeleton joint, the return value is in a 3*3 Matrix 
+		  and the confidence of this joint
+			float getJointOrientationSkeleton(int userId,int joint,PMatrix3D jointOrientation)
+		  Updated SimpleOpenNI_User3d, now you also see the orientation of the joints
 		- Added new Examples:
 			SimpleOpenNI_RecorderPlay
 		
 	Changes:
-		- All older exmaples where changed, now they are not using xml files anymore
+		- All older exmaples where changed, now they are not using xml files
 		
 v0.12 alpha, 02/28/2011
 	New:

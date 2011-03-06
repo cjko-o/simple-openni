@@ -155,6 +155,9 @@ public:
 	void	stopPoseDetection(int user);
 
 	bool	getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
+	bool	getJointOrientationSkeleton(int user,
+									    int joint,
+										XnSkeletonJointOrientation* jointOrientation);
 
 	// hands
 	virtual bool enableHands();
