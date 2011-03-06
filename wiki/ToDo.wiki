@@ -9,5 +9,6 @@
   * ~~Read joint orientation~~
   * Implement NITE
   * Use multiple threads
+  * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
 
   
