@@ -219,7 +219,7 @@ public:
 	static void XN_CALLBACK_TYPE progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt);
 
 	static int getNodeType(int internalType);
-	xn::ProductionNode* ContextWrapper::getNode(int internalType);
+	xn::ProductionNode* getNode(int internalType);
 
 protected:
 	
