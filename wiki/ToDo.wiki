@@ -8,7 +8,6 @@
   * Track multiple hands
   * ~~Read joint orientation~~
   * Implement NITE
-  * Check hands/gestures tracking for multiple hands
   * Use multiple threads
   * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
 
