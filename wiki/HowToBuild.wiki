@@ -15,7 +15,7 @@ Before you can build the library you should install following tools:
   * [https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_Developer-Site/en_US/-/USD/ViewProductDetail-Start?ProductRef=jdk-6u24-oth-JPR@CDS-CDS_Developer Java Development Kit] (should be installed on OSX)
   * [http://www.cmake.org/cmake/resources/software.html CMake]
   * [http://www.swig.org/download.html Swig] > v2.0.2
-
+----
 = Windows =
 
 On windows i only used Visual Studio 2008
@@ -28,7 +28,7 @@ On windows i only used Visual Studio 2008
 > cmake ..
 }}}
   * Now you have a Visual Studio Project 'SimpleOpenNI.sln'
-
+----
 
 = OSX =
 
@@ -41,7 +41,7 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
 > cmake .
 > make
 }}}
-
+----
 = UNIX/Linux =
 
   * Download the souces from the svn
