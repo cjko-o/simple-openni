@@ -20,7 +20,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 
 * Install OpenNI the official way *
 
-Those programs need to be installed in order to install OpenNI:
+Those programs have to be on your system in order to install OpenNI:
   * [http://developer.apple.com/technologies/tools/xcode.html Xcode] 
   * [http://distfiles.macports.org/MacPorts/MacPorts-1.9.2-10.6-SnowLeopard.dmg MacPorts]
   * [http://adcdownload.apple.com/Java/java_for_mac_os_x_10.6_update_3_developer_package/javadeveloper_10.6_10m3261.dmg Java JDK]
