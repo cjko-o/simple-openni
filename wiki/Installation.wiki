@@ -10,7 +10,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 
 * Install OpenNI *
   * Download and install [http://www.openni.org/downloadfiles/openni-binaries/latest-unstable/25-openni-unstable-build-for-windows-v1-0-0/download OpenNI]
-  * Download and install [http://www.openni.org/downloadfiles/openni-compliant-middleware-binaries/latest-unstable/46-primesense-nite-unstable-build-for-windows-v1-3-0/download NITE]. The installer will ask you for the key, set this key '*0KOIk2JeIBYClPWVnMoRKn5cdY4=*'
+  * Download and install [http://www.openni.org/downloadfiles/openni-compliant-middleware-binaries/latest-unstable/46-primesense-nite-unstable-build-for-windows-v1-3-0/download NITE]. The installer will ask you for the key, set this key *0KOIk2JeIBYClPWVnMoRKn5cdY4=*
   * Download [https://github.com/avin2/SensorKinect SensorKit], unzip it and open the file at '/avin2/SensorKit/SensorKinect-Win32-5.0.0.exe'
 
 If everything worked out, you should see the camera in your Device Manager(under PrimeSensor/Kinect Camera, Kinect Motor).
