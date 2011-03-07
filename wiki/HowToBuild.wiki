@@ -6,6 +6,7 @@ The build system is based on CMake, so it should be easy to build the project on
 
  * [HowToBuild#Preparation Preparation]
  * [HowToBuild#Windows Windows]
+ * [HowToBuild#OSX OSX ]
  * [HowToBuild#UNIX/Linux UNIX/Linux]
 ----
 = Preparation =
