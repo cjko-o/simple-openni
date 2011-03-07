@@ -4,7 +4,7 @@
 = Introduction =
 
 Before you can use SimpleOpenNI you have to install OpenNI. This can take quite some time on some platforms.
-
+----
 
 = Windows =
 
@@ -76,7 +76,7 @@ Those programs have to be on your system in order to install OpenNI:
   * Copy the 'SimpleOpenNI.zip' into this folder:
       /Users/'your username'/Documents/Processing/Libraries
   * If you don't have this folder then create it.
-
+----
 = Linux =
 
   * ...
