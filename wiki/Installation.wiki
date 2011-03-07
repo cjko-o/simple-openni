@@ -18,7 +18,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 
 = OSX =
 
-* Install OpenNI *
+* Install OpenNI the official way *
 
 Those programs need to be installed in order to install OpenNI:
   * [http://developer.apple.com/technologies/tools/xcode.html Xcode] 
@@ -54,6 +54,19 @@ Those programs need to be installed in order to install OpenNI:
 > sudo ./install.sh
 }}}
 ...
+
+* Install OpenNI the short way *
+  * Download the [http://code.google.com/p/simple-openni/downloads/detail?name=OpenNI_NITE_Installer-OSX-0.13.zip&can=2&q=#makechanges Installer]
+  * Unzip the file and open a terminal window
+  * Go to unzipped folder 'OpenNI_NITE_Installer-OSX'
+{{{
+> cd ./OpenNI_NITE_Installer-OSX 
+}}}
+  * Start the installer
+{{{
+> sudo ./install.sh
+}}}
+
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
