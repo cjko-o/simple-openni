@@ -19,7 +19,7 @@ If everything worked out, you should see the camera in your Device Manager(under
   * Copy the 'SimpleOpenNI.zip' into this folder:
       C:\Users\'your username'\Documents\Processing\Libraries
   * If you don't have this folder then create it.
-
+----
 = OSX =
 
 * Install OpenNI the official way *
