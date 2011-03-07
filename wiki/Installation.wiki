@@ -5,14 +5,9 @@
 
 Before you can use SimpleOpenNI you have to install OpenNI. This can take quite some time on some platforms.
 
-[Installation#Windows Windows Installation]
-[Installation#OSX OSX Installation]
-[Installation#Linux Linux Installation]
-
-
  * [Installation#Windows Windows Installation]
-* [Installation#OSX OSX Installation]
-* [Installation#Linux Linux Installation]
+ * [Installation#OSX OSX Installation]
+ * [Installation#Linux Linux Installation]
 ----
 
 = Windows =
