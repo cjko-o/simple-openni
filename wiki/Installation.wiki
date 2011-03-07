@@ -5,7 +5,7 @@
 
 Before you can use SimpleOpenNI you have to install OpenNI. This can take quite some time on some platforms.
 
-[WikiSyntax#Windows]
+[Installation#Windows]
 
 ----
 
