@@ -14,6 +14,8 @@ echo "copy OpenNI-Module..."
 cp -R ./data/ni /var/lib/
 
 echo "copy NITE-Conf..."
+mkdir /usr/etc
+
 cp -R ./data/primesense /usr/etc/
 
 # copy all dyn.libs
