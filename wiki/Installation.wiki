@@ -26,6 +26,8 @@ If everything worked out, you should see the camera in your Device Manager(under
 ----
 = OSX =
 
+I made a little installer(see Install OpenNI the short way), if this doesn't work for you, than you should install it the offical way. For my tests i use only OSX 10.6., with 10.5 i had some problems.
+
 * Install OpenNI the official way *
 
 Those programs have to be on your system in order to install OpenNI:
