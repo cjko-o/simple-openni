@@ -66,7 +66,7 @@ Those programs have to be on your system in order to install OpenNI:
 ...
 
 * Install OpenNI the short way *
-  * Download the [http://code.google.com/p/simple-openni/downloads/detail?name=OpenNI_NITE_Installer-OSX-0.13.zip&can=2&q=#makechanges Installer]
+  * Download the [http://code.google.com/p/simple-openni/downloads/detail?name=OpenNI_NITE_Installer-OSX-0.131.zip&can=2&q=#makechanges Installer]
   * Unzip the file and open a terminal window
   * Go to the unzipped folder 'OpenNI_NITE_Installer-OSX'
 {{{
