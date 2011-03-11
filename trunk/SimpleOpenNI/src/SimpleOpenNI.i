@@ -72,6 +72,8 @@ typedef XnPoint3D*	XnPoint3DArray;
 JAVA_ARRAYSOFCLASSES(XnPoint3DArray)
 %apply XnPoint3D[] {XnPoint3DArray};
 
+%constant int USERS_ALL				= 0;		
+
 %constant int SKEL_PROFILE_NONE		= XN_SKEL_PROFILE_NONE;
 %constant int SKEL_PROFILE_ALL		= XN_SKEL_PROFILE_ALL;
 %constant int SKEL_PROFILE_UPPER	= XN_SKEL_PROFILE_UPPER;
@@ -194,7 +196,15 @@ public:
 	void getSceneFloor(XnVector3D* point,
 					   XnVector3D* normal);
 	
+	int		userWidth();
+	int		userHeight();
+
+	bool	getCoM(int user, XnPoint3D&  com);
+	int		getNumberOfUsers();
 	int		getUsers(std::vector<int>* userList);
+	int		getUserPixels(int user,int* userSceneData);
+
+
 	
 	bool	isCalibratedSkeleton(int user);
 	void	requestCalibrationSkeleton(int user, bool force);

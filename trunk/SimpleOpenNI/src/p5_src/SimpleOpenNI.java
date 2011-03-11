@@ -68,7 +68,10 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected PImage			_irImage;
 	
 	protected PImage			_sceneImage;
-  
+  	protected int[]				_sceneRaw;
+
+  	protected int[]				_userRaw;
+	
 	/**
 	* Creates the OpenNI context ands inits the modules
 	* 
@@ -126,87 +129,24 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 		// user callbacks
 		_newUserMethod = getMethodRef("onNewUser",new Class[] { int.class });
-		/*
-		try {
-			_newUserMethod = _parent.getClass().getMethod("onNewUser",new Class[] { int.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
-		*/
-		
-		try {
-			_lostUserMethod = _parent.getClass().getMethod("onLostUser",new Class[] { int.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
-		
+		_lostUserMethod = getMethodRef("onLostUser",new Class[] { int.class });
+
 		// calibrations callbacks
-		try {
-			_startCalibrationMethod = _parent.getClass().getMethod("onStartCalibration",new Class[] { int.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
-		try {
-			_endCalibrationMethod = _parent.getClass().getMethod("onEndCalibration",new Class[] { int.class, boolean.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
+		_startCalibrationMethod = getMethodRef("onStartCalibration",new Class[] { int.class });
+		_endCalibrationMethod = getMethodRef("onEndCalibration",new Class[] { int.class, boolean.class });
 		
 		// pose callbacks
-		try {
-			_startPoseMethod = _parent.getClass().getMethod("onStartPose",new Class[] { String.class,int.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
-		try {
-			_endPoseMethod = _parent.getClass().getMethod("onEndPose",new Class[] { String.class,int.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
+		_startPoseMethod = getMethodRef("onStartPose",new Class[] { String.class,int.class });
+		_endPoseMethod = getMethodRef("onEndPose",new Class[] { String.class,int.class });
 		
 		// hands
 		_createHandsMethod = getMethodRef("onCreateHands",new Class[] { int.class,PVector.class,float.class });
 		_updateHandsMethod = getMethodRef("onUpdateHands",new Class[] { int.class,PVector.class,float.class });
 		_destroyHandsMethod = getMethodRef("onDestroyHands",new Class[] { int.class,float.class });
-/*		
-		try {
-			_createHandsMethod = _parent.getClass().getMethod("onCreateHands",new Class[] { int.class,PVector.class,float.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
-		try {
-			_updateHandsMethod = _parent.getClass().getMethod("onUpdateHands",new Class[] { int.class,PVector.class,float.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
-		try {
-			_destroyHandsMethod = _parent.getClass().getMethod("onDestroyHands",new Class[] { int.class,float.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}		
-*/
+
 		// gesture
-		try {
-			_recognizeGestureMethod = _parent.getClass().getMethod("onRecognizeGesture",new Class[] { String.class,PVector.class,PVector.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}		
-		try {
-			_progressGestureMethod = _parent.getClass().getMethod("onProgressGesture",new Class[] { String.class,PVector.class,float.class });																									
-		} 
-		catch (Exception e) 
-		{// no such method, or an error.. which is fine, just ignore*
-		}
+		_recognizeGestureMethod = getMethodRef("onRecognizeGesture",new Class[] { String.class,PVector.class,PVector.class  });
+		_progressGestureMethod = getMethodRef("onProgressGesture",new Class[] { String.class,PVector.class,float.class });
 	}
 	
 	protected Method getMethodRef(String methodName,Class[] paraList)
@@ -397,6 +337,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	private void setupScene()
 	{
 		_sceneImage = new PImage(sceneWidth(), sceneHeight(),PConstants.RGB);
+		_sceneRaw = new int[sceneWidth() * sceneHeight()];
 	}
 	
 	/**
@@ -440,6 +381,12 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return _sceneImage;
 	}
 	
+	public int[] sceneMap()
+	{
+		return _sceneRaw;
+	}
+
+	
 	public void getSceneFloor(PVector point,PVector normal)
 	{
 		XnVector3D p = new XnVector3D();
@@ -451,7 +398,9 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 	
 	private void setupUser()
-	{}
+	{
+		_userRaw = new int[userWidth() * userHeight()];
+	}
 	
 	/**
 	* Enable user 
@@ -465,6 +414,33 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		}
 		else
 			return false;
+	}
+	
+	public int[] getUsersPixels(int user)
+	{
+		int size = userWidth() * userHeight();
+		if(size == 0)
+			return _userRaw;
+			
+		if(_userRaw.length != userWidth() * userHeight())
+		{	// resize the array
+			_userRaw = new int[userWidth() * userHeight()];
+		}
+
+		super.getUserPixels(user,_userRaw);
+		return _userRaw;
+	}
+		
+	public boolean getCoM(int user,PVector com)
+	{
+		boolean ret;
+		XnVector3D com1 = new XnVector3D();
+		ret = super.getCoM(user,com1);	
+		com.set(com1.getX(),
+				com1.getY(),
+				com1.getZ());
+		
+		return ret;
 	}
 	
 	private void setupHands()
@@ -617,6 +593,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			_sceneImage.loadPixels();
 				sceneImage(_sceneImage.pixels);
 			_sceneImage.updatePixels();
+			
+			sceneMap(_sceneRaw);
 		}
 			
 		
@@ -733,9 +711,9 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		w.setY(world.y);
 		w.setZ(world.z);
 		convertRealWorldToProjective(w,p);
-		world.set(p.getX(),
-				  p.getY(),
-				  p.getZ());
+		proj.set(p.getX(),
+				 p.getY(),
+				 p.getZ());
 	}
 
 	/*

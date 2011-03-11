@@ -2,7 +2,7 @@
 # SimpleOpenNI 
 # -----------------------------------------------------------------------------
 # Processing Wrapper for the OpenNI/Kinect library
-# prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
+# prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
 # -----------------------------------------------------------------------------
 #
 #	this envVar should be set:

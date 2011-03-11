@@ -4,6 +4,18 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.14 alpha, 03/0x/2011
+	New:
+		- Added some functions for the scene analyser and user:
+		int[] 	sceneMap()						-	returns the hole scene map
+		int[] 	getUsersPixels(int user)		-	returns the sceneMap for a user(only if user is enabled)
+		int		getNumberOfUsers()				-	returns current count of users
+		boolean	getCoM(int user,PVector com)	-	returns the center of mass for a user
+		- Added new example:
+			SimpleOpenNI_UserScene3d	
+				Shows how to get a user data 
+		- Fixed a bug in 'convertRealWorldToProjective'
+
 v0.13 alpha, 03/06/2011
 	New:
 		- Created an installer for osx, but just for testing purpose
