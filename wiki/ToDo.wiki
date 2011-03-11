@@ -10,5 +10,5 @@
   * Implement NITE
   * Use multiple threads
   * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
-
+  * Add a camera calibration, that the depthImage + the rgbImage correlate better
   
