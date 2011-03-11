@@ -32,7 +32,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	13		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	14		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -63,7 +63,10 @@ _depthMapRealWorld(NULL),
 _initFlag(false),
 _generatingFlag(false),
 _firstTimeUpdate(true),
-_nodes(Node_None)
+_nodes(Node_None),
+_userWidth(0),
+_userHeight(0),
+_userSceneBufSize(0)
 {
 	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
 		
@@ -440,6 +443,15 @@ bool ContextWrapper::createUser(int flags,bool force)
 	_userGenerator.RegisterUserCallbacks(newUserCb, lostUserCb, this, _hUserCb);
 	_userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(startCalibrationCb, endCalibrationCb, this, _hCalibrationCb);
 	_userGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(startPoseCb, endPoseCb, this, _hPoseCb);
+
+	// get the scenemap + read out the size
+	SceneMetaData  sceneMD;
+	_userGenerator.GetUserPixels(0,sceneMD);
+	
+	_userWidth	= sceneMD.XRes();
+	_userHeight = sceneMD.YRes();
+	_userSceneBufSize = _userWidth * _userHeight;
+
 
 	_nodes |= Node_User;
 	return true;
@@ -1180,6 +1192,10 @@ void ContextWrapper::calcSceneData()
 
 int ContextWrapper::sceneMap(int* map)
 {
+	if(!_sceneAnalyzer.IsValid())
+		return 0;
+	
+
 	for(int i=0;i < _sceneBufSize;i++)
 		map[i] = (int)(_sceneMD.Data())[i]; 
 	return _sceneBufSize;
@@ -1200,6 +1216,23 @@ int ContextWrapper::sceneImage(int* map)
 ///////////////////////////////////////////////////////////////////////////////
 // user methods
 
+bool ContextWrapper::getCoM(int user, XnPoint3D&  com)
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	_rc = _userGenerator.GetCoM(user,com);
+	return(_rc == XN_STATUS_OK);	
+}
+
+int ContextWrapper::getNumberOfUsers()
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	return _userGenerator.GetNumberOfUsers();	
+}
+
 int ContextWrapper::getUsers(std::vector<int>* userList)
 {
 	if(!_userGenerator.IsValid())
@@ -1216,6 +1249,42 @@ int ContextWrapper::getUsers(std::vector<int>* userList)
 			userList->push_back((int)usersArray[i]);
 	}
 	return userCount;
+}
+	
+int	ContextWrapper::userWidth()
+{
+	return _userWidth;
+}
+
+int	ContextWrapper::userHeight()
+{
+	return _userHeight;
+}
+
+int	ContextWrapper::getUserPixels(int user,int* userSceneData)
+{
+	if(!_userGenerator.IsValid())
+		return 0;
+
+	 SceneMetaData  sceneMD;
+	_userGenerator.GetUserPixels(user,sceneMD);
+
+	// update the size / it seams like the user changes the camera size(QVGA/VGA)
+	_userWidth	= sceneMD.XRes();
+	_userHeight = sceneMD.YRes();
+
+	int					index = 0;
+	const XnLabel*		pLabels= sceneMD.Data();
+	for(unsigned int y=0; y < sceneMD.YRes(); y++)
+	{
+		for(unsigned int x=0; x < sceneMD.XRes(); x++)
+		{
+			userSceneData[index] = *pLabels;;
+
+			pLabels++;
+			index++;
+		}
+	}
 }
 
 

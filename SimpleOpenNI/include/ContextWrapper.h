@@ -84,8 +84,7 @@ public:
 
 	virtual void update();
 
-	
-
+	//////////////////////////////////////////////////////////////////////////////
 	// depth methods
 	virtual bool enableDepth();
 	virtual bool enableDepth(int width,int height,int fps);
@@ -108,6 +107,7 @@ public:
 	float hFieldOfView();
 	float vFieldOfView();
 
+	//////////////////////////////////////////////////////////////////////////////
 	// cam image
 	virtual bool enableRGB();
 	virtual bool enableRGB(int width,int height,int fps);
@@ -117,6 +117,7 @@ public:
 
 	int	rgbImage(int* map);			// argb 4-Bytes / alpha is not used
 
+	//////////////////////////////////////////////////////////////////////////////
 	// ir image
 	virtual bool enableIR();
 	virtual bool enableIR(int width,int height,int fps);
@@ -134,15 +135,22 @@ public:
 	int sceneWidth();
 	int	sceneHeight();
 
-	int sceneMap(int* map);			
+	int sceneMap(int* map);
 	int sceneImage(int* map);		// 16-bit value, with the labels, size of the depth map
 	void getSceneFloor(XnVector3D* point,	
 					   XnVector3D* normal);	
 
+	//////////////////////////////////////////////////////////////////////////////
 	// users
 	virtual bool enableUser(int flags);
 
+	int		userWidth();
+	int		userHeight();
+
+	bool	getCoM(int user, XnPoint3D&  com);
+	int		getNumberOfUsers();
 	int		getUsers(std::vector<int>* userList);
+	int		getUserPixels(int user,int* userSceneData);
 
 	bool	isCalibratedSkeleton(int user);
 	void	requestCalibrationSkeleton(int user, bool force);
@@ -159,6 +167,7 @@ public:
 									    int joint,
 										XnSkeletonJointOrientation* jointOrientation);
 
+	//////////////////////////////////////////////////////////////////////////////
 	// hands
 	virtual bool enableHands();
 	void	startTrackingHands(const XnVector3D& pos);
@@ -166,6 +175,7 @@ public:
 	void	stopTrackingAllHands();
 	void	setSmoothingHands(float smoothingFactor);
 
+	//////////////////////////////////////////////////////////////////////////////
 	// gesture
 	virtual bool enableGesture();
 	void addGesture(const char* gesture);
@@ -173,20 +183,26 @@ public:
 	bool availableGesture(const char *strGesture);
 	// void addGesture(const char* gesture,XnBoundingBox3D *  pArea);
 
+	//////////////////////////////////////////////////////////////////////////////
 	// audio
 	//bool enableAudio();
 
+	//////////////////////////////////////////////////////////////////////////////
 	// recorder
 	virtual bool enableRecorder(int recordMedium,const char* filePath);
 	bool addNodeToRecording(int nodeType,int compression);
 	bool removeNodeFromRecording(int nodeType);
 
+	//////////////////////////////////////////////////////////////////////////////
+	// player
 	virtual bool openFileRecording(const char* filePath);
 
+	//////////////////////////////////////////////////////////////////////////////
 	// access methods
 	void setMirror(bool flag);
 	bool mirror();
 
+	//////////////////////////////////////////////////////////////////////////////
 	// converter methods
 	void convertRealWorldToProjective(XnVector3D* world,XnVector3D* proj);	
 	void convertRealWorldToProjective(std::vector<XnVector3D>* worldArray,std::vector<XnVector3D>* projArray);
@@ -331,6 +347,9 @@ protected:
 	XnCallbackHandle	_hUserCb;
 	XnCallbackHandle	_hCalibrationCb;
 	XnCallbackHandle	_hPoseCb;
+	int					_userWidth;
+	int					_userHeight;
+	int					_userSceneBufSize;
 
 	// hands
 	xn::HandsGenerator	 _handsGenerator;
