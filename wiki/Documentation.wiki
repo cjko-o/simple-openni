@@ -1,8 +1,13 @@
 #summary JavaDoc
 
-= Functions =
+= Constants =
+
+= Class =
 
 *SimpleOpenNI*(PApplet parent, String initXMLFile)
+  _parent_
+   
+  _initXMLFile_
 
 ...
 
