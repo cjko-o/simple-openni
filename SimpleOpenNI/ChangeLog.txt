@@ -6,8 +6,8 @@ vx.xx status, mm/dd/yyyy
 
 v0.15 alpha, 03/xx/2011
 	New:
-		- Extended the CMakeList.txt, now you should get messages if you didn't setup
-		  the environmentvariables(for linux)
+		- Extended the CMakeList.txt, now there should be a messages if you didn't setup
+		  the environment variables(for linux)
 		
 	
 v0.14 alpha, 03/11/2011
