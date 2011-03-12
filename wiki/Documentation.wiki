@@ -16,8 +16,9 @@ Parameters:
 Parameters:
   * _parent_
 ----
-boolean isInit()
+boolean *isInit*()
 Return: 
+  
 ----
 void *enableDepth*() 
 ----
