@@ -9,10 +9,9 @@
 #		OPEN_NI_INCLUDE < set this on osx: export OPEN_NI_INCLUDE=...path
 #		OPEN_NI_LIB 
 #		JAVA_HOME
-#		JAVA_HOME
 #
 # -----------------------------------------------------------------------------
-
+	
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(SimpleOpenNI)
@@ -48,7 +47,15 @@ SET(CMAKE_SWIG_FLAGS -package SimpleOpenNI)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # openNI 
-INCLUDE_DIRECTORIES($ENV{OPEN_NI_INCLUDE})
+SET(OPEN_NI_INCLUDES $ENV{OPEN_NI_INCLUDE})
+IF(DEFINED OPEN_NI_INCLUDES)
+	INCLUDE_DIRECTORIES(${OPEN_NI_INCLUDES})
+ELSE()
+	MESSAGE("OPEN_NI_INCLUDE and OPEN_NI_LIB should be set by your environment, for example:")
+	MESSAGE(FATAL_ERROR "> cmake -DOPEN_NI_INCLUDE=/usr/???/ -DOPEN_NI_LIB=/usr/???/ .")	
+ENDIF()
+
+#INCLUDE_DIRECTORIES($ENV{OPEN_NI_INCLUDE})
 FIND_LIBRARY(OPEN_NI_LIBRARY NAMES openNI PATHS $ENV{OPEN_NI_LIB})
 SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
 
@@ -59,12 +66,16 @@ SET(P5_WRAPPER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/p5_src/SimpleOpenNI.java)
 # processing core lib
 # shoud use find_program
 IF(WIN32)
-	SET(P5_JAR "C:/Program Files (x86)/processing-1.2.1/lib/core.jar")
+	SET(P5_JAR "C:/Program Files (x86)/processing-1.2.1/lib/core.jar")	
 ELSEIF(APPLE)
 	SET(P5_JAR "/Applications/Processing.app/Contents/Resources/Java/core.jar")
 ELSE()
 	# unix/linux
 	# SET(P5_JAR "/?")
+	IF(NOT DEFINED P5_JAR)
+		MESSAGE("Set P5_JAR to the folder where Processing installed the core.jar file, for example:")
+		MESSAGE(FATAL_ERROR "> cmake -DP5_JAR=/usr/???/core.jar .")	
+	ENDIF()
 ENDIF()
 
 
