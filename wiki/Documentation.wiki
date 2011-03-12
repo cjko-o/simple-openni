@@ -1,5 +1,5 @@
 #summary JavaDoc
-
+[http://simple-openni.googlecode.com/svn/trunk/SimpleOpenNI/dist/all/SimpleOpenNI/documentation/index.html Auto. gen. doc]
 ===Constants===
 
 ===Class===
@@ -22,5 +22,3 @@ Return:
 void *enableDepth*() 
 ----
 ...
-
-[http://simple-openni.googlecode.com/svn/trunk/SimpleOpenNI/dist/all/SimpleOpenNI/documentation/index.html Auto. gen. doc]
