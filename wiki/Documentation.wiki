@@ -2,7 +2,7 @@
 [http://simple-openni.googlecode.com/svn/trunk/SimpleOpenNI/dist/all/SimpleOpenNI/documentation/index.html Auto. gen. doc]
 ===Constants===
 
-===Class===
+===Class SimpleOpenNI===
 
 *SimpleOpenNI*(PApplet parent, String initXMLFile)
 
