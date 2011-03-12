@@ -44,6 +44,9 @@
 #define		Node_Recorder	(1 << 7)
 #define		Node_Player		(1 << 8)
 
+#define		DepthImgMode_Default	0
+#define		DepthImgMode_RgbFade	1
+
 
 #define		MAX_DEPTH		10000	// 10m
 #define		STRING_BUFFER	255
@@ -94,7 +97,8 @@ public:
 
 	int	depthImage(int* map);		// argb 4-Bytes / alpha is not used
 	void setDepthImageColor(int r,int g,int b);
-	void setDepthImageColorRange(XnRGB24Pixel* colors,int count);
+	void setDepthImageColorMode(int mode);
+	int depthImageColorMode();
 
 	int depthMapSize();
 	int	depthMap(int* map);					// in milimeters
@@ -316,10 +320,12 @@ protected:
 	xn::DepthMetaData	_depthMD;
 	XnMapOutputMode		_depthMapOutputMode;
 	float				_pDepthHist[MAX_DEPTH];
+	float				_pDepthGamma[MAX_DEPTH];
 	XnRGB24Pixel*		_pDepthImage;
 	int					_depthBufSize;
 	float				_depthImageColor[3];
 	XnPoint3D*			_depthMapRealWorld;
+	int					_depthImageColorMode;
 
 	// cam image
 	xn::ImageGenerator	_image;

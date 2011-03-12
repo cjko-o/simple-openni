@@ -130,6 +130,12 @@ JAVA_ARRAYSOFCLASSES(XnPoint3DArray)
 
 %constant int RECORD_MEDIUM_FILE	= XN_CODEC_NULL;		
 
+
+%constant int IMG_MODE_DEFAULT	= DepthImgMode_Default;		
+%constant int IMG_MODE_RGB_FADE	= DepthImgMode_RgbFade;		
+
+
+
 %feature("director") ContextWrapper;
 class ContextWrapper
 {
@@ -171,6 +177,8 @@ public:
 	int	depthHeight();
 	int	depthImage(int* map);	
 	void setDepthImageColor(int r,int g,int b);
+	void setDepthImageColorMode(int mode);
+	int depthImageColorMode();
 	
 	int depthMapSize();
 	int	depthMap(int* map);					

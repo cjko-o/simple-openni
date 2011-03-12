@@ -23,6 +23,7 @@
 
 
 #include <iostream>
+#include <cmath>
 
 #include <XnTypes.h>
 
@@ -66,7 +67,8 @@ _firstTimeUpdate(true),
 _nodes(Node_None),
 _userWidth(0),
 _userHeight(0),
-_userSceneBufSize(0)
+_userSceneBufSize(0),
+_depthImageColorMode(DepthImgMode_Default)
 {
 	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
 		
@@ -89,6 +91,15 @@ _userSceneBufSize(0)
 	_sceneMapOutputMode.nXRes = XN_VGA_X_RES; 
 	_sceneMapOutputMode.nYRes = XN_VGA_Y_RES; 
 	_sceneMapOutputMode.nFPS = 30; 
+
+
+	// calc gamma map
+	for(int i=0; i< (MAX_DEPTH /1); ++i)
+	{
+		float v = i/(float)(MAX_DEPTH/1);
+		v = std::pow(v, 3)* 6;
+		_pDepthGamma[i] = v*6*256;
+	}
 
 }
 
@@ -888,9 +899,69 @@ void ContextWrapper::createDepthImage()
 			{
 				int nHistValue = (int)_pDepthHist[*pDepth];
 				
-				pPixel->nRed	= (XnUInt8)(nHistValue * _depthImageColor[0]);
-				pPixel->nGreen	= (XnUInt8)(nHistValue * _depthImageColor[1]);
-				pPixel->nBlue	= (XnUInt8)(nHistValue * _depthImageColor[2]);
+				switch(_depthImageColorMode)
+				{
+				case DepthImgMode_RgbFade:
+					{
+						int pval =_pDepthGamma[(int)((*pDepth) / 1)];
+						//int lb =  255 - (pval & 0xff);
+						int lb =  pval & 0xff;
+
+						switch (pval>>8)
+						{
+						case 0:
+							pPixel->nRed = 255;
+							pPixel->nGreen = 255-lb;
+							pPixel->nBlue = 255-lb;
+							break;
+						case 1:
+							pPixel->nRed = 255;
+							pPixel->nGreen = lb;
+							pPixel->nBlue = 0;
+							break;
+						case 2:
+							pPixel->nRed = 255-lb;
+							pPixel->nGreen = 255;
+							pPixel->nBlue = 0;
+							break;
+						case 3:
+							pPixel->nRed = 0;
+							pPixel->nGreen = 255;
+							pPixel->nBlue = lb;
+							break;
+						case 4:
+							pPixel->nRed = 0;
+							pPixel->nGreen = 255-lb;
+							pPixel->nBlue = 255;
+							break;
+						case 5:
+							pPixel->nRed = 0;
+							pPixel->nGreen = 0;
+							pPixel->nBlue = 255-lb;
+							break;
+						default:
+							pPixel->nRed = 0;
+							pPixel->nGreen = 0;
+							pPixel->nBlue = 0;
+							break;
+						}
+
+						/*
+						unsigned int color = (float)*pDepth * (float)0xffffff / (float)MAX_DEPTH ;
+						//color = 5000;
+						pPixel->nRed	= (XnUInt8)(color & 0x0000ff );
+						pPixel->nGreen	= (XnUInt8)(color & 0x00ff00 >> 8);
+						pPixel->nBlue	= (XnUInt8)(color & 0xff0000 >> 16);
+						*/
+					}
+					break;
+				case DepthImgMode_Default:
+				default:
+					pPixel->nRed	= (XnUInt8)(nHistValue * _depthImageColor[0]);
+					pPixel->nGreen	= (XnUInt8)(nHistValue * _depthImageColor[1]);
+					pPixel->nBlue	= (XnUInt8)(nHistValue * _depthImageColor[2]);
+					break;
+				}
 			}
 		}
 	}
@@ -1001,10 +1072,16 @@ void ContextWrapper::setDepthImageColor(int r,int g,int b)
 
 }
 
-void ContextWrapper::setDepthImageColorRange(XnRGB24Pixel* colors,int count)
+void ContextWrapper::setDepthImageColorMode(int mode)
 {
-
+	_depthImageColorMode = mode;
 }
+
+int ContextWrapper::depthImageColorMode()
+{
+	return _depthImageColorMode;
+}
+
 
 		
 ///////////////////////////////////////////////////////////////////////////////
