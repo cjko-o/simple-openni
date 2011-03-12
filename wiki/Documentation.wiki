@@ -5,9 +5,8 @@
 ===Class===
 
 *SimpleOpenNI*(PApplet parent, String initXMLFile)
-  _parent_
-   
-  _initXMLFile_
+  * _parent_
+  * _initXMLFile_
 
 ...
 
