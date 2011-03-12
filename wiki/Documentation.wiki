@@ -5,9 +5,10 @@
 ===Class===
 
 *SimpleOpenNI*(PApplet parent, String initXMLFile)
+Parameters:
   * _parent_
   * _initXMLFile_
-
+Return: 
 ...
 
 [http://simple-openni.googlecode.com/svn/trunk/SimpleOpenNI/dist/all/SimpleOpenNI/documentation/index.html Auto. gen. doc]
