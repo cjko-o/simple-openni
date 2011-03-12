@@ -2,7 +2,7 @@
 
 = Functions =
 
-SimpleOpenNI(PApplet parent, String initXMLFile)
+*SimpleOpenNI*(PApplet parent, String initXMLFile)
 
 ...
 
