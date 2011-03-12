@@ -1,8 +1,8 @@
 #summary JavaDoc
 
-== Constants ==
+===Constants===
 
-=== Class ===
+===Class===
 
 *SimpleOpenNI*(PApplet parent, String initXMLFile)
   _parent_
