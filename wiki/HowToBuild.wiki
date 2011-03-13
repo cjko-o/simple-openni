@@ -26,7 +26,7 @@ On windows i only used Visual Studio 2008
 {{{
 > mkdir build
 > cd build
-> cmake -DEIGEN3D_INCLUDE=C:/'_path to the Eigen folder_' ..
+> cmake -DEIGEN3D_INCLUDE=C:/'path to the Eigen folder' ..
 }}}
   * Now you should find in the 'SimpleOpenNI/build' folder the Visual Studio Projectfile
   * Open 'SimpleOpenNI.sln' and build it
@@ -56,7 +56,7 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
 > cd build
 > cmake -DOPEN_NI_INCLUDE=/usr/include/ni -DOPEN_NI_LIB=/usr/lib \
 -DXN_NITE_INCLUDE=/usr/include/nite -DXN_NITE_LIB=/usr/lib \
--DP5_JAR='_your path to the processing folder_'/processing-1.2.1/lib/core.jar \
+-DP5_JAR='your path to the processing folder'/processing-1.2.1/lib/core.jar \
 -DEIGEN3D_INCLUDE=/usr/local/include/eigen3 ..
 > make
 }}}
