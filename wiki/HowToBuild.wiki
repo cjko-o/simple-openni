@@ -26,7 +26,7 @@ On windows i only used Visual Studio 2008
 {{{
 > mkdir vc
 > cd vc
-> cmake ..
+> cmake .
 }}}
   * Now you have a Visual Studio Project 'SimpleOpenNI.sln'
 ----
