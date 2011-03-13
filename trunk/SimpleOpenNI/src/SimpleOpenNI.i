@@ -215,8 +215,17 @@ public:
 
 	
 	bool	isCalibratedSkeleton(int user);
+	bool	isCalibratingSkeleton(int user);
 	void	requestCalibrationSkeleton(int user, bool force);
+	void	abortCalibrationSkeleton(int user);
+	
+	bool	saveCalibrationDataSkeleton(int user,int slot);
+	bool	loadCalibrationDataSkeleton(int user,int slot);
+	void	clearCalibrationDataSkeleton(int slot);
+	bool	isCalibrationDataSkeleton(int slot);
 
+	void	setSmoothingSkeleton(float factor);
+	
 	bool	isTrackingSkeleton(int user);
 	void	startTrackingSkeleton(int user);
 	void	stopTrackingSkeleton(int user);

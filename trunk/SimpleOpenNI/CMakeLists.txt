@@ -14,12 +14,16 @@
 	
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+INCLUDE(CheckIncludeFiles)
+
 PROJECT(SimpleOpenNI)
 
+# -----------------------------------------------------------------------------
 # check swig
 FIND_PACKAGE(SWIG REQUIRED)
 INCLUDE(${SWIG_USE_FILE})
 
+# -----------------------------------------------------------------------------
 # check java/jni
 FIND_PACKAGE(Java REQUIRED)
 FIND_PACKAGE(JNI REQUIRED)
@@ -28,6 +32,8 @@ INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH2})
  
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
  
+# -----------------------------------------------------------------------------
+# java tools
 IF(WIN32)
 	SET(JAVA_RUNTIME2  $ENV{JAVA_HOME}/bin/java)
 	SET(JAVA_ARCHIVE2  $ENV{JAVA_HOME}/bin/jar)
@@ -41,24 +47,88 @@ ELSE()
 	SET(JAVA_DOC	   javadoc)
 ENDIF()
 
+# -----------------------------------------------------------------------------
 # swig 
 SET(CMAKE_SWIG_FLAGS -package SimpleOpenNI)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# -----------------------------------------------------------------------------
 # openNI 
-SET(OPEN_NI_INCLUDES $ENV{OPEN_NI_INCLUDE})
-IF(DEFINED OPEN_NI_INCLUDES)
-	INCLUDE_DIRECTORIES(${OPEN_NI_INCLUDES})
-ELSE()
-	MESSAGE("OPEN_NI_INCLUDE and OPEN_NI_LIB should be set by your environment, for example:")
-	MESSAGE(FATAL_ERROR "> cmake -DOPEN_NI_INCLUDE=/usr/???/ -DOPEN_NI_LIB=/usr/???/ .")	
+CHECK_INCLUDE_FILES("XnOS.h" HAVE_XNOS_H)
+IF(NOT HAVE_XNOS_H)
+	IF(NOT DEFINED OPEN_NI_INCLUDE)
+		# env is not set
+		SET(OPEN_NI_INCLUDE $ENV{OPEN_NI_INCLUDE})
+		IF(NOT DEFINED OPEN_NI_INCLUDE)
+			MESSAGE("OPEN_NI_INCLUDE should be set, for example:")
+			MESSAGE("> cmake -DOPEN_NI_INCLUDE=/usr/??? .")	
+		ENDIF()
+	ENDIF()
+	INCLUDE_DIRECTORIES(${OPEN_NI_INCLUDE})
 ENDIF()
 
-#INCLUDE_DIRECTORIES($ENV{OPEN_NI_INCLUDE})
-FIND_LIBRARY(OPEN_NI_LIBRARY NAMES openNI PATHS $ENV{OPEN_NI_LIB})
+	
+# openNI lib	
+IF(NOT OPEN_NI_LIB)
+	SET(OPEN_NI_LIB $ENV{OPEN_NI_LIB})
+	IF(NOT DEFINED OPEN_NI_LIB)
+		# env is not set
+		MESSAGE("OPEN_NI_LIB should be set, for example:")
+		MESSAGE("> cmake -DOPEN_NI_LIB=/usr/lib/??? .")	
+	ENDIF()
+ENDIF()
+	
+FIND_LIBRARY(OPEN_NI_LIBRARY NAMES OpenNI PATHS ${OPEN_NI_LIB})
 SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
 
+
+# IF(DEFINED OPEN_NI_INCLUDE)
+	# INCLUDE_DIRECTORIES(${OPEN_NI_INCLUDE})
+# ELSE()
+	# # check if the envvar is set
+	# SET(OPEN_NI_INCLUDE $ENV{OPEN_NI_INCLUDE})
+	# IF(DEFINED OPEN_NI_INCLUDE)
+		# INCLUDE_DIRECTORIES(${OPEN_NI_INCLUDE})
+	# ELSE()
+		# MESSAGE("OPEN_NI_INCLUDE and OPEN_NI_LIB should be set, for example:")
+		# MESSAGE("> cmake -DOPEN_NI_INCLUDE=/usr/???/ -DOPEN_NI_LIB=/usr/???/ .")	
+	# ENDIF()
+# ENDIF()
+
+# #INCLUDE_DIRECTORIES($ENV{OPEN_NI_INCLUDE})
+# FIND_LIBRARY(OPEN_NI_LIBRARY NAMES OpenNI PATHS $ENV{OPEN_NI_LIB})
+# SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
+
+# -----------------------------------------------------------------------------
+# NITE
+CHECK_INCLUDE_FILES("XnVSessionManager.h" HAVE_NITE_H)
+IF(NOT HAVE_NITE_H)
+	# check for the nite file
+	IF(NOT (DEFINED XN_NITE_INCLUDE AND DEFINED XN_NITE_LIB))
+		# 
+		IF(DEFINED XN_NITE_INSTALL_PATH)
+			SET(XN_NITE_INCLUDE ${XN_NITE_INSTALL_PATH}/Include)
+			SET(XN_NITE_LIB ${XN_NITE_INSTALL_PATH}/Lib)
+		ELSE()
+			# check if the envvar is set
+			SET(XN_NITE_PATH $ENV{XN_NITE_INSTALL_PATH})
+			IF(DEFINED XN_NITE_PATH)
+				SET(XN_NITE_INCLUDE ${XN_NITE_PATH}/Include)
+				SET(XN_NITE_LIB ${XN_NITE_PATH}/Lib)
+			ELSE()
+				MESSAGE("XN_NITE_INCLUDE and XN_NITE_LIB should be set, for example:")
+				MESSAGE("> cmake -DXN_NITE_INCLUDE=/usr/??? -DXN_NITE_LIB=/usr/lib/??? .")	
+			ENDIF()
+		ENDIF()
+	ENDIF()
+ENDIF()
+
+INCLUDE_DIRECTORIES(${XN_NITE_INCLUDE})
+FIND_LIBRARY(NITE_LIBRARY NAMES XnVNite PATHS ${XN_NITE_LIB})
+SET(LIBS ${LIBS} ${NITE_LIBRARY})
+
+# -----------------------------------------------------------------------------
 # processing wrappers
 SET(P5_WRAPPER ${CMAKE_CURRENT_SOURCE_DIR}/src/p5_src/)
 SET(P5_WRAPPER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/p5_src/SimpleOpenNI.java)
@@ -77,6 +147,22 @@ ELSE()
 		MESSAGE(FATAL_ERROR "> cmake -DP5_JAR=/usr/???/core.jar .")	
 	ENDIF()
 ENDIF()
+
+# -----------------------------------------------------------------------------
+# eigen 3d template lib
+IF(DEFINED EIGEN3D_INCLUDE)
+	INCLUDE_DIRECTORIES(${EIGEN3D_INCLUDE})
+ELSE()
+	# check if the envvar is set
+	SET(EIGEN3D_INCLUDE $ENV{EIGEN3D_INCLUDE})
+	IF(DEFINED EIGEN3D_INCLUDE)
+		INCLUDE_DIRECTORIES(${EIGEN3D_INCLUDE})
+	ELSE()
+		MESSAGE("EIGEN3D_INCLUDE should be set, for example:")
+		MESSAGE("> cmake -DEIGEN3D_INCLUDE=/usr/??? .")	
+	ENDIF()
+ENDIF()	
+
 
 
 SET(SWIG_SOURCES 
