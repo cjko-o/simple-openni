@@ -21,36 +21,42 @@ Before you can build the library you should install following tools:
 
 On windows i only used Visual Studio 2008
   * Download the souces from the svn
-  * On Windows i use the CMake-Gui
-  * Set the sourcecode folder to your '..SimpleOpenNI' location
-  * Set the binaries folder to '..SimpleOpenNI/vc'
-  * Configure and add an entry 'EIGEN3D_INCLUDE' to the folder where you have installed Eigen
-  * Select Visual Studio 2008(64Bit will not work, because the OpenNI libs are 32Bit)
-  * Now you have a Visual Studio Project 'SimpleOpenNI.sln'
-  * Open this in Visual Studio and build it
+  * Open a terminal and go into the 'SimpleOpenNI' folder
+  * Type those commands:
+{{{
+> mkdir build
+> cd build
+> cmake -DEIGEN3D_INCLUDE=C:/[path to the Eigen folder] ..
+}}}
+  * Now you should find in the 'SimpleOpenNI/build' folder the Visual Studio Projectfile
+  * Open 'SimpleOpenNI.sln' and build it
 ----
-
 = OSX =
 
 On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in order to compile the sources. Processing should be installed in the applications-folder.
 
   * Download the souces from the svn
-  * Open a terminal and go into the 'SimpleOpenN' folder
+  * Open a terminal and go into the 'SimpleOpenNI' folder
   * Type those commands:
 {{{
-> cmake .
+> mkdir build
+> cd build
+> cmake -DXN_NITE_INCLUDE=/usr/include/nite -DXN_NITE_LIB=/usr/lib \
+-DEIGEN3D_INCLUDE=/usr/local/include/eigen3 ..
 > make
 }}}
 ----
 = UNIX/Linux =
 
   * Download the souces from the svn
-  * Open a terminal and go into the 'SimpleOpenN' folder
+  * Open a terminal and go into the 'SimpleOpenNI' folder
   * Type those commands:
 {{{
+> mkdir build
+> cd build
 > cmake -DOPEN_NI_INCLUDE=/usr/include/ni -DOPEN_NI_LIB=/usr/lib \
 -DXN_NITE_INCLUDE=/usr/include/nite -DXN_NITE_LIB=/usr/lib \
 -DP5_JAR=/home/max/app/processing-1.2.1/lib/core.jar \
--DEIGEN3D_INCLUDE=/usr/local/include/eigen3 .
+-DEIGEN3D_INCLUDE=/usr/local/include/eigen3 ..
 > make
 }}}
