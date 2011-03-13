@@ -1372,6 +1372,7 @@ int	ContextWrapper::getUserPixels(int user,int* userSceneData)
 			index++;
 		}
 	}
+	return sceneMD.XRes() * sceneMD.YRes();
 }
 
 
