@@ -6,9 +6,22 @@ vx.xx status, mm/dd/yyyy
 
 v0.15 alpha, 03/xx/2011
 	New:
+		- Added several functions for the skeleton handling + functions to save and load the calibrations 
+		  for skeletons, but this saves and loads only to memory, not to the disk, so it's just for one session. 
+		  bool saveCalibrationDataSkeleton(int user,int slot)	- saves the calibration in ram
+		  bool loadCalibrationDataSkeleton(int user,int slot)	- load the calibration from ram
+		  void clearCalibrationDataSkeleton(int slot)			- clears the calibration data at this slot
+		  bool isCalibrationDataSkeleton(int slot)				- check if the calibration data exists at this slot
+		  void abortCalibrationSkeleton(int user)				- aborts the calibration (requestCalibrationSkeleton)
+	  	  bool isCalibratingSkeleton(int user)					- check if its in the state of calibrating
+		  void setSmoothingSkeleton(float factor)				- set the smoothing factor for the skeleton
+		  
+		  See further info on this thread:
+		  http://groups.google.com/group/openni-dev/browse_thread/thread/f3def5f642802ec0/1bafdb1c8570bc70?lnk=gst&q=Save++Calibration#1bafdb1c8570bc70
 		- Extended the CMakeList.txt, now there should be a messages if you didn't setup
 		  the environment variables(for linux)
-		
+		- Added Eigen(http://eigen.tuxfamily.org) as library dependency for the build 
+		  process. Eigen is a 3d Math Template Library.
 	
 v0.14 alpha, 03/11/2011
 	New:
