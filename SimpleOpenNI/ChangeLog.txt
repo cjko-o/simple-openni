@@ -18,8 +18,11 @@ v0.15 alpha, 03/xx/2011
 		  
 		  See further info on this thread:
 		  http://groups.google.com/group/openni-dev/browse_thread/thread/f3def5f642802ec0/1bafdb1c8570bc70?lnk=gst&q=Save++Calibration#1bafdb1c8570bc70
-		- Extended the CMakeList.txt, now there should be a messages if you didn't setup
-		  the environment variables(for linux)
+		- Added a download for linux-x86, also splitt up the download for each version: Win/OSX/Linux
+		- Extended the CMakeList.txt:
+			- now there should be a messages if you didn't setup the environment variables(for linux)
+			- added the nite headers
+			- fixed a spelling bug, couldn't find smallcase openNI library(for linux)
 		- Added Eigen(http://eigen.tuxfamily.org) as library dependency for the build 
 		  process. Eigen is a 3d Math Template Library.
 	

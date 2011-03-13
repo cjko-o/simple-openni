@@ -21,11 +21,19 @@
  * ----------------------------------------------------------------------------
  */
 
+#ifdef WIN32
+	#define NOMINMAX	// eigen + windows.h will have conflict without this
+#endif
 
 #include <iostream>
 #include <cmath>
 
+// openni
 #include <XnTypes.h>
+
+// eigen
+#include <Eigen/Geometry>
+
 
 #include "ContextWrapper.h"
 
@@ -71,7 +79,9 @@ _userSceneBufSize(0),
 _depthImageColorMode(DepthImgMode_Default)
 {
 	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
-		
+	Eigen::Vector4f v;
+
+
 	_depthImageColor[0] = 1.0f;
 	_depthImageColor[1] = 1.0f;
 	_depthImageColor[2] = 1.0f;
@@ -1381,12 +1391,74 @@ bool ContextWrapper::isCalibratedSkeleton(int user)
 	return _userGenerator.GetSkeletonCap().IsCalibrated(user) > 0;
 }
 
+bool ContextWrapper::isCalibratingSkeleton(int user)
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	return _userGenerator.GetSkeletonCap().IsCalibrating(user) > 0;
+}
+
 void ContextWrapper::requestCalibrationSkeleton(int user, bool force)
 {
 	if(!_userGenerator.IsValid())
 		return;
 
 	_userGenerator.GetSkeletonCap().RequestCalibration(user, force);
+}
+
+void ContextWrapper::abortCalibrationSkeleton(int user)
+{
+	if(!_userGenerator.IsValid())
+		return;
+
+	_userGenerator.GetSkeletonCap().AbortCalibration(user);
+
+}
+
+bool ContextWrapper::saveCalibrationDataSkeleton(int user,int slot)
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	if(_userGenerator.GetSkeletonCap().IsCalibrated(user) == 0)
+		return false;
+
+	_rc = _userGenerator.GetSkeletonCap().SaveCalibrationData(user,slot);
+	return(_rc == XN_STATUS_OK);
+}
+
+bool ContextWrapper::loadCalibrationDataSkeleton(int user,int slot)
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	_rc = _userGenerator.GetSkeletonCap().LoadCalibrationData(user,slot);
+	return(_rc == XN_STATUS_OK);
+}
+
+void ContextWrapper::setSmoothingSkeleton(float factor)
+{
+	if(!_userGenerator.IsValid())
+		return;
+
+	_rc = _userGenerator.GetSkeletonCap().SetSmoothing(factor);
+}
+
+void ContextWrapper::clearCalibrationDataSkeleton(int slot)
+{
+	if(!_userGenerator.IsValid())
+		return;
+
+	_rc = _userGenerator.GetSkeletonCap().ClearCalibrationData(slot);
+}
+
+bool ContextWrapper::isCalibrationDataSkeleton(int slot)
+{
+	if(!_userGenerator.IsValid())
+		return false;
+
+	return _userGenerator.GetSkeletonCap().IsCalibrationData(slot) > 0;
 }
 
 void ContextWrapper::startTrackingSkeleton(int user)

@@ -30,6 +30,10 @@
 #include <XnOS.h>
 #include <XnCppWrapper.h>
 
+#include <XnVHandPointContext.h>
+#include <XnVSessionManager.h>
+#include <XnVSelectableSlider2D.h>
+
 ///////////////////////////////////////////////////////////////////////////////
 // defines
 
@@ -157,7 +161,16 @@ public:
 	int		getUserPixels(int user,int* userSceneData);
 
 	bool	isCalibratedSkeleton(int user);
+	bool	isCalibratingSkeleton(int user);
 	void	requestCalibrationSkeleton(int user, bool force);
+	void	abortCalibrationSkeleton(int user);
+
+	bool	saveCalibrationDataSkeleton(int user,int slot);
+	bool	loadCalibrationDataSkeleton(int user,int slot);
+	void	clearCalibrationDataSkeleton(int slot);
+	bool	isCalibrationDataSkeleton(int slot);
+
+	void	setSmoothingSkeleton(float factor);
 
 	bool	isTrackingSkeleton(int user);
 	void	startTrackingSkeleton(int user);
@@ -170,6 +183,7 @@ public:
 	bool	getJointOrientationSkeleton(int user,
 									    int joint,
 										XnSkeletonJointOrientation* jointOrientation);
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// hands
@@ -369,6 +383,9 @@ protected:
 	xn::Recorder		_recorder;
 
 	bool				_firstTimeUpdate;
+
+	// nite
+	XnVSessionManager	_sessionManager;
 
 };
 
