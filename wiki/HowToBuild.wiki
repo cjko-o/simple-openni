@@ -21,11 +21,11 @@ Before you can build the library you should install following tools:
 
 On windows i only used Visual Studio 2008
   * Download the souces from the svn
-  * Open a terminal and go into the 'SimpleOpenN' folder
-  * Type those commands:
-{{{
-> cmake .
-}}}
+  * On Windows i use the CMake-Gui
+  * Set sourcecode folder to your ..SimpleOpenNI location
+  * Set the binaries folder to ..SimpleOpenNI/vc
+  * Configure and add an entry 'EIGEN3D_INCLUDE' to the folder where you have installed Eigen
+  * Select Visual Studio 2008(64Bit will not work, because the OpenNI libs are 32Bit)
   * Now you have a Visual Studio Project 'SimpleOpenNI.sln'
 ----
 
