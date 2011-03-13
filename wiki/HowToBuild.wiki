@@ -14,7 +14,8 @@ The build system is based on CMake, so it should be easy to build the project on
 Before you can build the library you should install following tools:
   * [https://cds.sun.com/is-bin/INTERSHOP.enfinity/WFS/CDS-CDS_Developer-Site/en_US/-/USD/ViewProductDetail-Start?ProductRef=jdk-6u24-oth-JPR@CDS-CDS_Developer Java Development Kit] (should be installed on OSX)
   * [http://www.cmake.org/cmake/resources/software.html CMake]
-  * [http://www.swig.org/download.html Swig] > v2.0.2
+  * [http://www.swig.org/download.html Swig] >= *v2.0.2*
+  * [http://eigen.tuxfamily.org Eigen] >= v3.0
 ----
 = Windows =
 
