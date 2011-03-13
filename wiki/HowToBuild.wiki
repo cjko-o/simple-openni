@@ -24,8 +24,6 @@ On windows i only used Visual Studio 2008
   * Open a terminal and go into the 'SimpleOpenN' folder
   * Type those commands:
 {{{
-> mkdir vc
-> cd vc
 > cmake .
 }}}
   * Now you have a Visual Studio Project 'SimpleOpenNI.sln'
