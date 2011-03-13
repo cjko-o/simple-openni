@@ -52,6 +52,6 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
 > cmake -DOPEN_NI_INCLUDE=/usr/include/ni -DOPEN_NI_LIB=/usr/lib \
 -DXN_NITE_INCLUDE=/usr/include/nite -DXN_NITE_LIB=/usr/lib \
 -DP5_JAR=/home/max/app/processing-1.2.1/lib/core.jar \
--DEIGEN3D_INCLUDE=/usr/local/include/eigen3 .. 
+-DEIGEN3D_INCLUDE=/usr/local/include/eigen3 .
 > make
 }}}
