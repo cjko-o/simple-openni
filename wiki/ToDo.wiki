@@ -11,6 +11,6 @@
   * Use multiple threads
   * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
   * Add a camera calibration, that the depthImage + the rgbImage correlate  better
-  * Save and load of calibration data of skeleton
+  * Save and load calibration data of a skeleton
   * Multiple cameras
   
