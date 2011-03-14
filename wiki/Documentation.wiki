@@ -8,7 +8,6 @@
 
 Parameters:* _parent_
   * _initXMLFile_
-----
 
 *SimpleOpenNI*(PApplet parent)
 
