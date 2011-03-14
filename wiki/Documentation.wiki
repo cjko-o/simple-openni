@@ -16,7 +16,8 @@ Parameters:
   * _parent_
 ----
 boolean *isInit*()
-Return: 
+
+Return: True if SimpleOpenNI is initialized
   
 ----
 ===Depth Map===
