@@ -13,4 +13,5 @@
   * Add a camera calibration, that the depthImage + the rgbImage correlate  better
   * Save and load calibration data of a skeleton
   * Multiple cameras
+  * Motor control
   
