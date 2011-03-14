@@ -6,7 +6,8 @@
 
 *SimpleOpenNI*(PApplet parent, String initXMLFile)
 
-Parameters:* _parent_
+Parameters:
+  * _parent_
   * _initXMLFile_
 
 *SimpleOpenNI*(PApplet parent)
