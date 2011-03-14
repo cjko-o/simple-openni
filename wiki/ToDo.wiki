@@ -8,7 +8,7 @@
   * Track multiple hands
   * ~~Read joint orientation~~
   * Implement NITE
-  * Use multiple threads
+  * Use threads to enhance the performance
   * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
   * Add a camera calibration, that the depthImage + the rgbImage correlate  better
   * Save and load calibration data of a skeleton
