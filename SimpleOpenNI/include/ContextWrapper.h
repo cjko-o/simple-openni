@@ -136,6 +136,7 @@ public:
 	int irMap(int* map);			// 16-bit value
 	int irImage(int* map);			// argb 4-Bytes / alpha is not used
 
+	//////////////////////////////////////////////////////////////////////////////
 	// scene analyzer
 	virtual bool enableScene();
 	virtual bool enableScene(int width,int height,int fps);
@@ -251,7 +252,17 @@ public:
 	// gesture
 	static void XN_CALLBACK_TYPE recognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition, void* cxt);
 	static void XN_CALLBACK_TYPE progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt);
+	
+	///////////////////////////////////////////////////////////////////////////
+	// NITE
 
+	// session
+	static void XN_CALLBACK_TYPE startSessionCb(const XnPoint3D* pFocus, void* cxt);
+	static void XN_CALLBACK_TYPE endSessionCb(void* cxt);
+
+
+	///////////////////////////////////////////////////////////////////////////
+	// node helper
 	static int getNodeType(int internalType);
 	xn::ProductionNode* getNode(int internalType);
 
@@ -384,7 +395,8 @@ protected:
 
 	bool				_firstTimeUpdate;
 
-	// nite
+	///////////////////////////////////////////////////////////////////////////
+	// NITE
 	XnVSessionManager	_sessionManager;
 
 };

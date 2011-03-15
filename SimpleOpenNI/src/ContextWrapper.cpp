@@ -22,6 +22,8 @@
  */
 
 #ifdef WIN32
+	#pragma warning( disable : 4251 )	// warnings from NITE
+	#pragma warning( disable : 4275 )
 	#define NOMINMAX	// eigen + windows.h will have conflict without this
 #endif
 
@@ -60,6 +62,11 @@ XnFloat Colors[][3] =
 	{1,1,1}
 };
 XnUInt32 nColors = 10;
+
+///////////////////////////////////////////////////////////////////////////////
+// eigen defs
+
+typedef Eigen::Hyperplane<float,3> HyperPlane3d;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ContextWrapper
@@ -1187,7 +1194,10 @@ int	ContextWrapper::sceneHeight()
 {
 	return _sceneMD.YRes();
 }
-	
+
+
+
+
 void ContextWrapper::getSceneFloor(XnVector3D* point,	
 								   XnVector3D* normal)
 {
@@ -1204,6 +1214,22 @@ void ContextWrapper::getSceneFloor(XnVector3D* point,
 	normal->X = plane.vNormal.X;
 	normal->Y = plane.vNormal.Y;
 	normal->Z = plane.vNormal.Z;
+
+
+	// test
+	Eigen::Vector3f	p(plane.ptPoint.X,plane.ptPoint.Y,plane.ptPoint.Z);
+	Eigen::Vector3f	n(plane.vNormal.X,plane.vNormal.Y,plane.vNormal.Z);
+	HyperPlane3d	plane3d(n,p);
+
+	Eigen::Vector3f projNull;
+	Eigen::Vector3f projNullNormal;
+	projNull = plane3d.projection(Eigen::Vector3f(0.0f,0.0f,0.0f));
+	projNullNormal = (Eigen::Vector3f(0.0f,0.0f,0.0f) - projNull).normalized();
+
+	Quaternion		camRot;
+	Quaternion		planeRot;
+
+
 }
 
 void ContextWrapper::calcSceneData()
