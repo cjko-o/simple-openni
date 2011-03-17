@@ -21,7 +21,7 @@ If everything worked out, you should see the camera in your Device Manager(under
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
-      C:\Users\'your username'\Documents\Processing\Libraries
+      C:\Users\'your username'\Documents\Processing\libraries
   * If you don't have this folder then create it.
 ----
 = OSX =
@@ -80,7 +80,7 @@ Those programs have to be on your system in order to install OpenNI:
 
 * Install SimpleOpenNI *
   * Copy the 'SimpleOpenNI.zip' into this folder:
-      /Users/'your username'/Documents/Processing/Libraries
+      /Users/'your username'/Documents/Processing/libraries
   * If you don't have this folder then create it.
 ----
 = Linux =
