@@ -2,13 +2,14 @@
 # SimpleOpenNI 
 # -----------------------------------------------------------------------------
 # Processing Wrapper for the OpenNI/Kinect library
-# prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
+# prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
 # -----------------------------------------------------------------------------
 
 %module(directors="1") SimpleOpenNI
 
 %{
 #include "ContextWrapper.h"
+
 %}
 
 %include "arrays_java.i"
@@ -18,7 +19,7 @@
 
 %apply int[] {int *};
 
-# ----------------------------------------------------------------------------/
+# ----------------------------------------------------------------------------
 # Xn
 
 JAVA_ARRAYSOFCLASSES(XnVector3D)
@@ -54,7 +55,7 @@ typedef struct XnSkeletonJointOrientation
 } XnSkeletonJointOrientation;
 
 
-# ----------------------------------------------------------------------------/
+# ----------------------------------------------------------------------------
 # stl
 
 %include "std_vector.i"
@@ -63,7 +64,7 @@ namespace std {
    %template(Vector3D) vector<XnVector3D>;
 };
 
-# ----------------------------------------------------------------------------/
+# ----------------------------------------------------------------------------
 # ContextWrapper
 
 namespace sOpenNI{
@@ -283,3 +284,6 @@ protected:
 };
 
 };
+
+%include "SimpleNite.i"
+

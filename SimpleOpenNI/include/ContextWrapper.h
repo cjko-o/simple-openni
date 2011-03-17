@@ -24,7 +24,14 @@
 #ifndef _CONTEXWRAPPER_H_
 #define _CONTEXWRAPPER_H_
 
+#ifdef WIN32
+	#pragma warning( disable : 4251 )	// disable warnings from NITE
+	#pragma warning( disable : 4275 )
+#endif
+
+
 #include <vector>
+#include <iostream>
 
 // OpenNI
 #include <XnOS.h>
@@ -401,6 +408,31 @@ protected:
 
 };
 
+
 };
+
+
+// virtual method test
+
+class TestClass
+{
+public:
+	TestClass()
+	{}
+
+	virtual void test1(int i)
+	{
+		std::cout << "TestClass::test1 - " << i << std::endl;
+	}
+
+	static void test(TestClass* p)
+	{
+		p->test1(100);
+	}
+
+protected:
+
+};
+
 
 #endif // _CONTEXWRAPPER_H_

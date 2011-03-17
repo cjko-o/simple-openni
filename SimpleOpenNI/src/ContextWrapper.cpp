@@ -22,12 +22,9 @@
  */
 
 #ifdef WIN32
-	#pragma warning( disable : 4251 )	// warnings from NITE
-	#pragma warning( disable : 4275 )
 	#define NOMINMAX	// eigen + windows.h will have conflict without this
 #endif
 
-#include <iostream>
 #include <cmath>
 
 // openni
@@ -1215,8 +1212,8 @@ void ContextWrapper::getSceneFloor(XnVector3D* point,
 	normal->Y = plane.vNormal.Y;
 	normal->Z = plane.vNormal.Z;
 
-
-	// test
+	/*
+	// floor orientation test
 	Eigen::Vector3f	p(plane.ptPoint.X,plane.ptPoint.Y,plane.ptPoint.Z);
 	Eigen::Vector3f	n(plane.vNormal.X,plane.vNormal.Y,plane.vNormal.Z);
 	HyperPlane3d	plane3d(n,p);
@@ -1225,10 +1222,11 @@ void ContextWrapper::getSceneFloor(XnVector3D* point,
 	Eigen::Vector3f projNullNormal;
 	projNull = plane3d.projection(Eigen::Vector3f(0.0f,0.0f,0.0f));
 	projNullNormal = (Eigen::Vector3f(0.0f,0.0f,0.0f) - projNull).normalized();
-
+	*/
+	/*
 	Quaternion		camRot;
 	Quaternion		planeRot;
-
+	*/
 
 }
 
