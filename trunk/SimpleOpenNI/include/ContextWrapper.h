@@ -264,14 +264,24 @@ public:
 	// NITE
 
 	// session
-	static void XN_CALLBACK_TYPE startSessionCb(const XnPoint3D* pFocus, void* cxt);
-	static void XN_CALLBACK_TYPE endSessionCb(void* cxt);
+	static void XN_CALLBACK_TYPE onStartSessionCb(const XnPoint3D& ptPosition, void* cxt);
+	static void XN_CALLBACK_TYPE onEndSessionCb(void* cxt);
+	static void XN_CALLBACK_TYPE onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt);
 
 
 	///////////////////////////////////////////////////////////////////////////
 	// node helper
 	static int getNodeType(int internalType);
 	xn::ProductionNode* getNode(int internalType);
+
+
+	///////////////////////////////////////////////////////////////////////////
+	// XnVSessionManager
+	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
+											xn::HandsGenerator* pTracker = NULL, xn::GestureGenerator* pFocusGenerator = NULL,
+											xn::GestureGenerator* pQuickRefocusGenerator = NULL);
+
+	void update(XnVSessionManager* sessionManager);
 
 protected:
 	
@@ -321,7 +331,13 @@ protected:
 
 	void			onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress);
 	virtual void	onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress);
+	
+	///////////////////////////////////////////////////////////////////////////
+	// NITE
 
+	virtual void onStartSessionCb(const XnPoint3D& ptPosition);
+	virtual void onEndSessionCb();
+	virtual void onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress);
 
 	//////////////////////////////////////////////////////////////////////////////
 	// create methods
@@ -423,6 +439,11 @@ public:
 	virtual void test1(int i)
 	{
 		std::cout << "TestClass::test1 - " << i << std::endl;
+	}
+
+	virtual void testX(XnVector3D* p)
+	{
+		std::cout << "TestClass::testX - " << std::endl;
 	}
 
 	static void test(TestClass* p)

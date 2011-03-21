@@ -53,6 +53,10 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected Method 			_recognizeGestureMethod;
 	protected Method 			_progressGestureMethod;
 
+	// nite session cb
+	protected Method 			_startSessionMethod;
+	protected Method 			_endSessionMethod;
+	protected Method 			_focusSessionMethod;
 	
 	
 	protected String 			_filename;	
@@ -147,6 +151,11 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		// gesture
 		_recognizeGestureMethod = getMethodRef("onRecognizeGesture",new Class[] { String.class,PVector.class,PVector.class  });
 		_progressGestureMethod = getMethodRef("onProgressGesture",new Class[] { String.class,PVector.class,float.class });
+
+		// nite
+		_startSessionMethod = getMethodRef("onStartSession",new Class[] { PVector.class  });
+		_endSessionMethod = getMethodRef("onEndSession",new Class[] {});
+		_focusSessionMethod = getMethodRef("onFocusSession",new Class[] { String.class,PVector.class,float.class });
 	}
 	
 	protected Method getMethodRef(String methodName,Class[] paraList)
@@ -154,6 +163,18 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		Method	ret = null;
 		try {
 			ret = _parent.getClass().getMethod(methodName,paraList);																									
+		} 
+		catch (Exception e) 
+		{ // no such method, or an error.. which is fine, just ignore
+		}
+		return ret;
+	}
+	
+	public static Method getMethodRef(Object obj,String methodName,Class[] paraList)
+	{
+		Method	ret = null;
+		try {
+			ret = obj.getClass().getMethod(methodName,paraList);																									
 		} 
 		catch (Exception e) 
 		{ // no such method, or an error.. which is fine, just ignore
@@ -922,5 +943,37 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		catch (Exception e) 
 		{}	
 	}	
+		
+	// nite callbacks
+	protected void onStartSessionCb(XnVector3D ptPosition)
+	{
+		try {
+			_startSessionMethod.invoke(_parent, new Object[] { new PVector(ptPosition.getX(),ptPosition.getY(),ptPosition.getZ()) });
+		} 
+		catch (Exception e) 
+		{}	
+	}
+	
+	protected void onEndSessionCb()
+	{
+		try {
+			_endSessionMethod.invoke(_parent, new Object[] { });
+		} 
+		catch (Exception e) 
+		{}		}
+	
+	protected void onFocusSessionCb(String strFocus, XnVector3D ptPosition, float fProgress)
+	{
+		try {
+			_focusSessionMethod.invoke(_parent, new Object[] {strFocus, 
+															  new PVector(ptPosition.getX(),ptPosition.getY(),ptPosition.getZ()),
+															  fProgress });
+		} 
+		catch (Exception e) 
+		{}	
+	
+	}
+	
+	//public native void XXX(); 
 }
 

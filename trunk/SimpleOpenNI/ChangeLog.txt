@@ -4,6 +4,20 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.16 alpha, 03/20/2011
+	New:
+		- Added NITE support, NITE is quite objectorientated so i couldn't simplify that much, i just ported 
+		  most of the NITE classes to SimpleOpenNI. There are some NITE classes that use multiple inheritance, which
+		  java doesn't support. In this case i implemented the basic functions that is needed(not all inheritated functions
+		  are impemented)
+		- Implemented a callback method from c++ to java, mostly for NITE class callbacks. Turned out to be much more
+		  work as expected, maybe there is a simpler way, but i didn't found anything on the web.
+		- Added new example:
+			SimpleOpenNI_NITE_Hands		- Shows how NITE works with multiple hands, but you have to change the Nite ini file
+			SimpleOpenNI_NITE_CircleCtrl- Shows circular control of NITE
+		- Extended the java doc, now all classes will be visible with the document generator
+		- Fixed a typing mistake in the SimpleOpenNI_UserScene3d example
+			
 v0.15 alpha, 03/xx/2011
 	New:
 		- Added several functions for the skeleton handling + functions to save and load the calibrations 

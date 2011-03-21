@@ -173,6 +173,7 @@ ENDIF()
 SET(SWIG_SOURCES 
 src/SimpleOpenNI.i
 src/ContextWrapper.cpp
+src/NITE_Helpers.cpp
 )
 
 SET_SOURCE_FILES_PROPERTIES(${SWIG_SOURCES} PROPERTIES CPLUSPLUS ON)
@@ -205,4 +206,5 @@ ADD_CUSTOM_COMMAND(TARGET SimpleOpenNI
 				   COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Creating doc files..."
 				   COMMAND cmake -E make_directory ./doc
-				   COMMAND ${JAVA_DOC} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${P5_WRAPPER}/*.java -version ${CMAKE_SWIG_OUTDIR}/ContextWrapper.java)
+				   #COMMAND ${JAVA_DOC} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${P5_WRAPPER}/*.java -version ${CMAKE_SWIG_OUTDIR}/ContextWrapper.java)
+				   COMMAND ${JAVA_DOC} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${CMAKE_SWIG_OUTDIR}/*.java)

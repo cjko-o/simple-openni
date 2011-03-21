@@ -7,22 +7,8 @@
 
 # ----------------------------------------------------------------------------
 # Virtual method test
-/*
-%{
-#include <XnCppWrapper.h>
-#include "XnVMessageListener.h"
-#include "XnVDeviceControl.h"
-#include <XnVSessionManager.h>
-#include <XnPlatformWin32.h>
-%}
-#define XN_CALLBACK_TYPE XN_STDCALL
 
-#%include <XnCppWrapper.h>
-#%include "XnVMessageListener.h"
-#%include "XnVDeviceControl.h"
-#%include <XnVSessionManager.h>
-#%include "XnPlatformWin32.h"
-*/
+
 
 
 %feature("director") TestClass;
@@ -33,6 +19,7 @@ public:
 	{}
 
 	virtual void test1(int i);
+	virtual void testX(XnVector3D* p);
 	static void test(TestClass* p);
 
 protected:
