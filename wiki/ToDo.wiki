@@ -12,7 +12,7 @@
   * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
   * Add a camera calibration, that the depthImage + the rgbImage correlate  better
   * Add the Alternative View Point Capability
-  * Save and load calibration data of a skeleton
+  * ~~Save and load calibration data of a skeleton~~(not across processes)
   * Multiple cameras
   * Motor control
   
