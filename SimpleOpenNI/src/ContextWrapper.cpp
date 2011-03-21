@@ -40,7 +40,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	14		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	16		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -1826,4 +1826,71 @@ xn::ProductionNode* ContextWrapper::getNode(int internalType)
 		return NULL;
 	else
 		return NULL;
+}
+	
+///////////////////////////////////////////////////////////////////////////////
+// XnVSessionManager helper methods
+
+void XN_CALLBACK_TYPE ContextWrapper::onStartSessionCb(const XnPoint3D& ptPosition, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onStartSessionCb(ptPosition);
+}
+
+void XN_CALLBACK_TYPE ContextWrapper::onEndSessionCb(void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onEndSessionCb();
+}
+
+void XN_CALLBACK_TYPE ContextWrapper::onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* cxt)
+{
+	ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+	if(context == NULL)
+		return;
+	context->onFocusSessionCb(strFocus,ptPosition,fProgress);
+}
+
+void ContextWrapper::onStartSessionCb(const XnPoint3D& ptPosition)
+{}
+
+void ContextWrapper::onEndSessionCb()
+{}
+
+void ContextWrapper::onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress)
+{}
+
+
+XnVSessionManager* ContextWrapper::createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
+														xn::HandsGenerator*		pTracker, 
+														xn::GestureGenerator*	pFocusGenerator,
+														xn::GestureGenerator*	pQuickRefocusGenerator)
+{
+	if(!_initFlag)
+		return NULL;
+
+	XnVSessionManager* ret = new XnVSessionManager();
+	_rc = ret->Initialize(&_context,
+						  strUseAsFocus,strUseAsQuickRefocus,
+						  pTracker, 
+						  pFocusGenerator,
+						  pQuickRefocusGenerator);
+
+	// set callbacks
+	ret->RegisterSession(this, onStartSessionCb, onEndSessionCb, onFocusSessionCb);
+
+	return ret;
+}
+
+
+void ContextWrapper::update(XnVSessionManager* sessionManager)
+{
+	if(!_initFlag && sessionManager == NULL)
+		return;
+	
+	sessionManager->Update(&_context);
 }
