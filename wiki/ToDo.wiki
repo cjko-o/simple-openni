@@ -5,7 +5,7 @@
   * Finalize the programming interface
   * ~~Init openNI also without xml, only with the enable functions~~
   * ~~Track gesture and hands~~
-  * Track multiple hands
+  * ~~Track multiple hands~~(check out the SimpleOpenNI_NITE_Hands example)
   * ~~Read joint orientation~~
   * Implement NITE
   * Use threads to enhance the performance
