@@ -4,7 +4,7 @@
  * Processing Wrapper for the OpenNI/Kinect library
  * http://code.google.com/p/simple-openni
  * --------------------------------------------------------------------------
- * prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
+ * prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
  * date:  02/16/2011 (m/d/y)
  * ----------------------------------------------------------------------------
  * this demos is at the moment only for 1 user, will be implemented later
@@ -33,7 +33,7 @@ void setup()
 
   // enable skeleton generation for all joints
   context.enableUser(SimpleOpenNI.SKEL_PROFILE_ALL);
-  
+
   stroke(255,255,255);
   smooth();  
   perspective(95,

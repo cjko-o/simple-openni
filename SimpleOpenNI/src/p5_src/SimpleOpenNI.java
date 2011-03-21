@@ -65,7 +65,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected PImage			_depthImage;
 	protected int[]				_depthRaw;
 	protected PVector[]			_depthMapRealWorld;
-	XnVector3D[] 				_depthMapRealWorldXn;
+	XnPoint3D[] 				_depthMapRealWorldXn;
 	
 	protected PImage			_rgbImage;
 
@@ -201,12 +201,12 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		_depthImage 		= new PImage(depthWidth(), depthHeight(),PConstants.RGB);
 		_depthRaw 			= new int[depthMapSize()];
 		_depthMapRealWorld 	= new PVector[depthMapSize()];
-		_depthMapRealWorldXn = new XnVector3D[depthMapSize()];
+		_depthMapRealWorldXn = new XnPoint3D[depthMapSize()];
 			
 		for(int i=0;i < depthMapSize();i++ )
 		{
 			_depthMapRealWorld[i] 	= new PVector();
-			_depthMapRealWorldXn[i] = new XnVector3D();
+			_depthMapRealWorldXn[i] = new XnPoint3D();
 		}
 	}
 	
@@ -455,7 +455,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public boolean getCoM(int user,PVector com)
 	{
 		boolean ret;
-		XnVector3D com1 = new XnVector3D();
+		XnPoint3D com1 = new XnPoint3D();
 		ret = super.getCoM(user,com1);	
 		com.set(com1.getX(),
 				com1.getY(),
@@ -570,7 +570,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			
 			depthMap(_depthRaw);
 			
-			XnVector3D vec;
+			XnPoint3D vec;
 			depthMapRealWorld(_depthMapRealWorldXn);
 			for(int i=0;i < _depthMapRealWorldXn.length;i++)
 			{
@@ -893,7 +893,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 
 	// hands
-	protected void onCreateHandsCb(long nId, XnVector3D pPosition, float fTime)
+	protected void onCreateHandsCb(long nId, XnPoint3D pPosition, float fTime)
 	{
 		try {
 			_createHandsMethod.invoke(_parent, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
@@ -902,7 +902,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		{}	
 	}	
 	
-	protected void onUpdateHandsCb(long nId, XnVector3D pPosition, float fTime)
+	protected void onUpdateHandsCb(long nId, XnPoint3D pPosition, float fTime)
 	{
 		try {
 			_updateHandsMethod.invoke(_parent, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
@@ -920,7 +920,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		{}	
 	}	
   
-	protected void onRecognizeGestureCb(String strGesture, XnVector3D pIdPosition, XnVector3D pEndPosition) 
+	protected void onRecognizeGestureCb(String strGesture, XnPoint3D pIdPosition, XnPoint3D pEndPosition) 
 	{
 		try {
 			_recognizeGestureMethod.invoke(_parent, new Object[] { strGesture,
@@ -932,7 +932,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		{}	
 	}
 
-	protected void onProgressGestureCb(String strGesture, XnVector3D pPosition, float fProgress) 
+	protected void onProgressGestureCb(String strGesture, XnPoint3D pPosition, float fProgress) 
 	{
 		try {
 			_progressGestureMethod.invoke(_parent, new Object[] { strGesture,
@@ -945,7 +945,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}	
 		
 	// nite callbacks
-	protected void onStartSessionCb(XnVector3D ptPosition)
+	protected void onStartSessionCb(XnPoint3D ptPosition)
 	{
 		try {
 			_startSessionMethod.invoke(_parent, new Object[] { new PVector(ptPosition.getX(),ptPosition.getY(),ptPosition.getZ()) });
@@ -962,7 +962,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		catch (Exception e) 
 		{}		}
 	
-	protected void onFocusSessionCb(String strFocus, XnVector3D ptPosition, float fProgress)
+	protected void onFocusSessionCb(String strFocus, XnPoint3D ptPosition, float fProgress)
 	{
 		try {
 			_focusSessionMethod.invoke(_parent, new Object[] {strFocus, 

@@ -4,7 +4,7 @@
  * Processing Wrapper for the OpenNI/Kinect library
  * http://code.google.com/p/simple-openni
  * --------------------------------------------------------------------------
- * prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
+ * prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
  * date:  02/16/2011 (m/d/y)
  * ----------------------------------------------------------------------------
  */
@@ -25,11 +25,10 @@ void setup()
   context.enableDepth();
   
   // enable ir generation
-  context.enableRGB(640,480,30);
+  context.enableRGB();
+  //context.enableRGB(640,480,30);
   //context.enableRGB(1280,1024,15);
-  //context.enableRGB();
  
-  background(200,0,0);
   size(context.depthWidth() + context.rgbWidth() + 10, context.rgbHeight()); 
 }
 
@@ -37,6 +36,8 @@ void draw()
 {
   // update the cam
   context.update();
+  
+  background(200,0,0);
   
   // draw depthImageMap
   image(context.depthImage(),0,0);

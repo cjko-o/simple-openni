@@ -4,7 +4,7 @@
  * Processing Wrapper for the OpenNI/Kinect library
  * http://code.google.com/p/simple-openni
  * --------------------------------------------------------------------------
- * prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
+ * prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
  * date:  03/16/2011 (m/d/y)
  * ----------------------------------------------------------------------------
  * For playing the recorded file, just uncomment the playing part and comment 

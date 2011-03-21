@@ -4,7 +4,7 @@
  * Processing Wrapper for the OpenNI/Kinect library
  * http://code.google.com/p/simple-openni
  * --------------------------------------------------------------------------
- * prog:  Max Rheiner / Interaction Design / zhkd / http://iad.zhdk.ch/
+ * prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
  * date:  02/27/2011 (m/d/y)
  * ----------------------------------------------------------------------------
  * This demos shows how to use the gesture/hand generator.
@@ -80,7 +80,7 @@ void draw()
  
   translate(0,0,-1000);  // set the rotation center of the scene 1000 infront of the camera
 
-  stroke(100); 
+  stroke(200); 
   for(int y=0;y < context.depthHeight();y+=steps)
   {
     for(int x=0;x < context.depthWidth();x+=steps)
@@ -99,7 +99,7 @@ void draw()
   if(handsTrackFlag)  
   {
     pushStyle();
-      stroke(255,0,0,100);
+      stroke(255,0,0,200);
       noFill();
       Iterator itr = handVecList.iterator(); 
       beginShape();
