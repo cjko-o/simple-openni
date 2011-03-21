@@ -23,6 +23,7 @@
 # Xn
 
 JAVA_ARRAYSOFCLASSES(XnVector3D)
+JAVA_ARRAYSOFCLASSES(XnPoint3D)
 
 typedef	bool			XnBool;
 typedef	char			XnChar;
@@ -38,7 +39,13 @@ typedef struct XnVector3D
 	XnFloat Z;
 } XnVector3D;
 
-typedef XnVector3D XnPoint3D;
+typedef struct XnPoint3D
+{
+	XnFloat X;
+	XnFloat Y;
+	XnFloat Z;
+} XnPoint3D;
+// typedef XnVector3D XnPoint3D;
 
 typedef XnFloat  XnConfidence;
 
@@ -73,7 +80,9 @@ typedef struct XnVCircle
 namespace std {
    %template(IntVector) vector<int>;
    %template(Vector3D) vector<XnVector3D>;
+   %template(Point3D) vector<XnPoint3D>;
 };
+
 
 # ----------------------------------------------------------------------------
 # ContextWrapper
@@ -83,6 +92,7 @@ namespace sOpenNI{
 typedef XnPoint3D*	XnPoint3DArray;
 JAVA_ARRAYSOFCLASSES(XnPoint3DArray)
 %apply XnPoint3D[] {XnPoint3DArray};
+
 
 %constant int USERS_ALL				= 0;		
 
