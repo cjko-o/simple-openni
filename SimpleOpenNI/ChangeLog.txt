@@ -10,10 +10,11 @@ v0.16 alpha, 03/20/2011
 		  most of the NITE classes to SimpleOpenNI. There are some NITE classes that use multiple inheritance, which
 		  java doesn't support. In this case i implemented the basic functions that is needed(not all inheritated functions
 		  are impemented)
+		  NITE is not fully ported yet, with the next release it should be done
 		- Implemented a callback method from c++ to java, mostly for NITE class callbacks. Turned out to be much more
 		  work as expected, maybe there is a simpler way, but i didn't found anything on the web.
 		- Added new example:
-			SimpleOpenNI_NITE_Hands		- Shows how NITE works with multiple hands, but you have to change the Nite ini file
+			SimpleOpenNI_NITE_Hands		- Shows how NITE works with multiple hands(to activate multiple hands, see explanation in the sourcecode)
 			SimpleOpenNI_NITE_CircleCtrl- Shows circular control of NITE
 		- Extended the java doc, now all classes will be visible with the document generator
 		- Fixed a typing mistake in the SimpleOpenNI_UserScene3d example
