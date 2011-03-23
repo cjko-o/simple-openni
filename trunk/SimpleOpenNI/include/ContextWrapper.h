@@ -283,6 +283,9 @@ public:
 
 	void update(XnVSessionManager* sessionManager);
 
+	//
+	inline unsigned long frameStamp() { _frameStamp; }
+
 protected:
 	
 	enum LogOutMsg{
@@ -355,6 +358,23 @@ protected:
 	void createIrImage();
 	void calcSceneData();
 
+	void updateDepthData();
+	void updateDepthImageData();
+	void updateDepthRealWorldData();
+
+	void updateRgbData();
+
+	void updateIrData();
+
+	void updateSceneData();
+	void updateSceneImageData();
+
+	void updateUser();
+	void updateHands();
+	void updateGesture();
+
+	void resetUpdateFlags();
+
 	bool _initFlag;
 	bool _generatingFlag;
 	
@@ -421,6 +441,28 @@ protected:
 	///////////////////////////////////////////////////////////////////////////
 	// NITE
 	XnVSessionManager	_sessionManager;
+
+
+	///////////////////////////////////////////////////////////////////////////
+	// update flags, performance 
+	bool			_depthUpdateFlag;
+	bool			_depthImageUpdateFlag;
+	bool			_depthRealWorldUpdateFlag;
+
+	bool			_imageUpdateFlag;
+	bool			_irUpdateFlag;
+
+	bool			_sceneUpdateFlag;
+	bool			_sceneImageUpdateFlag;
+
+	bool			_userUpdateFlag;
+	bool			_gestureUpdateFlag;
+	bool			_handsUpdateFlag;
+
+	unsigned long	_frameStamp;
+	XnUInt64		_depthTimeStamp;
+	XnUInt64		_imageTimeStamp;
+	XnUInt64		_sceneTimeStamp;
 
 };
 

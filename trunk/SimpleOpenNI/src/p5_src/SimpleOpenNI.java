@@ -76,6 +76,29 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
   	protected int[]				_userRaw;
 	
+	protected boolean			_depthUpdateFlag;
+	protected boolean			_depthImageUpdateFlag;
+	protected boolean			_depthRealWorldUpdateFlag;
+	protected boolean			_imageUpdateFlag;
+	protected boolean			_irUpdateFlag;
+	protected boolean			_sceneRawUpdateFlag;
+	protected boolean			_sceneImageUpdateFlag;
+	
+	
+	void resetUpdateFlags()
+	{
+		_depthUpdateFlag 			= true;
+		_depthImageUpdateFlag 		= true;
+		_depthRealWorldUpdateFlag 	= true;
+		
+		_imageUpdateFlag 			= true;
+		
+		_irUpdateFlag 				= true;
+		
+		_sceneRawUpdateFlag 		= true;	
+		_sceneImageUpdateFlag 		= true;	
+	}
+	
 	/**
 	* Creates the OpenNI context ands inits the modules
 	* 
@@ -95,6 +118,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		
 		// load the initfile
 		this.init(parent.dataPath(initXMLFile));
+		resetUpdateFlags();
 	}
 
 	/**
@@ -114,6 +138,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		
 		// load the initfile
 		this.init();
+		resetUpdateFlags();
 	}
 	
 	protected void setupCallbackFunc()
@@ -196,8 +221,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 
 	private void setupDepth()
-	{
-		
+	{	
 		_depthImage 		= new PImage(depthWidth(), depthHeight(),PConstants.RGB);
 		_depthRaw 			= new int[depthMapSize()];
 		_depthMapRealWorld 	= new PVector[depthMapSize()];
@@ -248,16 +272,19 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	public PImage depthImage() 
 	{
+		updateDepthImage();
 		return _depthImage;
 	}
 	
 	public int[] depthMap()
 	{
+		updateDepthRaw();
 		return _depthRaw;
 	}
 
 	public PVector[] depthMapRealWorld()
 	{
+		updateDepthRealWorld();
 		return _depthMapRealWorld;
 	}	
 	
@@ -304,6 +331,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 	public PImage rgbImage() 
 	{
+		updateImage();
 		return _rgbImage;
 	}
 		
@@ -352,6 +380,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	public PImage irImage() 
 	{
+		updateIrImage();
 		return _irImage;
 	}
 
@@ -399,11 +428,13 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	public PImage sceneImage()
 	{
+		updateSceneImage();
 		return _sceneImage;
 	}
 	
 	public int[] sceneMap()
 	{
+		updateSceneRaw();
 		return _sceneRaw;
 	}
 
@@ -554,71 +585,123 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			return false;
 	}
 	
+	protected void updateDepthRaw()
+	{
+		if((nodes() & NODE_DEPTH) == 0)
+			return;
+		if(!_depthUpdateFlag)
+			return;
+
+		depthMap(_depthRaw);
+		
+		_depthUpdateFlag = false;
+	}	
+	
+	protected void updateDepthImage()
+	{
+		if((nodes() & NODE_DEPTH) == 0)
+			return;
+		if(!_depthImageUpdateFlag)
+			return;
+		
+		_depthImage.loadPixels();
+			depthImage(_depthImage.pixels);
+		_depthImage.updatePixels();
+		
+		_depthImageUpdateFlag = false;
+	}
+	
+	protected void updateDepthRealWorld()
+	{
+		if((nodes() & NODE_DEPTH) == 0)
+			return;	
+		if(!_depthRealWorldUpdateFlag)
+			return;
+	
+		XnPoint3D vec;
+		depthMapRealWorld(_depthMapRealWorldXn);
+		for(int i=0;i < _depthMapRealWorldXn.length;i++)
+		{
+			vec = _depthMapRealWorldXn[i];
+			_depthMapRealWorld[i].set(vec.getX(),
+									  vec.getY(),
+								      vec.getZ());
+		}
+				
+		/* still have to find out how i get an return array back with swig
+		XnVector3D[] depthMapRealWorld = depthMapRealWorldA();
+		for(int i=0;i < depthMapSize();i++)
+		{
+			_depthMapRealWorld[i].set(depthMapRealWorld[i].getX(),
+									  depthMapRealWorld[i].getY(),
+								      depthMapRealWorld[i].getZ());
+		}
+		*/	
+		_depthRealWorldUpdateFlag = false;
+	}
+	
+	protected void updateImage()
+	{
+		if((nodes() & NODE_IMAGE) == 0)
+			return;
+		if(!_imageUpdateFlag)
+			return;
+		
+		// copy the rgb map
+		_rgbImage.loadPixels();
+			rgbImage(_rgbImage.pixels);
+		_rgbImage.updatePixels();
+		
+		_imageUpdateFlag = false;
+	}
+	
+	protected void updateIrImage()
+	{
+		if((nodes() & NODE_IR) == 0)
+			return;
+		if(!_irUpdateFlag)
+			return;
+					
+		_irImage.loadPixels();
+			irImage(_irImage.pixels);
+		_irImage.updatePixels();
+		
+		_irUpdateFlag = false;			
+	}
+		
+	protected void updateSceneRaw()
+	{
+		if((nodes() & NODE_SCENE) == 0)
+			return;
+		if(!_sceneRawUpdateFlag)
+			return;
+					
+		sceneMap(_sceneRaw);
+		_sceneRawUpdateFlag = false;				
+	}
+	
+	protected void updateSceneImage()
+	{
+		if((nodes() & NODE_SCENE) == 0)
+			return;
+		if(!_sceneImageUpdateFlag)
+			return;
+		
+		// copy the scene map
+		_sceneImage.loadPixels();
+			sceneImage(_sceneImage.pixels);
+		_sceneImage.updatePixels();
+			
+		_sceneImageUpdateFlag = false;			
+	}
+	
 	/**
 	* Enable the user data collection
 	*/  
 	public void update() 
 	{
 		super.update();
-		
-		// copy the depth map
-		if((nodes() & NODE_DEPTH) > 0)
-		{
-			_depthImage.loadPixels();
-				depthImage(_depthImage.pixels);
-			_depthImage.updatePixels();
-			
-			depthMap(_depthRaw);
-			
-			XnPoint3D vec;
-			depthMapRealWorld(_depthMapRealWorldXn);
-			for(int i=0;i < _depthMapRealWorldXn.length;i++)
-			{
-				vec = _depthMapRealWorldXn[i];
-				_depthMapRealWorld[i].set(vec.getX(),
-										  vec.getY(),
-									      vec.getZ());
-			}
-					
-			/* still have to find out how i get an return array back with swig
-			XnVector3D[] depthMapRealWorld = depthMapRealWorldA();
-			for(int i=0;i < depthMapSize();i++)
-			{
-				_depthMapRealWorld[i].set(depthMapRealWorld[i].getX(),
-										  depthMapRealWorld[i].getY(),
-									      depthMapRealWorld[i].getZ());
-			}
-			*/
-			
-		}
-		
-		// copy the rgb map
-		if((nodes() & NODE_IMAGE) > 0)
-		{
-			_rgbImage.loadPixels();
-				rgbImage(_rgbImage.pixels);
-			_rgbImage.updatePixels();
-		}
-		
-		// copy the ir map
-		if((nodes() & NODE_IR) > 0)
-		{
-			_irImage.loadPixels();
-				irImage(_irImage.pixels);
-			_irImage.updatePixels();
-		}
-		
-		// copy the scene map
-		if((nodes() & NODE_SCENE) > 0)
-		{
-			_sceneImage.loadPixels();
-				sceneImage(_sceneImage.pixels);
-			_sceneImage.updatePixels();
-			
-			sceneMap(_sceneRaw);
-		}
-			
-		
+		resetUpdateFlags();
 	}	
 	
 	/**
@@ -973,7 +1056,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		{}	
 	
 	}
-	
-	//public native void XXX(); 
+
 }
 

@@ -4,6 +4,14 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.18 alpha, 0x/xx/2011
+
+v0.17 alpha, 03/23/2011
+	New:
+		- Improved the overall performance
+		- The skeleton was not always synchronized with the depthImage, now this should be better
+
+
 v0.16 alpha, 03/20/2011
 	New:
 		- Added NITE support, NITE is quite objectorientated so i couldn't simplify that much, i just ported 
