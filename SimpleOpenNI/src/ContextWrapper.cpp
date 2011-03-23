@@ -40,7 +40,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	16		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	17		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -81,10 +81,10 @@ _userWidth(0),
 _userHeight(0),
 _userSceneBufSize(0),
 _depthImageColorMode(DepthImgMode_Default)
+
 {
 	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
-	Eigen::Vector4f v;
-
+	resetUpdateFlags();
 
 	_depthImageColor[0] = 1.0f;
 	_depthImageColor[1] = 1.0f;
@@ -115,6 +115,7 @@ _depthImageColorMode(DepthImgMode_Default)
 		_pDepthGamma[i] = v*6*256;
 	}
 
+	_frameStamp = 0;
 }
 
 ContextWrapper::~ContextWrapper()
@@ -146,6 +147,8 @@ void ContextWrapper::close()
 	_pIrImage	= NULL;
 	_pSceneImage= NULL;
 	_depthMapRealWorld= NULL;
+
+	_frameStamp = 0;
 
 	// shutdown the context
 	_context.Shutdown();
@@ -769,6 +772,172 @@ bool ContextWrapper::openFileRecording(const char* filePath)
 
 ///////////////////////////////////////////////////////////////////////////////
 // update
+void ContextWrapper::resetUpdateFlags()
+{
+	_depthUpdateFlag			= true;
+	_depthImageUpdateFlag		= true;
+	_depthRealWorldUpdateFlag	= true;
+
+	_imageUpdateFlag	= true;
+	_irUpdateFlag		= true;
+
+	_sceneUpdateFlag		= true;
+	_sceneImageUpdateFlag	= true;
+
+	_userUpdateFlag		= true;
+	_gestureUpdateFlag	= true;
+	_handsUpdateFlag	= true;
+}
+
+// depth
+void ContextWrapper::updateDepthData()
+{
+	if(!_depthUpdateFlag)
+		return;
+
+	_depth.GetMetaData(_depthMD);
+
+	_depthUpdateFlag = false;
+}
+
+void ContextWrapper::updateDepthImageData()
+{
+	if(!_depthImageUpdateFlag)
+		return;
+
+	updateDepthData();
+
+	calcHistogram();
+	createDepthImage();
+
+	_depthImageUpdateFlag = false;
+}
+
+void ContextWrapper::updateDepthRealWorldData()
+{
+	if(!_depthRealWorldUpdateFlag)
+		return;
+
+	updateDepthData();
+
+	calcDepthImageRealWorld();
+	_depthRealWorldUpdateFlag = false;
+}
+
+// image
+void ContextWrapper::updateRgbData()
+{
+	if(!_imageUpdateFlag)
+		return;
+
+	// get the new data
+	_image.GetMetaData(_imageMD);
+		
+	_imageUpdateFlag = false;
+}
+
+// ir
+void ContextWrapper::updateIrData()
+{	
+	if(!_irUpdateFlag)
+		return;
+	
+	// get the new data
+	_ir.GetMetaData(_irMD);
+
+	createIrImage();
+
+	_irUpdateFlag = false;
+}
+
+// user
+void ContextWrapper::updateSceneData()
+{
+	if(!_sceneUpdateFlag)
+		return;
+
+	// get the new data
+	_sceneAnalyzer.GetMetaData(_sceneMD);
+	_sceneUpdateFlag = false;
+}
+
+void ContextWrapper::updateSceneImageData()
+{
+	if(!_sceneImageUpdateFlag)
+		return;
+
+	updateSceneData();
+	if(_depth.IsValid())
+		updateDepthImageData();
+	calcSceneData();
+
+	_sceneImageUpdateFlag = false;
+}
+
+void ContextWrapper::updateUser()
+{
+	if(!_userUpdateFlag)
+		return;
+	_userUpdateFlag = false;
+}
+
+void ContextWrapper::updateHands()
+{
+	if(!_handsUpdateFlag)
+		return;
+	_handsUpdateFlag = false;
+}
+
+void ContextWrapper::updateGesture()
+{
+	if(!_gestureUpdateFlag)
+		return;
+	_gestureUpdateFlag = false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// time measure
+
+//#define  WIN_PERF_DEBUG
+
+#ifdef WIN_PERF_DEBUG
+
+typedef struct {
+    LARGE_INTEGER start;
+    LARGE_INTEGER stop;
+} stopWatch;
+
+
+void startTimer( stopWatch *timer) {
+    QueryPerformanceCounter(&timer->start);
+}
+
+void stopTimer( stopWatch *timer) {
+    QueryPerformanceCounter(&timer->stop);
+}
+
+double LIToSecs( LARGE_INTEGER * L) {
+    LARGE_INTEGER frequency;
+	QueryPerformanceFrequency( &frequency );
+	return ((double)L->QuadPart /(double)frequency.QuadPart);
+}
+
+double getElapsedTime( stopWatch *timer) {
+	LARGE_INTEGER time;
+	time.QuadPart = timer->stop.QuadPart - timer->start.QuadPart;
+    return LIToSecs( &time) ;
+}
+
+stopWatch	timer;
+stopWatch	timer1;
+stopWatch	timer2;
+double		dif;
+double		dif1;
+double		dif2;
+double		total=0;
+unsigned long count=0;
+
+#endif // WIN_PERF_DEBUG
 
 void ContextWrapper::update()
 {
@@ -789,57 +958,58 @@ void ContextWrapper::update()
 		_generatingFlag = true;
 	}
 
-	// Read a new frame
-	_rc = _context.WaitAnyUpdateAll();
-
-	if(_rc != XN_STATUS_OK)
-		return;
-
-	// update depthMap
-	if(_depth.IsValid())
-	{	
-		/*
-		_rc = _depth.WaitAndUpdateData();
-		if(_rc == XN_STATUS_OK)
-		{
-			_depth.GetMetaData(_depthMD);
-			calcHistogram();
-			createDepthImage();
-		}
-		*/
-		_depth.GetMetaData(_depthMD);
-		calcHistogram();
-		createDepthImage();
-		calcDepthImageRealWorld();
-	}
-
-
-	// calc the images
-	if(_image.IsValid())
-	{	
-		_image.GetMetaData(_imageMD);
-	}
-
-	// calc the infraRed images
-	if(_ir.IsValid())
-	{	
-		_ir.GetMetaData(_irMD);
-		createIrImage();
-	}
 	
-	// calc the scene data
-	if(_sceneAnalyzer.IsValid())
-	{	
-		_sceneAnalyzer.GetMetaData(_sceneMD);
-		calcSceneData();
-	}	
+	resetUpdateFlags();
 
-	// update the generator
-	// i don't know why, but it only works if i add 'WaitAndUpdateAll'
-	if(_gestureGenerator.IsValid() || _handsGenerator.IsValid())
-	{
+#ifdef WIN_PERF_DEBUG
+	startTimer(&timer);
+#endif // WIN_PERF_DEBUG
+
+
+	if(_gestureGenerator.IsValid() || _handsGenerator.IsValid() ||
+	   _userGenerator.IsValid())
+	{	// i don't know why, but it only works if i add 'WaitAndUpdateAll'
+		//_rc = _context.WaitAnyUpdateAll();		
 		_rc = _context.WaitAndUpdateAll();
 	}
+	else
+		_rc = _context.WaitAnyUpdateAll();
+
+
+#ifdef WIN_PERF_DEBUG
+	stopTimer(&timer);
+	startTimer(&timer1);
+#endif // WIN_PERF_DEBUG
+
+
+#ifdef WIN_PERF_DEBUG
+	stopTimer(&timer1);
+
+	dif = getElapsedTime(&timer); 
+	total += dif;
+	count++;
+
+	dif1 = getElapsedTime(&timer1); 
+
+	if(count % 20 == 0)
+	{
+		std::cout << "fps:\t\t" << (1.0 / (total / count)) << 
+				     "\topenNI time:\t" << (total / count * 1000) <<
+					 std::endl;
+
+		std::cout << "memcopy sub:\t" << (dif1 * 1000) << 
+				     "\topenNI sub:\t" << (dif * 1000) <<
+				     "\ttotal:\t" << (dif + dif1)* 1000 <<
+					 std::endl;
+		std::cout << "---------" << std::endl;
+		
+	}
+
+	if((dif * 1000) < 5 )
+	{
+		printf(".");
+	}
+#endif // WIN_PERF_DEBUG
 
 }
 
@@ -1014,6 +1184,11 @@ int	ContextWrapper::depthHeight()
 
 int ContextWrapper::depthImage(int* map)
 {
+	if(_depth.IsValid() == false)
+		return 0;
+	else
+		updateDepthImageData();
+
 	for(int i=0;i < _depthBufSize;i++)
 	{
 		map[i] = (0xff	<< 24) | 
@@ -1027,6 +1202,11 @@ int ContextWrapper::depthImage(int* map)
 
 int ContextWrapper::depthMap(int* map)
 {
+	if(_depth.IsValid() == false)
+		return 0;
+	else
+		updateDepthData();
+
 	for(int i=0;i < _depthBufSize;i++)
 		map[i] = (int)(_depthMD.Data())[i]; 
 
@@ -1035,6 +1215,11 @@ int ContextWrapper::depthMap(int* map)
 
 int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
 {
+	if(_depth.IsValid() == false)
+		return 0;
+	else
+		updateDepthRealWorldData();
+
 	// speed up the copy
 	memcpy((void*)map,(const void *)_depthMapRealWorld,_depthBufSize * sizeof(XnPoint3D));
 
@@ -1053,6 +1238,11 @@ int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
 
 XnPoint3DArray ContextWrapper::depthMapRealWorldA()
 {
+	if(_depth.IsValid() == false)
+		return _depthMapRealWorld;
+	else
+		updateDepthRealWorldData();
+
 	return _depthMapRealWorld;
 }
 
@@ -1061,8 +1251,6 @@ int ContextWrapper::depthMapSize()
 	return _depthBufSize;
 }
 
-
-
 int ContextWrapper::depthHistSize()
 {
 	return MAX_DEPTH;
@@ -1070,6 +1258,11 @@ int ContextWrapper::depthHistSize()
 
 int ContextWrapper::depthHistMap(float* histMap)
 {
+	if(_depth.IsValid() == false)
+		return 0;
+	else
+		updateDepthImageData();
+
 	memcpy((void*)histMap,(const void *)_pDepthHist,MAX_DEPTH * sizeof(float));
 /*
 	for(int i=0;i < MAX_DEPTH;i++)
@@ -1113,6 +1306,11 @@ int	ContextWrapper::rgbHeight()
 
 int ContextWrapper::rgbImage(int* map)
 {
+	if(_image.IsValid() == false)
+		return 0;
+	else
+		updateRgbData();
+
 	const XnRGB24Pixel* rgbImage = _imageMD.RGB24Data();
 
 	for(int i=0;i < _rgbBufSize;i++)
@@ -1140,6 +1338,11 @@ int ContextWrapper::irHeight()
 
 int ContextWrapper::irImage(int* map)
 {
+	if(_ir.IsValid() == false)
+		return 0;
+	else
+		updateIrData();
+
 	for(int i=0;i < _irBufSize;i++)
 	{
 		map[i] = 0xff	<< 24 | 
@@ -1153,6 +1356,11 @@ int ContextWrapper::irImage(int* map)
 
 int ContextWrapper::irMap(int* map)
 {
+	if(_ir.IsValid() == false)
+		return 0;
+	else
+		updateIrData();
+
 	for(int i=0;i < _irBufSize;i++)
 		map[i] = (int)(_irMD.Data())[i]; 
 	return _irBufSize;
@@ -1193,13 +1401,13 @@ int	ContextWrapper::sceneHeight()
 }
 
 
-
-
 void ContextWrapper::getSceneFloor(XnVector3D* point,	
 								   XnVector3D* normal)
 {
 	if(!_sceneAnalyzer.IsValid())
 		return;
+	else
+		updateSceneData();
 
 	XnPlane3D plane;
 	_sceneAnalyzer.GetFloor(plane);
@@ -1223,7 +1431,11 @@ void ContextWrapper::getSceneFloor(XnVector3D* point,
 	projNull = plane3d.projection(Eigen::Vector3f(0.0f,0.0f,0.0f));
 	projNullNormal = (Eigen::Vector3f(0.0f,0.0f,0.0f) - projNull).normalized();
 	*/
-	/*
+
+	// calc the orientation matrix for the floor
+	// coordinate center is in the projection of the camera eye to the floor
+
+	/* 
 	Quaternion		camRot;
 	Quaternion		planeRot;
 	*/
@@ -1248,25 +1460,25 @@ void ContextWrapper::calcSceneData()
 			for(unsigned int x=0; x < _sceneMD.XRes(); x++, nIndex++)
 			{
 				nValue = *pDepth;
-
-				XnLabel		label	 = *pLabels;
-				XnUInt32	nColorID = label % nColors;
-				if (label == 0)
-					nColorID = nColors;
-
-				if(nValue != 0)
+				if(*pDepth != 0)
 				{
+					XnLabel		label	 = *pLabels;
+					XnUInt32	nColorID = label % nColors;
+
 					nHistValue = (unsigned int)_pDepthHist[nValue];
 
-					pPixel->nRed	= (XnUInt8)(nHistValue * Colors[nColorID][0]); 
-					pPixel->nGreen	= (XnUInt8)(nHistValue * Colors[nColorID][1]);
-					pPixel->nBlue	= (XnUInt8)(nHistValue * Colors[nColorID][2]);
-				}
-				else
-				{
-					pPixel->nRed	= 0;
-					pPixel->nGreen	= 0;
-					pPixel->nBlue	= 0;
+					if(label == 0)
+					{
+						pPixel->nRed	= (XnUInt8)(nHistValue * _depthImageColor[0]);
+						pPixel->nGreen	= (XnUInt8)(nHistValue * _depthImageColor[1]);
+						pPixel->nBlue	= (XnUInt8)(nHistValue * _depthImageColor[2]);
+					}				
+					else
+					{
+						pPixel->nRed	= (XnUInt8)(nHistValue * Colors[nColorID][0]); 
+						pPixel->nGreen	= (XnUInt8)(nHistValue * Colors[nColorID][1]);
+						pPixel->nBlue	= (XnUInt8)(nHistValue * Colors[nColorID][2]);
+					}
 				}
 
 				pDepth++;
@@ -1277,7 +1489,7 @@ void ContextWrapper::calcSceneData()
 	
 	}
 	else
-	{	// calc with straight colors
+	{	// calc with no background
 		const XnLabel*		pLabels= _sceneMD.Data();
 		XnRGB24Pixel*		pPixel = _pSceneImage;
 
@@ -1305,7 +1517,8 @@ int ContextWrapper::sceneMap(int* map)
 {
 	if(!_sceneAnalyzer.IsValid())
 		return 0;
-	
+	else
+		updateSceneData();	
 
 	for(int i=0;i < _sceneBufSize;i++)
 		map[i] = (int)(_sceneMD.Data())[i]; 
@@ -1314,6 +1527,11 @@ int ContextWrapper::sceneMap(int* map)
 
 int ContextWrapper::sceneImage(int* map)
 {
+	if(!_sceneAnalyzer.IsValid())
+		return 0;
+	else
+		updateSceneImageData();	
+
 	for(int i=0;i < _sceneBufSize;i++)
 	{
 		map[i] = 0xff	<< 24 | 
@@ -1331,6 +1549,8 @@ bool ContextWrapper::getCoM(int user, XnPoint3D&  com)
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	_rc = _userGenerator.GetCoM(user,com);
 	return(_rc == XN_STATUS_OK);	
@@ -1339,7 +1559,9 @@ bool ContextWrapper::getCoM(int user, XnPoint3D&  com)
 int ContextWrapper::getNumberOfUsers()
 {
 	if(!_userGenerator.IsValid())
-		return false;
+		return 0;
+	else
+		updateUser();
 
 	return _userGenerator.GetNumberOfUsers();	
 }
@@ -1348,6 +1570,8 @@ int ContextWrapper::getUsers(std::vector<int>* userList)
 {
 	if(!_userGenerator.IsValid())
 		return 0;
+	else
+		updateUser();
 
 	XnUInt16	userCount = _userGenerator.GetNumberOfUsers();
 	if(userCount > 0)
@@ -1376,6 +1600,8 @@ int	ContextWrapper::getUserPixels(int user,int* userSceneData)
 {
 	if(!_userGenerator.IsValid())
 		return 0;
+	else
+		updateUser();
 
 	 SceneMetaData  sceneMD;
 	_userGenerator.GetUserPixels(user,sceneMD);
@@ -1404,6 +1630,8 @@ bool ContextWrapper::isTrackingSkeleton(int user)
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	return _userGenerator.GetSkeletonCap().IsTracking(user) > 0;
 }
@@ -1412,6 +1640,8 @@ bool ContextWrapper::isCalibratedSkeleton(int user)
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	return _userGenerator.GetSkeletonCap().IsCalibrated(user) > 0;
 }
@@ -1420,6 +1650,8 @@ bool ContextWrapper::isCalibratingSkeleton(int user)
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	return _userGenerator.GetSkeletonCap().IsCalibrating(user) > 0;
 }
@@ -1428,6 +1660,8 @@ void ContextWrapper::requestCalibrationSkeleton(int user, bool force)
 {
 	if(!_userGenerator.IsValid())
 		return;
+	else
+		updateUser();
 
 	_userGenerator.GetSkeletonCap().RequestCalibration(user, force);
 }
@@ -1436,6 +1670,8 @@ void ContextWrapper::abortCalibrationSkeleton(int user)
 {
 	if(!_userGenerator.IsValid())
 		return;
+	else
+		updateUser();
 
 	_userGenerator.GetSkeletonCap().AbortCalibration(user);
 
@@ -1445,6 +1681,8 @@ bool ContextWrapper::saveCalibrationDataSkeleton(int user,int slot)
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	if(_userGenerator.GetSkeletonCap().IsCalibrated(user) == 0)
 		return false;
@@ -1457,6 +1695,8 @@ bool ContextWrapper::loadCalibrationDataSkeleton(int user,int slot)
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	_rc = _userGenerator.GetSkeletonCap().LoadCalibrationData(user,slot);
 	return(_rc == XN_STATUS_OK);
@@ -1524,6 +1764,8 @@ bool ContextWrapper::getJointPositionSkeleton(int user,int joint,XnSkeletonJoint
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	_rc = _userGenerator.GetSkeletonCap().GetSkeletonJointPosition( user, (XnSkeletonJoint)joint, *jointPos);
 
@@ -1536,6 +1778,8 @@ bool ContextWrapper::getJointOrientationSkeleton(int user,
 {
 	if(!_userGenerator.IsValid())
 		return false;
+	else
+		updateUser();
 
 	_rc = _userGenerator.GetSkeletonCap().GetSkeletonJointOrientation ( user, (XnSkeletonJoint)joint, *jointOrientation);
 	
