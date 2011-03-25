@@ -29,7 +29,7 @@ On windows i only used Visual Studio 2008
 {{{
 > mkdir build
 > cd build
-> cmake -DEIGEN3D_INCLUDE=C:/'path to the Eigen folder' -DBOOST_ROOT=C:/'path to the Boost folder' ..
+> cmake -DEIGEN3D_INCLUDE='path to the Eigen folder' -DBOOST_ROOT='path to the Boost folder' ..
 }}}
   * Now you should find in the 'SimpleOpenNI/build' folder the Visual Studio Projectfile
   * Open 'SimpleOpenNI.sln' and build it
