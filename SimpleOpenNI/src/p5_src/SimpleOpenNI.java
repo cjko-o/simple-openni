@@ -65,7 +65,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected PImage			_depthImage;
 	protected int[]				_depthRaw;
 	protected PVector[]			_depthMapRealWorld;
-	XnPoint3D[] 				_depthMapRealWorldXn;
+	protected XnPoint3D[] 		_depthMapRealWorldXn;
+	//protected XnPoint3DArray	_depthMapRealWorldArray;
 	
 	protected PImage			_rgbImage;
 
@@ -76,27 +77,38 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
   	protected int[]				_userRaw;
 	
-	protected boolean			_depthUpdateFlag;
-	protected boolean			_depthImageUpdateFlag;
-	protected boolean			_depthRealWorldUpdateFlag;
-	protected boolean			_imageUpdateFlag;
-	protected boolean			_irUpdateFlag;
-	protected boolean			_sceneRawUpdateFlag;
-	protected boolean			_sceneImageUpdateFlag;
+	// update flags
+	protected long				_depthMapTimeStamp;
+	protected long				_depthImageTimeStamp;
+	protected long				_depthRealWorldTimeStamp;
 	
+	protected long				_rgbTimeStamp;
 	
-	void resetUpdateFlags()
+	protected long				_irImageTimeStamp;
+	
+	protected long				_sceneMapTimeStamp;
+	protected long				_sceneImageTimeStamp;
+
+	
+	/**
+	* Creates the OpenNI context ands inits the modules
+	* 
+	* @param parent
+	*          PApplet
+	* @param initXMLFile
+	*          String
+	*/
+	public SimpleOpenNI(PApplet parent, String initXMLFile)
 	{
-		_depthUpdateFlag 			= true;
-		_depthImageUpdateFlag 		= true;
-		_depthRealWorldUpdateFlag 	= true;
+		this._parent 	= parent;
+		parent.registerDispose(this);
+		initVars();
 		
-		_imageUpdateFlag 			= true;
+		// setup the callbacks
+		setupCallbackFunc();
 		
-		_irUpdateFlag 				= true;
-		
-		_sceneRawUpdateFlag 		= true;	
-		_sceneImageUpdateFlag 		= true;	
+		// load the initfile
+		this.init(parent.dataPath(initXMLFile));
 	}
 	
 	/**
@@ -106,39 +118,76 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	*          PApplet
 	* @param initXMLFile
 	*          String
-	* @return
+	* @param runMode
+	*     	   - RunMode_Default, RunMode_SingleThreaded = Runs all in a single thread	
+	*		   - RunMode_MultiThreaded = Runs the openNI/NIITE in another thread than processing	
 	*/
-	public SimpleOpenNI(PApplet parent, String initXMLFile)
+	public SimpleOpenNI(PApplet parent, String initXMLFile,int runMode)
 	{
 		this._parent 	= parent;
 		parent.registerDispose(this);
+		initVars();
 		
 		// setup the callbacks
 		setupCallbackFunc();
 		
 		// load the initfile
-		this.init(parent.dataPath(initXMLFile));
-		resetUpdateFlags();
+		this.init(parent.dataPath(initXMLFile),runMode);
 	}
-
 	/**
 	* Creates the OpenNI context ands inits the modules
 	* 
 	* @param parent
 	*          PApplet
-	* @return
 	*/
 	public SimpleOpenNI(PApplet parent)
 	{
 		this._parent 	= parent;
 		parent.registerDispose(this);
+		initVars();
 		
 		// setup the callbacks
 		setupCallbackFunc();
 		
 		// load the initfile
 		this.init();
-		resetUpdateFlags();
+	}
+	
+	/**
+	* Creates the OpenNI context ands inits the modules
+	* 
+	* @param parent
+	*          PApplet
+	* @param runMode
+	*     	   - RunMode_Default, RunMode_SingleThreaded = Runs all in a single thread	
+	*		   - RunMode_MultiThreaded = Runs the openNI/NIITE in another thread than processing	
+	*/
+	public SimpleOpenNI(PApplet parent,int runMode)
+	{
+		this._parent 	= parent;
+		parent.registerDispose(this);
+		initVars();
+		
+		// setup the callbacks
+		setupCallbackFunc();
+		
+		// load the initfile
+		this.init(runMode);
+	}
+	
+	protected void initVars()
+	{
+		_depthMapTimeStamp			= -1;
+		_depthImageTimeStamp		= -1;
+		_depthRealWorldTimeStamp	= -1;
+		
+		_rgbTimeStamp				= -1;
+		
+		_irImageTimeStamp			= -1;
+		
+		_sceneMapTimeStamp			= -1;
+		_sceneImageTimeStamp		= -1;		
+	
 	}
 	
 	protected void setupCallbackFunc()
@@ -232,6 +281,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			_depthMapRealWorld[i] 	= new PVector();
 			_depthMapRealWorldXn[i] = new XnPoint3D();
 		}
+		
+		//_depthMapRealWorldArray	= new XnPoint3DArray(depthMapSize());
 	}
 	
 	/**
@@ -589,37 +640,36 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		if((nodes() & NODE_DEPTH) == 0)
 			return;
-		if(!_depthUpdateFlag)
+		if(_depthMapTimeStamp ==  updateTimeStamp())
 			return;
 
 		depthMap(_depthRaw);
-		
-		_depthUpdateFlag = false;
+		_depthMapTimeStamp = updateTimeStamp();
 	}	
 	
 	protected void updateDepthImage()
 	{
 		if((nodes() & NODE_DEPTH) == 0)
 			return;
-		if(!_depthImageUpdateFlag)
+		if(_depthImageTimeStamp ==  updateTimeStamp())
 			return;
-		
+	
 		_depthImage.loadPixels();
 			depthImage(_depthImage.pixels);
 		_depthImage.updatePixels();
-		
-		_depthImageUpdateFlag = false;
+		_depthImageTimeStamp = updateTimeStamp();
 	}
 	
 	protected void updateDepthRealWorld()
 	{
 		if((nodes() & NODE_DEPTH) == 0)
 			return;	
-		if(!_depthRealWorldUpdateFlag)
+		if(_depthRealWorldTimeStamp ==  updateTimeStamp())
 			return;
-	
-		XnPoint3D vec;
+
 		depthMapRealWorld(_depthMapRealWorldXn);
+		
+		XnPoint3D vec;
 		for(int i=0;i < _depthMapRealWorldXn.length;i++)
 		{
 			vec = _depthMapRealWorldXn[i];
@@ -627,24 +677,54 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 									  vec.getY(),
 								      vec.getZ());
 		}
-				
-		/* still have to find out how i get an return array back with swig
-		XnVector3D[] depthMapRealWorld = depthMapRealWorldA();
+	
+		/*
+		int now = _parent.millis();
+		XnPoint3D vec;
+		depthMapRealWorldA(_depthMapRealWorldArray);
+		
+		_parent.println("depthMapRealWorld calc: " + (_parent.millis()-now));
+		now = _parent.millis();
+		
 		for(int i=0;i < depthMapSize();i++)
 		{
-			_depthMapRealWorld[i].set(depthMapRealWorld[i].getX(),
-									  depthMapRealWorld[i].getY(),
-								      depthMapRealWorld[i].getZ());
+			vec = _depthMapRealWorldArray.getitem(i);
+			_depthMapRealWorld[i].set(vec.getX(),
+									  vec.getY(),
+								      vec.getZ());
 		}
-		*/	
-		_depthRealWorldUpdateFlag = false;
+		_parent.println("updateDepthRealWorld calc: " + (_parent.millis()-now));
+	*/
+		
+		/*
+		int now = _parent.millis();
+		
+		XnPoint3D vec;
+		
+		XnPoint3DArray array = depthMapRealWorldA();
+		
+		_parent.println("depthMapRealWorld calc: " + (_parent.millis()-now));
+		now = _parent.millis();
+		
+		for(int i=0;i < depthMapSize();i++)
+		{
+			vec = array.getitem(i);
+			_depthMapRealWorld[i].set(vec.getX(),
+									  vec.getY(),
+								      vec.getZ());
+		}
+		
+		_parent.println("updateDepthRealWorld calc: " + (_parent.millis()-now));
+		*/
+		
+		_depthRealWorldTimeStamp = updateTimeStamp();
 	}
 	
 	protected void updateImage()
 	{
 		if((nodes() & NODE_IMAGE) == 0)
 			return;
-		if(!_imageUpdateFlag)
+		if(_rgbTimeStamp ==  updateTimeStamp())
 			return;
 		
 		// copy the rgb map
@@ -652,47 +732,47 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			rgbImage(_rgbImage.pixels);
 		_rgbImage.updatePixels();
 		
-		_imageUpdateFlag = false;
+		_rgbTimeStamp = updateTimeStamp();
 	}
 	
 	protected void updateIrImage()
 	{
 		if((nodes() & NODE_IR) == 0)
 			return;
-		if(!_irUpdateFlag)
+		if(_irImageTimeStamp ==  updateTimeStamp())
 			return;
 					
 		_irImage.loadPixels();
 			irImage(_irImage.pixels);
 		_irImage.updatePixels();
 		
-		_irUpdateFlag = false;			
+		_irImageTimeStamp = updateTimeStamp();
 	}
 		
 	protected void updateSceneRaw()
 	{
 		if((nodes() & NODE_SCENE) == 0)
 			return;
-		if(!_sceneRawUpdateFlag)
+		if(_sceneMapTimeStamp ==  updateTimeStamp())
 			return;
 					
 		sceneMap(_sceneRaw);
-		_sceneRawUpdateFlag = false;				
+		
+		_sceneMapTimeStamp = updateTimeStamp();
 	}
 	
 	protected void updateSceneImage()
 	{
 		if((nodes() & NODE_SCENE) == 0)
 			return;
-		if(!_sceneImageUpdateFlag)
+		if(_sceneImageTimeStamp ==  updateTimeStamp())
 			return;
 		
 		// copy the scene map
 		_sceneImage.loadPixels();
 			sceneImage(_sceneImage.pixels);
 		_sceneImage.updatePixels();
-			
-		_sceneImageUpdateFlag = false;			
+		_sceneImageTimeStamp = updateTimeStamp();
 	}
 	
 	/**
@@ -701,7 +781,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public void update() 
 	{
 		super.update();
-		resetUpdateFlags();
 	}	
 	
 	/**

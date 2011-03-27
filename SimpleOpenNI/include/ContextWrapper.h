@@ -29,9 +29,15 @@
 	#pragma warning( disable : 4275 )
 #endif
 
-
 #include <vector>
 #include <iostream>
+
+// boost
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/cstdint.hpp>
 
 // OpenNI
 #include <XnOS.h>
@@ -58,6 +64,10 @@
 #define		DepthImgMode_Default	0
 #define		DepthImgMode_RgbFade	1
 
+#define		RunMode_Default			0
+#define		RunMode_SingleThreaded	RunMode_Default
+#define		RunMode_MultiThreaded	(RunMode_SingleThreaded + 1)
+
 
 #define		MAX_DEPTH		10000	// 10m
 #define		STRING_BUFFER	255
@@ -73,7 +83,6 @@ protected:\
 
 namespace sOpenNI{
 
-typedef XnPoint3D*	XnPoint3DArray;
 
 class ContextWrapper
 {
@@ -86,8 +95,8 @@ public:
 	int version();
 
 	// init methods
-	bool init(const char* xmlInitFile);
-	bool init();
+	bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
+	bool init(int runMode=RunMode_SingleThreaded);
 
 	int nodes();
 
@@ -113,8 +122,14 @@ public:
 
 	int depthMapSize();
 	int	depthMap(int* map);					// in milimeters
-	int depthMapRealWorld(XnPoint3D map[]);	
-	XnPoint3DArray depthMapRealWorldA();	
+	int depthMapRealWorld(XnPoint3D map[]);
+	int depthMapRealWorldA(XnPoint3D* map)
+	{
+		return depthMapRealWorld(map);
+	}
+
+	XnPoint3D* depthMapRealWorldA();	
+	int depthMapRealWorldA(XnPoint3D* map,int count);	
 
 	int depthHistSize();
 	int depthHistMap(float* histMap);
@@ -154,7 +169,9 @@ public:
 	int sceneMap(int* map);
 	int sceneImage(int* map);		// 16-bit value, with the labels, size of the depth map
 	void getSceneFloor(XnVector3D* point,	
-					   XnVector3D* normal);	
+					   XnVector3D* normal);
+	void getSceneFloorCoordsys(float* matrix);		// 4*4 matrix, rotation + translation to the nearest point
+												    // on the floor plane to the camera as null point
 
 	//////////////////////////////////////////////////////////////////////////////
 	// users
@@ -236,6 +253,7 @@ public:
 	void convertProjectiveToRealWorld(XnVector3D* proj,XnVector3D* world);	
 	void convertProjectiveToRealWorld(std::vector<XnVector3D>* projArray,std::vector<XnVector3D>* worldArray);
 
+
 	///////////////////////////////////////////////////////////////////////////
 	// callbacks
 
@@ -282,9 +300,6 @@ public:
 											xn::GestureGenerator* pQuickRefocusGenerator = NULL);
 
 	void update(XnVSessionManager* sessionManager);
-
-	//
-	inline unsigned long frameStamp() { _frameStamp; }
 
 protected:
 	
@@ -358,9 +373,9 @@ protected:
 	void createIrImage();
 	void calcSceneData();
 
-	void updateDepthData();
-	void updateDepthImageData();
-	void updateDepthRealWorldData();
+	bool updateDepthData();
+	bool updateDepthImageData();
+	bool updateDepthRealWorldData();
 
 	void updateRgbData();
 
@@ -372,8 +387,6 @@ protected:
 	void updateUser();
 	void updateHands();
 	void updateGesture();
-
-	void resetUpdateFlags();
 
 	bool _initFlag;
 	bool _generatingFlag;
@@ -440,29 +453,76 @@ protected:
 
 	///////////////////////////////////////////////////////////////////////////
 	// NITE
-	XnVSessionManager	_sessionManager;
+	std::vector<XnVSessionManager*>		_sessionManagerList;
 
 
 	///////////////////////////////////////////////////////////////////////////
 	// update flags, performance 
-	bool			_depthUpdateFlag;
-	bool			_depthImageUpdateFlag;
-	bool			_depthRealWorldUpdateFlag;
 
-	bool			_imageUpdateFlag;
-	bool			_irUpdateFlag;
+	// timestamps
+	unsigned long 	_depthMapTimeStamp;
+	unsigned long 	_depthImageTimeStamp;
+	unsigned long 	_depthRealWorldTimeStamp;
 
-	bool			_sceneUpdateFlag;
-	bool			_sceneImageUpdateFlag;
+	unsigned long 	_imageTimeStamp;
+	
+	unsigned long 	_irTimeStamp;
 
-	bool			_userUpdateFlag;
-	bool			_gestureUpdateFlag;
-	bool			_handsUpdateFlag;
+	unsigned long 	_sceneTimeStamp;
+	unsigned long	_sceneImageTimeStamp;
+	
+	unsigned long 	_userTimeStamp;
+	unsigned long 	_gestureTimeStamp;
+	unsigned long 	_handsTimeStamp;
 
-	unsigned long	_frameStamp;
-	XnUInt64		_depthTimeStamp;
-	XnUInt64		_imageTimeStamp;
-	XnUInt64		_sceneTimeStamp;
+	unsigned long 	_updateTimeStamp;
+	unsigned long 	_updateSubTimeStamp;
+
+public:
+	inline unsigned long depthMapTimeStamp(){ return _depthMapTimeStamp; }
+	inline unsigned long depthImageTimeStamp(){ return _depthImageTimeStamp; }
+	inline unsigned long depthRealWorldTimeStamp(){ return _depthRealWorldTimeStamp; }
+	inline unsigned long imageTimeStamp(){ return _imageTimeStamp; }
+	inline unsigned long irTimeStamp(){ return _irTimeStamp; }
+	inline unsigned long sceneTimeStamp(){ return _sceneTimeStamp; }
+	inline unsigned long userTimeStamp(){ return _userTimeStamp; }
+	inline unsigned long handsTimeStamp(){ return _handsTimeStamp; }
+
+	inline unsigned long updateTimeStamp(){ return _updateTimeStamp; }
+	inline unsigned long updateSubTimeStamp(){ return _updateSubTimeStamp; }
+
+	inline bool newThreadData()
+	{
+		return(_updateTimeStamp != _updateSubTimeStamp);
+	}
+
+	inline bool newDepthMapThreadData()
+	{
+		return(_depthMapTimeStamp != _updateTimeStamp) && newThreadData();
+	}
+
+	inline bool newDepthImageThreadData()
+	{
+		return(_depthImageTimeStamp != _updateTimeStamp) && newThreadData();
+	}
+
+	inline bool newDepthRealWorldThreadData()
+	{
+		return(_depthRealWorldTimeStamp != _updateTimeStamp) && newThreadData();
+	}
+
+///////////////////////////////////////////////////////////////////////////
+// threading
+
+private:
+	
+	void updateSub();
+	void run();
+
+	boost::shared_ptr<boost::thread>	_thread;
+	boost::mutex						_mainMutex;
+	bool								_threadRun;
+	int									_threadMode;
 
 };
 

@@ -22,10 +22,13 @@
  */
 
 #ifdef WIN32
+	#define _CRT_SECURE_NO_WARNINGS
+
 	#define NOMINMAX	// eigen + windows.h will have conflict without this
 #endif
 
 #include <cmath>
+
 
 // openni
 #include <XnTypes.h>
@@ -36,11 +39,10 @@
 
 #include "ContextWrapper.h"
 
-
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	17		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	18		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -80,11 +82,11 @@ _nodes(Node_None),
 _userWidth(0),
 _userHeight(0),
 _userSceneBufSize(0),
-_depthImageColorMode(DepthImgMode_Default)
-
+_depthImageColorMode(DepthImgMode_Default),
+_threadMode(RunMode_Default),
+_threadRun(false)
 {
-	//std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
-	resetUpdateFlags();
+	std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
 
 	_depthImageColor[0] = 1.0f;
 	_depthImageColor[1] = 1.0f;
@@ -115,7 +117,19 @@ _depthImageColorMode(DepthImgMode_Default)
 		_pDepthGamma[i] = v*6*256;
 	}
 
-	_frameStamp = 0;
+	_depthMapTimeStamp			= 0;
+	_depthImageTimeStamp		= 0;
+	_depthRealWorldTimeStamp	= 0;
+
+	_imageTimeStamp				= 0;
+	_irTimeStamp				= 0;
+	_sceneTimeStamp				= 0;
+	_userTimeStamp				= 0;
+	_gestureTimeStamp			= 0;
+	_handsTimeStamp				= 0;
+
+	_updateTimeStamp			= 1;	// set to 1 for the first update
+	_updateSubTimeStamp			= 1;
 }
 
 ContextWrapper::~ContextWrapper()
@@ -127,6 +141,19 @@ void ContextWrapper::close()
 {
 	if(!_initFlag)
 		return;
+
+	if(_threadMode == RunMode_MultiThreaded)
+	{	
+		_threadRun = false;
+		if(_thread.get() != NULL)
+		{
+			// wait till thread is done
+			_thread->join();
+			
+			// delete the thread
+			_thread.reset();
+		}
+	}
 
 	// stop generators
 	_context.StopGeneratingAll();
@@ -148,7 +175,19 @@ void ContextWrapper::close()
 	_pSceneImage= NULL;
 	_depthMapRealWorld= NULL;
 
-	_frameStamp = 0;
+	_depthMapTimeStamp			= 0;
+	_depthImageTimeStamp		= 0;
+	_depthRealWorldTimeStamp	= 0;
+
+	_imageTimeStamp				= 0;
+	_irTimeStamp				= 0;
+	_sceneTimeStamp				= 0;
+	_userTimeStamp				= 0;
+	_gestureTimeStamp			= 0;
+	_handsTimeStamp				= 0;
+
+	_updateTimeStamp			= 1;	// set to 1 for the first update
+	_updateSubTimeStamp			= 1;
 
 	// shutdown the context
 	_context.Shutdown();
@@ -192,8 +231,10 @@ void ContextWrapper::logOut(int msgType,const char* msg,...)
 	std::cout << _strBuffer << std::endl;
 }
 
-bool ContextWrapper::init(const char* xmlInitFile)
+bool ContextWrapper::init(const char* xmlInitFile,int runMode)
 {
+	_threadMode = runMode;
+
 	// init the cam with the xml setup file
 	xn::EnumerationErrors errors;
 	_rc = _context.InitFromXmlFile(xmlInitFile, &errors);
@@ -209,8 +250,10 @@ bool ContextWrapper::init(const char* xmlInitFile)
 	return true;
 }
 	
-bool ContextWrapper::init()
+bool ContextWrapper::init(int runMode)
 {
+	_threadMode = runMode;
+
 	// init the cam with the xml setup file
 	xn::EnumerationErrors errors;
 	_rc = _context.Init();
@@ -772,74 +815,67 @@ bool ContextWrapper::openFileRecording(const char* filePath)
 
 ///////////////////////////////////////////////////////////////////////////////
 // update
-void ContextWrapper::resetUpdateFlags()
-{
-	_depthUpdateFlag			= true;
-	_depthImageUpdateFlag		= true;
-	_depthRealWorldUpdateFlag	= true;
-
-	_imageUpdateFlag	= true;
-	_irUpdateFlag		= true;
-
-	_sceneUpdateFlag		= true;
-	_sceneImageUpdateFlag	= true;
-
-	_userUpdateFlag		= true;
-	_gestureUpdateFlag	= true;
-	_handsUpdateFlag	= true;
-}
 
 // depth
-void ContextWrapper::updateDepthData()
+bool ContextWrapper::updateDepthData()
 {
-	if(!_depthUpdateFlag)
-		return;
-
+	if(_depthMapTimeStamp == _updateTimeStamp)
+		return false;
+	
 	_depth.GetMetaData(_depthMD);
-
-	_depthUpdateFlag = false;
+	_depthMapTimeStamp  = _updateTimeStamp;
+	
+	//boost::mutex::scoped_lock l(_mainMutex);
+	return true;
 }
 
-void ContextWrapper::updateDepthImageData()
+bool ContextWrapper::updateDepthImageData()
 {
-	if(!_depthImageUpdateFlag)
-		return;
+	if(_depthImageTimeStamp == _updateTimeStamp)
+		return false;
 
+	// updtate the base data
 	updateDepthData();
 
 	calcHistogram();
 	createDepthImage();
+	_depthImageTimeStamp = _updateTimeStamp;
 
-	_depthImageUpdateFlag = false;
+	//boost::mutex::scoped_lock l(_mainMutex);
+	return true;
 }
 
-void ContextWrapper::updateDepthRealWorldData()
+bool ContextWrapper::updateDepthRealWorldData()
 {
-	if(!_depthRealWorldUpdateFlag)
-		return;
+	if(_depthRealWorldTimeStamp == _updateTimeStamp)
+		return false;
 
+	// updtate the base data
 	updateDepthData();
-
 	calcDepthImageRealWorld();
-	_depthRealWorldUpdateFlag = false;
+
+	_depthRealWorldTimeStamp = _updateTimeStamp;
+
+	return true;
 }
 
 // image
 void ContextWrapper::updateRgbData()
 {
-	if(!_imageUpdateFlag)
+	if(_imageTimeStamp == _updateTimeStamp)
 		return;
 
 	// get the new data
 	_image.GetMetaData(_imageMD);
 		
-	_imageUpdateFlag = false;
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_imageTimeStamp = _updateTimeStamp;
 }
 
 // ir
 void ContextWrapper::updateIrData()
 {	
-	if(!_irUpdateFlag)
+	if(_irTimeStamp == _updateTimeStamp)
 		return;
 	
 	// get the new data
@@ -847,23 +883,26 @@ void ContextWrapper::updateIrData()
 
 	createIrImage();
 
-	_irUpdateFlag = false;
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_irTimeStamp = _updateTimeStamp;
 }
 
 // user
 void ContextWrapper::updateSceneData()
 {
-	if(!_sceneUpdateFlag)
+	if(_sceneTimeStamp == _updateTimeStamp)
 		return;
 
 	// get the new data
 	_sceneAnalyzer.GetMetaData(_sceneMD);
-	_sceneUpdateFlag = false;
+
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_sceneTimeStamp = _updateTimeStamp;
 }
 
 void ContextWrapper::updateSceneImageData()
 {
-	if(!_sceneImageUpdateFlag)
+	if(_sceneImageTimeStamp == _updateTimeStamp)
 		return;
 
 	updateSceneData();
@@ -871,28 +910,35 @@ void ContextWrapper::updateSceneImageData()
 		updateDepthImageData();
 	calcSceneData();
 
-	_sceneImageUpdateFlag = false;
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_sceneImageTimeStamp = _updateTimeStamp;
 }
 
 void ContextWrapper::updateUser()
 {
-	if(!_userUpdateFlag)
+	if(_userTimeStamp == _updateTimeStamp)
 		return;
-	_userUpdateFlag = false;
+
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_userTimeStamp = _updateTimeStamp;
 }
 
 void ContextWrapper::updateHands()
 {
-	if(!_handsUpdateFlag)
+	if(_handsTimeStamp == _updateTimeStamp)
 		return;
-	_handsUpdateFlag = false;
+
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_handsTimeStamp = _updateTimeStamp;
 }
 
 void ContextWrapper::updateGesture()
 {
-	if(!_gestureUpdateFlag)
+	if(_gestureTimeStamp == _updateTimeStamp)
 		return;
-	_gestureUpdateFlag = false;
+
+	//boost::mutex::scoped_lock l(_mainMutex);
+	_gestureTimeStamp = _updateTimeStamp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -944,28 +990,42 @@ void ContextWrapper::update()
 	if(!_initFlag)
 		return;
 
-	// check if everything is all right for the first round
-	/*
-	if(_firstTimeUpdate)
-	{
-		_firstTimeUpdate = false;
-	}
-	*/
-
 	if(!_generatingFlag)
 	{	
 		_context.StartGeneratingAll();
 		_generatingFlag = true;
 	}
 
+	// check if everything is all right for the first round
+	if(_firstTimeUpdate)
+	{
+		_firstTimeUpdate = false;
+
+		// check if we use multithreading
+		if(_threadMode == RunMode_MultiThreaded) 
+		{
+			// create + start the thread
+			_thread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&ContextWrapper::run, this)));
+		}
+	}
 	
-	resetUpdateFlags();
+	// update timestamp
+	_updateTimeStamp = _updateSubTimeStamp;
+
+	// update the data
+	if(_threadMode < RunMode_MultiThreaded) 
+		updateSub();
+}
+
+void ContextWrapper::updateSub()
+{
+	boost::mutex::scoped_lock l(_mainMutex);
 
 #ifdef WIN_PERF_DEBUG
 	startTimer(&timer);
 #endif // WIN_PERF_DEBUG
 
-
+	// update openNI
 	if(_gestureGenerator.IsValid() || _handsGenerator.IsValid() ||
 	   _userGenerator.IsValid())
 	{	// i don't know why, but it only works if i add 'WaitAndUpdateAll'
@@ -974,12 +1034,27 @@ void ContextWrapper::update()
 	}
 	else
 		_rc = _context.WaitAnyUpdateAll();
+	
+	// update timestamp
+	_updateSubTimeStamp++;
 
 
 #ifdef WIN_PERF_DEBUG
 	stopTimer(&timer);
 	startTimer(&timer1);
 #endif // WIN_PERF_DEBUG
+/*
+
+	// update NITE
+	if(_threadMode == RunMode_MultiThreaded) 
+	{	// update all sessionManagers
+		std::vector<XnVSessionManager*>::iterator itr = _sessionManagerList.begin();
+		for(;itr != _sessionManagerList.end(); itr++)
+		{
+			(*itr)->Update(&_context);
+		}
+	}
+*/
 
 
 #ifdef WIN_PERF_DEBUG
@@ -993,6 +1068,8 @@ void ContextWrapper::update()
 
 	if(count % 20 == 0)
 	{
+		std::cout << "_rc: "<< _rc << std::endl;
+		
 		std::cout << "fps:\t\t" << (1.0 / (total / count)) << 
 				     "\topenNI time:\t" << (total / count * 1000) <<
 					 std::endl;
@@ -1004,14 +1081,9 @@ void ContextWrapper::update()
 		std::cout << "---------" << std::endl;
 		
 	}
-
-	if((dif * 1000) < 5 )
-	{
-		printf(".");
-	}
 #endif // WIN_PERF_DEBUG
-
 }
+
 
 
 void ContextWrapper::calcHistogram()
@@ -1052,11 +1124,10 @@ void ContextWrapper::calcDepthImageRealWorld()
 	XnPoint3D*			map		= _depthMapRealWorld;
 	for(int y = 0; y < _depthMD.YRes(); ++y)
 	{
-		for(int x = 0; x < _depthMD.XRes(); ++x, ++pDepth,++map)
+		for(int x = 0; x < _depthMD.XRes() ; ++x, ++pDepth,++map)
 		{
 			map->X = (float)x;
-			//map->Y = _depthMD.YRes()-y;		// in the coordinatesystem of the image y points down, in the realword it points up
-			map->Y = (float)y;		// in the coordinatesystem of the image y points down, in the realword it points up
+			map->Y = (float)y;
 			map->Z = (float)*pDepth;
 		}
 	}
@@ -1065,6 +1136,7 @@ void ContextWrapper::calcDepthImageRealWorld()
 	_depth.ConvertProjectiveToRealWorld(_depthBufSize,
 										_depthMapRealWorld,
 										_depthMapRealWorld);
+
 }
 
 
@@ -1211,7 +1283,7 @@ int ContextWrapper::depthMap(int* map)
 		map[i] = (int)(_depthMD.Data())[i]; 
 
 	return _depthBufSize;
-}
+} 
 
 int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
 {
@@ -1223,20 +1295,10 @@ int ContextWrapper::depthMapRealWorld(XnPoint3D map[])
 	// speed up the copy
 	memcpy((void*)map,(const void *)_depthMapRealWorld,_depthBufSize * sizeof(XnPoint3D));
 
-	/*
-	for(int i=0;i < _depthBufSize;i++)
-	{	
-		map[i] = _depthMapRealWorld[i]; 
-		//logOut(MsgNode_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", _depthMapRealWorld[i].X,_depthMapRealWorld[i].Y,_depthMapRealWorld[i].Z);
-		//logOut(MsgNode_Error,"depthMapRealWorld: x:%f,y:%f,z:%f", map[i].X,map[i].Y,map[i].Z);
-
-	}
-	*/
-
 	return _depthBufSize;
-}
-
-XnPoint3DArray ContextWrapper::depthMapRealWorldA()
+}  
+  
+XnPoint3D* ContextWrapper::depthMapRealWorldA()
 {
 	if(_depth.IsValid() == false)
 		return _depthMapRealWorld;
@@ -1244,6 +1306,11 @@ XnPoint3DArray ContextWrapper::depthMapRealWorldA()
 		updateDepthRealWorldData();
 
 	return _depthMapRealWorld;
+}
+
+int ContextWrapper::depthMapRealWorldA(XnPoint3D* map,int count)
+{
+	return depthMapRealWorld(map);
 }
 
 int ContextWrapper::depthMapSize()
@@ -2127,14 +2194,34 @@ XnVSessionManager* ContextWrapper::createSessionManager(const XnChar* strUseAsFo
 	// set callbacks
 	ret->RegisterSession(this, onStartSessionCb, onEndSessionCb, onFocusSessionCb);
 
+	_sessionManagerList.push_back(ret);
 	return ret;
 }
 
 
 void ContextWrapper::update(XnVSessionManager* sessionManager)
 {
-	if(!_initFlag && sessionManager == NULL)
+	if((!_initFlag && sessionManager == NULL) )/*||
+	   _threadMode == RunMode_MultiThreaded)*/
+		// the session manager will be updated in the thread function
 		return;
 	
 	sessionManager->Update(&_context);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// threading
+
+void ContextWrapper::run()
+{
+	_threadRun = true;
+
+	while(_threadRun)
+	{
+		updateSub();
+
+		boost::this_thread::sleep(boost::posix_time::millisec(1)); 
+		//std::cout <<"." << std::flush;
+	}
+
 }
