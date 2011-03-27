@@ -4,13 +4,19 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
-v0.18 alpha, 0x/xx/2011
+v0.18 alpha, 03/27/2011
 	New:
-		- Implemented now multithreading support, the hole calculation and the camera captureing will be made
-		  in an own thread. So the drawing thread of processing is less stessed.
-		- Improved the performance in single threaded mode 
+		- Implemented multithreading support, the hole camera captureing will be made in an own thread. 
+		  By default it will still run in single threaded mode, to enable multithreading, just use this line:
+		  context = new SimpleOpenNI(this,SimpleOpenNI.RUN_MODE_MULTI_THREADED);
+		  So the drawing thread of processing is less stessed(the examples work now well, even on my Intel Atom/Linux).
+		  Not all functions can profit that much from multithreading, 'depthMapRealWorld' will still slow down the because
+		  it copies w*h*Vector3d from c++ to java, which takes quite a will(30-40ms)
+		  The hole implementation is not done, the callbacks of openNI are still from the other thread,
+		  should be in the same thread as processing. For NITE this is already implemented.
+		- Improved the performance in single threaded mode as well
 		- Added new example:
-		change the structure of the examples
+		  SimpleOpenNI_DepthImage_Threaded - Show how to use multithreading
 		
 	Changes:
 		- Now by default SimpleOpenNI uses the multithreaded support. Your code stays the same.
