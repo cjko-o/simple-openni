@@ -17,12 +17,7 @@ v0.18 alpha, 03/27/2011
 		- Improved the performance in single threaded mode as well
 		- Added new example:
 		  SimpleOpenNI_DepthImage_Threaded - Show how to use multithreading
-		
-	Changes:
-		- Now by default SimpleOpenNI uses the multithreaded support. Your code stays the same.
-		  To switch back to single threaded support, use:
-		  Init(SimpleOpenNI.RunMode_SingleThreaded);
-		- context.depthMapRealWorld() will always update if there is new data,
+
 		  
 v0.17 alpha, 03/23/2011
 	New:
