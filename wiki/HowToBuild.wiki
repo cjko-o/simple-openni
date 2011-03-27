@@ -18,7 +18,7 @@ Before you can build the library you should install following tools:
   * [http://www.cmake.org/cmake/resources/software.html CMake]
   * [http://www.swig.org/download.html Swig] >= *v2.0.2*
   * [http://eigen.tuxfamily.org Eigen] >= *v3.0*
-  * [http://www.boost.org/ Boost] >= *v1.46*
+  * [http://www.boost.org/ Boost] >= *v1.46* (use the static build)
 ----
 = Windows =
 
