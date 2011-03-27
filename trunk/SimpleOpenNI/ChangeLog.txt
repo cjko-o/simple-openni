@@ -5,7 +5,19 @@ http://code.google.com/p/simple-openni/
 vx.xx status, mm/dd/yyyy
 
 v0.18 alpha, 0x/xx/2011
-
+	New:
+		- Implemented now multithreading support, the hole calculation and the camera captureing will be made
+		  in an own thread. So the drawing thread of processing is less stessed.
+		- Improved the performance in single threaded mode 
+		- Added new example:
+		change the structure of the examples
+		
+	Changes:
+		- Now by default SimpleOpenNI uses the multithreaded support. Your code stays the same.
+		  To switch back to single threaded support, use:
+		  Init(SimpleOpenNI.RunMode_SingleThreaded);
+		- context.depthMapRealWorld() will always update if there is new data,
+		  
 v0.17 alpha, 03/23/2011
 	New:
 		- Improved the overall performance

@@ -26,17 +26,22 @@
 
 #include "NITE_Helpers.h"
 
-#define		NITE_JNI_CALLBACK(Class,FuncName,CalbackFunc) \
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_##FuncName(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr) \
+#define		NITE_VIRTUAL_CALLBACK_FUNC(FuncName) On##FuncName##CB
+
+#define		NITE_JNI_CALLBACK_DECL(Class,FuncName) \
+JNIEXPORT void JNICALL Java_SimpleOpenNI_##Class##_Register##FuncName##Sub(JNIEnv *env, jobject  obj, jobject objCb, jlong ptr);
+
+#define		NITE_JNI_CALLBACK(Class,FuncName) \
+JNIEXPORT void JNICALL Java_SimpleOpenNI_##Class##_Register##FuncName##Sub(JNIEnv *env, jobject  obj, jobject objCb, jlong ptr) \
 { \
-	XnVPointControl* p = static_cast<XnVPointControl*>((void*)ptr); \
+	Class * p = static_cast< Class *>((void*)ptr); \
 	if(p == NULL) \
 		return; \
 	JavaCbContainer* cbContainer = new JavaCbContainer(env, \
 													   objCb, \
 													   (void*)ptr); \
 	_cbContainerList.push_back(cbContainer); \
-	p->##FuncName(cbContainer,OnPointCreateCB); \
+	p->Register##FuncName(cbContainer, NITE_VIRTUAL_CALLBACK_FUNC(FuncName) ); \
 } \
 
 
@@ -44,7 +49,7 @@ JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_##FuncName(JNIEnv *env,
 ///////////////////////////////////////////////////////////////////////////////
 // session callbacks
 
-void XN_CALLBACK_TYPE OnSessionStartCB(const XnPoint3D& ptPosition, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SessionStart)(const XnPoint3D& ptPosition, void* UserCxt)
 {
 	XnVSessionListener* p = static_cast<XnVSessionListener*>(UserCxt);
 	if(p == NULL)
@@ -52,7 +57,7 @@ void XN_CALLBACK_TYPE OnSessionStartCB(const XnPoint3D& ptPosition, void* UserCx
 	p->OnSessionStart(ptPosition);
 }
 
-void XN_CALLBACK_TYPE OnSessionEndCB(void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SessionEnd)(void* UserCxt)
 {
 	XnVSessionListener* p = static_cast<XnVSessionListener*>(UserCxt);
 	if(p == NULL)
@@ -60,7 +65,7 @@ void XN_CALLBACK_TYPE OnSessionEndCB(void* UserCxt)
 	p->OnSessionEnd();
 }
 
-void XN_CALLBACK_TYPE OnFocusStartDetectedCB(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(FocusStartDetected)(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)
 {
 	XnVSessionListener* p = static_cast<XnVSessionListener*>(UserCxt);
 	if(p == NULL)
@@ -71,7 +76,7 @@ void XN_CALLBACK_TYPE OnFocusStartDetectedCB(const XnChar* strFocus, const XnPoi
 ///////////////////////////////////////////////////////////////////////////////
 // XnVPointControl
 
-void XN_CALLBACK_TYPE OnPointCreateCB(const XnVHandPointContext* pContext, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointCreate)(const XnVHandPointContext* pContext, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -108,7 +113,7 @@ void XN_CALLBACK_TYPE OnPointCreateCB(const XnVHandPointContext* pContext, void*
 	}
 }
 
-void XN_CALLBACK_TYPE OnPointDestroyCB(XnUInt32 nID, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointDestroy)(XnUInt32 nID, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -136,7 +141,7 @@ void XN_CALLBACK_TYPE OnPointDestroyCB(XnUInt32 nID, void* UserCxt)
 	}
 }
 
-void XN_CALLBACK_TYPE OnPointUpdateCB(const XnVHandPointContext* pContext, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointUpdate)(const XnVHandPointContext* pContext, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -173,7 +178,7 @@ void XN_CALLBACK_TYPE OnPointUpdateCB(const XnVHandPointContext* pContext, void*
 	}
 }
 
-void XN_CALLBACK_TYPE OnPrimaryPointCreateCB(const XnVHandPointContext* pContext,const XnPoint3D& ptFocus, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointCreate)(const XnVHandPointContext* pContext,const XnPoint3D& ptFocus, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -221,7 +226,7 @@ void XN_CALLBACK_TYPE OnPrimaryPointCreateCB(const XnVHandPointContext* pContext
 	}
 }
 
-void XN_CALLBACK_TYPE OnPrimaryPointDestroyCB(XnUInt32 nID, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointDestroy)(XnUInt32 nID, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -253,7 +258,7 @@ void XN_CALLBACK_TYPE OnPrimaryPointDestroyCB(XnUInt32 nID, void* UserCxt)
 ///////////////////////////////////////////////////////////////////////////////
 // XnVCircleDetector
 
-void XN_CALLBACK_TYPE OnCircleCB(XnFloat fTimes, XnBool bConfident, const XnVCircle* pCircle, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Circle)(XnFloat fTimes, XnBool bConfident, const XnVCircle* pCircle, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -292,7 +297,7 @@ void XN_CALLBACK_TYPE OnCircleCB(XnFloat fTimes, XnBool bConfident, const XnVCir
 	}
 }
 
-void XN_CALLBACK_TYPE OnNoCircleCB(XnFloat fLastValue, XnVCircleDetector::XnVNoCircleReason eReason, void *UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(NoCircle)(XnFloat fLastValue, XnVCircleDetector::XnVNoCircleReason eReason, void *UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -334,173 +339,21 @@ extern "C" {
 
 ///////////////////////////////////////////////////////////////////////////////
 // XnVPointControl Java method export 
-	
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_RegisterPointCreateSub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVPointControl* p = static_cast<XnVPointControl*>((void*)ptr);
-	if(p == NULL)
-		return;
 
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
+NITE_JNI_CALLBACK(XnVPointControl,PointCreate)	
+NITE_JNI_CALLBACK(XnVPointControl,PointDestroy)	
+NITE_JNI_CALLBACK(XnVPointControl,PointUpdate)	
 
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterPointCreate(cbContainer,OnPointCreateCB);
-}
 
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_RegisterPointDestroySub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVPointControl* p = static_cast<XnVPointControl*>((void*)ptr);
-	if(p == NULL)
-		return;
-
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
-
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterPointDestroy(cbContainer,OnPointDestroyCB);
-}
-
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_RegisterPointUpdateSub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVPointControl* p = static_cast<XnVPointControl*>((void*)ptr);
-	if(p == NULL)
-		return;
-
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
-
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterPointUpdate(cbContainer,OnPointUpdateCB);
-}
-
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_RegisterPrimaryPointCreateSub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVPointControl* p = static_cast<XnVPointControl*>((void*)ptr);
-	if(p == NULL)
-		return;
-
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
-
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterPrimaryPointCreate(cbContainer,OnPrimaryPointCreateCB);
-
-	/*
-	// testz
-	XnVHandPointContext pContext;
-	XnPoint3D ptFocus;
-
-	OnPrimaryPointCreateCB(&pContext,ptFocus,cbContainer);
-	*/
-}
-
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVPointControl_RegisterPrimaryPointDestroySub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVPointControl* p = static_cast<XnVPointControl*>((void*)ptr);
-	if(p == NULL)
-		return;
-
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
-
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterPrimaryPointDestroy(cbContainer,OnPrimaryPointDestroyCB);
-}
-
+NITE_JNI_CALLBACK(XnVPointControl,PrimaryPointCreate)	
+NITE_JNI_CALLBACK(XnVPointControl,PrimaryPointDestroy)	
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // XnVCircleDetector Java method export
 
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVCircleDetector_RegisterCircleSub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVCircleDetector* p = static_cast<XnVCircleDetector*>((void*)ptr);
-	if(p == NULL)
-		return;
-
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
-
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterCircle(cbContainer,OnCircleCB);
-
-/*
-	// testz
-	XnVCircle circle;
-	circle.fRadius = 0.11f;
-	circle.ptCenter.X = 11;
-	circle.ptCenter.Y = 22;
-	circle.ptCenter.Z = 33;
-
-	OnCircleCB(.5, 
-			   false,
-			   &circle,
-			   cbContainer);
-*/
-
-}
-
-JNIEXPORT void JNICALL Java_SimpleOpenNI_XnVCircleDetector_RegisterNoCircleSub(JNIEnv *env, jobject  obj,jobject objCb,jlong ptr)
-{
-	// call the java class method which is embedded registration
-	XnVCircleDetector* p = static_cast<XnVCircleDetector*>((void*)ptr);
-	if(p == NULL)
-		return;
-
-	// register the callback
-	JavaCbContainer* cbContainer = new JavaCbContainer(env,
-													   objCb,
-													   (void*)ptr);
-
-	// add to the list
-	_cbContainerList.push_back(cbContainer);
-	
-	// register the callback in the class
-	p->RegisterNoCircle(cbContainer,OnNoCircleCB);
-
-	/*
-	OnNoCircleCB(.5, 
-				 XnVCircleDetector::NO_CIRCLE_NO_INPUT,
-			     cbContainer);
-	*/
-}
+NITE_JNI_CALLBACK(XnVCircleDetector,Circle)	
+NITE_JNI_CALLBACK(XnVCircleDetector,NoCircle)	
 
 #ifdef __cplusplus
 }
