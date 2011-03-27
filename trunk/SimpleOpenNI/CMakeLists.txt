@@ -56,6 +56,10 @@ IF(Boost_INCLUDE_DIRS MATCHES "Boost_INCLUDE_DIR-NOTFOUND")
 ELSE()
 	INCLUDE_DIRECTORIES ( ${Boost_INCLUDE_DIRS} )
 	LINK_DIRECTORIES ( ${Boost_LIBRARY_DIRS} )
+	IF(NOT WIN32)
+		# osx / linux
+		set(Boost_LIBRARIES  "boost_thread.a")
+	ENDIF()
 ENDIF()
 # -----------------------------------------------------------------------------
 # swig 
@@ -195,7 +199,7 @@ MAKE_DIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 
 SWIG_ADD_MODULE(SimpleOpenNI Java ${SWIG_SOURCES})
-SWIG_LINK_LIBRARIES(SimpleOpenNI ${JAVA_LIBRARIES} ${JNI_LIBRARIES} ${LIBS})
+SWIG_LINK_LIBRARIES(SimpleOpenNI ${JAVA_LIBRARIES} ${JNI_LIBRARIES} ${Boost_LIBRARIES} ${LIBS})
 
 
 ADD_CUSTOM_COMMAND(TARGET SimpleOpenNI

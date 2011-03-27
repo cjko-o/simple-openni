@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
- * SimpleOpenNI SceneDepth Test
+ * SimpleOpenNI DepthImage Test
  * --------------------------------------------------------------------------
  * Processing Wrapper for the OpenNI/Kinect library
  * http://code.google.com/p/simple-openni
@@ -11,34 +11,37 @@
 
 import SimpleOpenNI.*;
 
+
 SimpleOpenNI  context;
 
 void setup()
 {
-//  context = new SimpleOpenNI(this);
-  context = new SimpleOpenNI(this,,SimpleOpenNI.RUN_MODE_SINGLE_THREADED);
+  context = new SimpleOpenNI(this,SimpleOpenNI.RUN_MODE_MULTI_THREADED);
+   
+  // mirror is by default enabled
+  context.setMirror(true);
   
   // enable depthMap generation 
   context.enableDepth();
-  context.enableScene();
+  
+  // enable ir generation
+  context.enableRGB();
+  //context.enableRGB(640,480,30);
+  //context.enableRGB(1280,1024,15);
  
-  background(200,0,0);
-  size(context.sceneWidth(), context.sceneHeight()); 
+  size(context.depthWidth() + context.rgbWidth() + 10, context.rgbHeight()); 
 }
 
 void draw()
 {
   // update the cam
   context.update();
-    
+  
+  background(200,0,0);
+  
+  // draw depthImageMap
+  image(context.depthImage(),0,0);
+  
   // draw irImageMap
-  image(context.sceneImage(),0,0);
-  
-  // // gives you a label map, 0 = no person, 0+n = person n
-  // int[] map = context.sceneMap();
-  
-  // // get the floor plane
-  // PVector point = new PVector();
-  // PVector normal = new PVector();
-  // context.getSceneFloor(point,normal);  
+  image(context.rgbImage(),context.depthWidth() + 10,0);
 }

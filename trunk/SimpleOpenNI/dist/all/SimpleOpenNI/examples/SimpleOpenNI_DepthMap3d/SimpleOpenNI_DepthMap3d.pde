@@ -19,8 +19,11 @@ float        rotY = radians(0);
 
 void setup()
 {
+   frameRate(300);
+ 
   size(1024,768,P3D);  // strange, get drawing error in the cameraFrustum if i use P3D, in opengl there is no problem
 
+  //context = new SimpleOpenNI(this,SimpleOpenNI.RUN_MODE_SINGLE_THREADED);
   context = new SimpleOpenNI(this);
 
   // disable mirror
@@ -52,11 +55,12 @@ void draw()
   int     steps   = 3;  // to speed up the drawing, draw every third point
   int     index;
   PVector realWorldPoint;
-
+ 
   translate(0,0,-1000);  // set the rotation center of the scene 1000 infront of the camera
 
   stroke(255);
 
+  PVector[] realWorldMap = context.depthMapRealWorld();
   for(int y=0;y < context.depthHeight();y+=steps)
   {
     for(int x=0;x < context.depthWidth();x+=steps)
@@ -65,9 +69,11 @@ void draw()
       if(depthMap[index] > 0)
       { 
         // draw the projected point
-        realWorldPoint = context.depthMapRealWorld()[index];
+//        realWorldPoint = context.depthMapRealWorld()[index];
+        realWorldPoint = realWorldMap[index];
         point(realWorldPoint.x,realWorldPoint.y,realWorldPoint.z);  // make realworld z negative, in the 3d drawing coordsystem +z points in the direction of the eye
       }
+      //println("x: " + x + " y: " + y);
     }
   } 
 

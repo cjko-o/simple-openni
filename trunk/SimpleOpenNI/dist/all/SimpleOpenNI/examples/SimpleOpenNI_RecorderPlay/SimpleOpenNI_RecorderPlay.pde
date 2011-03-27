@@ -18,36 +18,38 @@ import SimpleOpenNI.*;
 
 
 SimpleOpenNI  context;
+boolean       recordFlag = true;
 
 void setup()
 {
   context = new SimpleOpenNI(this);
   
-  /*
-  // playing, this works without the camera
-  if( context.openFileRecording("test.oni") == false)
+  if(recordFlag == false)
   {
-    println("can't find recording !!!!");
-    exit();
+    // playing, this works without the camera
+    if( context.openFileRecording("test.oni") == false)
+    {
+      println("can't find recording !!!!");
+      exit();
+    }
+    // it's possible to run the sceneAnalyzer over the recorded data stream
+    context.enableScene();
   }
-  // it's possible to run the sceneAnalyzer over the recorded data stream
-  context.enableScene();
-  */
+  else
+  {  
+    // recording
+    context.enableDepth();
+    context.enableRGB();
   
-  
-  // recording
-  context.enableDepth();
-  context.enableRGB();
-  
-  // setup the recording 
-  context.enableRecorder(SimpleOpenNI.RECORD_MEDIUM_FILE,"test.oni");
+    // setup the recording 
+    context.enableRecorder(SimpleOpenNI.RECORD_MEDIUM_FILE,"test.oni");
 
-  // select the recording channels
-  context.addNodeToRecording(SimpleOpenNI.NODE_DEPTH,
-                             SimpleOpenNI.CODEC_16Z_EMB_TABLES);
-  context.addNodeToRecording(SimpleOpenNI.NODE_IMAGE,
-                             SimpleOpenNI.CODEC_JPEG);
-
+    // select the recording channels
+    context.addNodeToRecording(SimpleOpenNI.NODE_DEPTH,
+                               SimpleOpenNI.CODEC_16Z_EMB_TABLES);
+    context.addNodeToRecording(SimpleOpenNI.NODE_IMAGE,
+                               SimpleOpenNI.CODEC_JPEG);
+  }
 
   
   // set window size 
