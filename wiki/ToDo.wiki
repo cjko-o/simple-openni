@@ -8,7 +8,7 @@
   * ~~Track multiple hands~~(check out the SimpleOpenNI_NITE_Hands example)
   * ~~Read joint orientation~~
   * Implement NITE
-  * Use threads to enhance the performance
+  * ~~Use threads to enhance the performance~~
   * OBB(oriented bounding box), Sphere, Ray, Line for collision detection
   * Add a camera calibration, that the depthImage + the rgbImage correlate  better
   * Add the Alternative View Point Capability
