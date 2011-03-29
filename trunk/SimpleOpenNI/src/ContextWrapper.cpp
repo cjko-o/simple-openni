@@ -42,7 +42,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	18		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	19		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -525,6 +525,7 @@ bool ContextWrapper::createUser(int flags,bool force)
 
 
 	_nodes |= Node_User;
+
 	return true;
 
 }
@@ -804,7 +805,7 @@ bool ContextWrapper::openFileRecording(const char* filePath)
 	createRgb(false);
 	createIr(false);
 	createScene(false);
-	createUser(false);
+	createUser(XN_SKEL_PROFILE_ALL,false);
 	createGesture(false);
 	createHands(false);
 
@@ -1690,6 +1691,18 @@ int	ContextWrapper::getUserPixels(int user,int* userSceneData)
 		}
 	}
 	return sceneMD.XRes() * sceneMD.YRes();
+}
+
+bool ContextWrapper::getUserPostition(int user, XnBoundingBox3D*  pPosition )
+{
+	if(!_depth.IsValid())
+		return false;
+
+	UserPositionCapability  userPosCap = _depth.GetUserPositionCap();
+	userPosCap.GetUserPosition(user,*pPosition);
+
+	return true;
+
 }
 
 
