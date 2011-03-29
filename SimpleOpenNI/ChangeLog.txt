@@ -4,6 +4,13 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.19 alpha, xx/xx/2011
+	New:
+		- Ported some more NITE classes(XnVSelectableSlider2D)
+		- Added new example:
+		  SimpleOpenNI_NITE_Slider2d	- Shows how to use 2D Sliders
+		- Fixed a bug: If you play a redord, skeletons were not displayed
+
 v0.18 alpha, 03/27/2011
 	New:
 		- Implemented multithreading support, the hole camera captureing will be made in an own thread. 

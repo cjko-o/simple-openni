@@ -31,6 +31,7 @@ JAVA_ARRAYSOFCLASSES(XnPoint3D)
 typedef	bool				XnBool;
 typedef	char				XnChar;
 typedef	unsigned int		XnUInt32;
+typedef	int					XnInt32;
 typedef	float				XnFloat;
 typedef XnUInt32			XnVHandle;
 typedef XnUInt32			XnStatus;
@@ -77,6 +78,12 @@ typedef struct XnVCircle
     XnFloat fRadius;
 }XnVCircle;
 
+typedef struct XnBoundingBox3D
+{
+	XnPoint3D LeftBottomNear;
+	XnPoint3D RightTopFar;
+} XnBoundingBox3D;
+
 %array_class(XnVector3D, XnVector3DArray);
 %array_class(XnPoint3D, XnPoint3DArray);
 
@@ -85,11 +92,12 @@ typedef struct XnVCircle
 # stl
 
 %include "std_vector.i"
-namespace std {
-   %template(IntVector) vector<int>;
-   %template(Vector3D) vector<XnVector3D>;
-   %template(Point3D) vector<XnPoint3D>;
-};
+
+
+%template(IntVector)	std::vector<int>;
+%template(Vector3D)		std::vector<XnVector3D>;
+%template(Point3D)		std::vector<XnPoint3D>;
+
 
 
 # ----------------------------------------------------------------------------
@@ -250,6 +258,7 @@ public:
 	int		getUsers(std::vector<int>* userList);
 	int		getUserPixels(int user,int* userSceneData);
 
+	bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
 
 	
 	bool	isCalibratedSkeleton(int user);

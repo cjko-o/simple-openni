@@ -53,6 +53,42 @@ typedef struct XnVHandPointContext
     XnFloat fConfidence;
 } XnVHandPointContext;
 
+/*
+typedef enum XnVDirection
+{
+    DIRECTION_LEFT,
+    DIRECTION_RIGHT,
+    DIRECTION_UP,
+    DIRECTION_DOWN,
+    DIRECTION_BACKWARD,
+    DIRECTION_FORWARD,
+    DIRECTION_ILLEGAL
+}XnVDirection;
+
+typedef enum XnVAxis
+{
+    AXIS_X,
+    AXIS_Y,
+    AXIS_Z,
+    AXIS_ILLEGAL
+} XnVAxis;
+*/
+
+typedef	int	XnVDirection;
+typedef	int	XnVAxis;
+
+%constant int NITE_DIRECTION_LEFT		= DIRECTION_LEFT;
+%constant int NITE_DIRECTION_RIGHT		= DIRECTION_RIGHT;
+%constant int NITE_DIRECTION_UP			= DIRECTION_UP;
+%constant int NITE_DIRECTION_DOWN		= DIRECTION_DOWN;
+%constant int NITE_DIRECTION_BACKWARD	= DIRECTION_BACKWARD;
+%constant int NITE_DIRECTION_FORWARD	= DIRECTION_FORWARD;
+%constant int NITE_DIRECTION_ILLEGAL	= DIRECTION_ILLEGAL;
+
+
+XnVAxis XnVDirectionAsAxis(XnVDirection eDir);
+const XnChar* XnVDirectionAsString(XnVDirection eDir);
+
 # -----------------------------------------------------------------------------
 # NITE macros
 
@@ -704,5 +740,104 @@ protected:
 	public native void UnregisterCircleSub();
 	*/
 }
+};
+
+# -----------------------------------------------------------------------------
+# XnVSelectableSlider2D
+
+%feature("director") XnVSelectableSlider2D;
+class XnVSelectableSlider2D : public XnVPointControl
+{
+public:
+
+	XnVSelectableSlider2D(XnInt32 nXItems, XnInt32 nYItems,
+        XnFloat fSliderSizeX = ms_fDefaultSliderSize, XnFloat fSliderSizeY = ms_fDefaultSliderSize,
+        XnFloat fBorderWidth = 0, const XnChar* strName = "XnVSelectableSlider2D");
+    virtual ~XnVSelectableSlider2D();
+
+    void OnPrimaryPointCreate(const XnVHandPointContext* pContext, const XnPoint3D& ptFocus);
+    void OnPrimaryPointUpdate(const XnVHandPointContext* pContext);
+    void OnPrimaryPointDestroy(XnUInt32 nID);
+
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSelectableSlider2D{
+
+	NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider2D,ItemHover)
+	NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider2D,Scroll)
+	NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider2D,ValueChange)
+	NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider2D,ItemSelect)
+	NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider2D,OffAxisMovement)
+}
+
+/*
+
+    typedef void (XN_CALLBACK_TYPE *ItemHoverCB)(XnInt32 nXIndex, XnInt32 nYIndex, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *ItemSelectCB)(XnInt32 nXIndex, XnInt32 nYIndex, XnVDirection eDir, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *OffAxisMovementCB)(XnVDirection eDir, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *ValueChangeCB)(XnFloat fXValue, XnFloat fYValue, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *ScrollCB)(XnFloat fXValue, XnFloat fYValue, void* pUserCxt);
+
+    XnCallbackHandle RegisterItemHover(void* cxt, ItemHoverCB CB);
+    XnCallbackHandle RegisterScroll(void* cxt, ScrollCB CB);
+    XnCallbackHandle RegisterValueChange(void* cxt, ValueChangeCB CB);
+    XnCallbackHandle RegisterItemSelect(void* cxt, ItemSelectCB CB);
+    XnCallbackHandle RegisterOffAxisMovement(void* cxt, OffAxisMovementCB CB);
+
+    void UnregisterItemHover(XnCallbackHandle hCB);
+    void UnregisterScroll(XnCallbackHandle hCB);
+    void UnregisterValueChange(XnCallbackHandle hCB);
+    void UnregisterItemSelect(XnCallbackHandle hCB);
+    void UnregisterOffAxisMovement(XnCallbackHandle hCB);
+*/
+    static const XnFloat ms_fDefaultSliderSize; // = 450
+
+    void Reposition(const XnPoint3D& ptCenter);
+    void GetCenter(XnPoint3D& ptCenter) const;
+
+    void GetSliderSize(XnFloat& fSliderXSize, XnFloat& fSliderYSize) const;
+    void SetSliderSize(XnFloat fSliderXSize, XnFloat fSliderYSize);
+
+    XnUInt32 GetItemXCount() const;
+    XnUInt32 GetItemYCount() const;
+    void SetItemCount(XnUInt32 nItemXCount, XnUInt32 nItemYCount);
+    void SetItemXCount(XnUInt32 nItemXCount);
+    void SetItemYCount(XnUInt32 nItemYCount);
+
+    void SetValueChangeOnOffAxis(XnBool bReport);
+    XnBool GetValueChangeOnOffAxis() const;
+
+    XnFloat GetBorderWidth() const;
+    XnStatus SetBorderWidth(XnFloat fWidth);
+    void SetHysteresisRatio(XnFloat fRatio);
+    XnFloat GetHysteresisRatio() const;
+
+protected:
+/*
+    XN_DECLARE_EVENT_3ARG(XnVItemSelectSpecificEvent, XnVItemSelectEvent, XnInt32, nItemX, XnInt32, nItemY, XnVDirection, eDir);
+
+    void UpdateSlider(XnFloat fXValue, XnFloat fYValue);
+
+    void PointDeleted(XnBool bReason);
+    void PointMoved(const XnPoint3D& pt, XnFloat fTime);
+
+    // Invoke events
+    void ItemHover(XnInt32 nXIndex, XnInt32 nYIndex);
+    void Scroll(XnFloat fXValue, XnFloat fYValue);
+    void ValueChange(XnFloat fXValue, XnFloat fYValue);
+    void ItemSelect(XnVDirection eDir);
+    void OffAxisMovement(XnVDirection eDir);
+
+    // Callbacks
+    static void XN_CALLBACK_TYPE Slider_ValueChange(XnFloat fXValue, XnFloat fYValue, void* pContext);
+    static void XN_CALLBACK_TYPE Slider_OffAxis(XnVDirection eDir, void* cxt);
+    static void XN_CALLBACK_TYPE Hysteresis_ItemSelected(XnInt32 nXItem, XnInt32 nYItem, void* pContext);
+    static void XN_CALLBACK_TYPE Scroller2D_Scrolled(XnFloat fXValue, XnFloat fYValue, void *pContext);
+
+    static void XN_CALLBACK_TYPE SecondarySlider_OffAxisMovement(XnVDirection eDir, void* cxt);
+    static void XN_CALLBACK_TYPE SecondarySlider_ValueChange(XnFloat fValue, void* cxt);
+    static void XN_CALLBACK_TYPE OffAxisHysteresis_ItemSelected(XnInt32 nItem, void* cxt);
+*/
 
 };

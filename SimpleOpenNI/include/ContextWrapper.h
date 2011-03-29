@@ -185,6 +185,8 @@ public:
 	int		getUsers(std::vector<int>* userList);
 	int		getUserPixels(int user,int* userSceneData);
 
+	bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
+
 	bool	isCalibratedSkeleton(int user);
 	bool	isCalibratingSkeleton(int user);
 	void	requestCalibrationSkeleton(int user, bool force);
