@@ -1,7 +1,7 @@
 import SimpleOpenNI.*;
 import processing.core.*;
 
-public class test extends PApplet {
+public class SimpleOpenNI_User_eclipse extends PApplet {
 
 	public SimpleOpenNI  context;
 
