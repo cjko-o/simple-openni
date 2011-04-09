@@ -7,3 +7,9 @@
 *Import Processing Library*
 
 see [http://processing.org/learning/eclipse http://processing.org/learning/eclipse]
+
+*Import Simple-OpenNI Library*
+
+* Go to: File>Import...>General>File System>
+* Browse “Library” folder of the download package, and check the “SimpleOpenNI.jar” file.
+* Select destination Project folder.
