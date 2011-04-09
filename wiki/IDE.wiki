@@ -1,3 +1,9 @@
 #summary Build Environments
 
 = Eclipse =
+
+== Importing Libraries into Eclipse Project ==
+
+*Import Processing Library*
+
+see [http://processing.org/learning/eclipse http://processing.org/learning/eclipse]
