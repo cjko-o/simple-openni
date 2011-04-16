@@ -13,7 +13,7 @@ see [http://processing.org/learning/eclipse http://processing.org/learning/eclip
  * Go to: File>Import...>General>File System>
  * Browse “Library” folder of the download package, and check the “SimpleOpenNI.jar” file.
  * Select destination Project folder.
-
+[http://simple-openni.googlecode.com/svn/site/screenshots/eclipse1.png]
  * Right-Click “SimplelOpenNI.jar” and select “Build Path>Add to Buildpath” 
  * Copy the “libSimpleOpenNI.jnilib” file from the download package into the projects “bin” folder.
  * Import library by adding “import SimpleOpenNI.*;” to your sourcecode
