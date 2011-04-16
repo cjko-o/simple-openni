@@ -20,7 +20,8 @@ see [http://processing.org/learning/eclipse http://processing.org/learning/eclip
 
 *Problems*
 
-{{{Exception in thread "Animation Thread" java.lang.UnsatisfiedLinkError: /Users/nuss/Documents/Documents/Education/ZHDK/IAD/Module/Bachelor/05_prototyp/code/lonely/bin/libSimpleOpenNI.jnilib:  no suitable image found.  Did find:  /Users/nuss/Documents/Documents/Education/ZHDK/IAD/Module/Bachelor/05_prototyp/code/lonely/bin/libSimpleOpenNI.jnilib: mach-o, but wrong architecture
+{{{
+Exception in thread "Animation Thread" java.lang.UnsatisfiedLinkError: /Users/nuss/Documents/Documents/Education/ZHDK/IAD/Module/Bachelor/05_prototyp/code/lonely/bin/libSimpleOpenNI.jnilib:  no suitable image found.  Did find:  /Users/nuss/Documents/Documents/Education/ZHDK/IAD/Module/Bachelor/05_prototyp/code/lonely/bin/libSimpleOpenNI.jnilib: mach-o, but wrong architecture
 	at java.lang.ClassLoader$NativeLibrary.load(Native Method)
 	at java.lang.ClassLoader.loadLibrary0(ClassLoader.java:1823)
 	at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1738)
@@ -30,7 +31,8 @@ see [http://processing.org/learning/eclipse http://processing.org/learning/eclip
 	at lonely.setup(lonely.java:17)
 	at processing.core.PApplet.handleDraw(PApplet.java:1583)
 	at processing.core.PApplet.run(PApplet.java:1503)
-	at java.lang.Thread.run(Thread.java:680)}}}
+	at java.lang.Thread.run(Thread.java:680)
+}}}
 ---
 
 Importing Libraries into Eclipse Project
