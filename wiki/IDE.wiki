@@ -45,7 +45,7 @@ Exception in thread "Animation Thread" java.lang.UnsatisfiedLinkError: /Users/nu
 
  * Open Java Preferences: Applications/Utilities/Java Preferences
  * Make Sure that the 32-bit is on top (drag & drop)
-[http://simple-openni.googlecode.com/svn/site/screenshots/eclipse2.png]
+[http://simple-openni.googlecode.com/svn/site/screenshots/eclipse1.png]
  * Restart your computer
  * Open Terminal: Applications/Utilities/Terminal
  * Enter “java -version” and compare to the following:
