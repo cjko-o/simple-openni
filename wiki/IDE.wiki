@@ -50,8 +50,8 @@ Exception in thread "Animation Thread" java.lang.UnsatisfiedLinkError: /Users/nu
  * Open Terminal: Applications/Utilities/Terminal
  * Enter “java -version” and compare to the following:
 
+{{{
 java version "1.6.0_24"
-
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334-10M3326)
-
 Java HotSpot(TM) Client VM (build 19.1-b02-334, mixed mode)
+}}}
