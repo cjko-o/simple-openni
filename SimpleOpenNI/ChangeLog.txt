@@ -4,6 +4,9 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.20 alpha,
+	New
+
 v0.19 alpha, xx/xx/2011
 	New:
 		- Ported some more NITE classes(XnVSelectableSlider2D)
