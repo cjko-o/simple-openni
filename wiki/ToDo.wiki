@@ -15,4 +15,5 @@
   * ~~Save and load calibration data of a skeleton~~(not across processes)
   * Multiple cameras
   * Motor control
+  * Add 64bit version to all distributions
   
