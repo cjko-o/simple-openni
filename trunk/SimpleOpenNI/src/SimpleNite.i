@@ -503,6 +503,68 @@ protected:
 
     XnFloat AngleBetweenVectors(const XnV3DVector& v1, const XnV3DVector& v2);
 
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVPushDetector{
+
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVPushDetector,Push)
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVPushDetector,Stabilized)
+}
+};
+
+
+# -----------------------------------------------------------------------------
+# XnVSwipeDetector
+
+%feature("director") XnVSwipeDetector;
+class XnVSwipeDetector : public XnVPointControl
+{
+public:
+/*
+        typedef void (XN_CALLBACK_TYPE *SwipeCB)(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+        typedef void (XN_CALLBACK_TYPE *GeneralSwipeCB)(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+*/
+        XnVSwipeDetector(XnBool bUseSteadyBeforeSwipe = true, const XnChar* strName = "XnVSwipeDetector");
+        ~XnVSwipeDetector();
+        void OnPrimaryPointCreate(const XnVHandPointContext* pContext, const XnPoint3D& ptFocus);
+        void OnPrimaryPointUpdate(const XnVHandPointContext* pContext);
+        void Reset();
+
+/*
+        XnCallbackHandle RegisterSwipeUp(void* cxt, SwipeCB pCB); // Add CB to list
+        XnCallbackHandle RegisterSwipeDown(void* cxt, SwipeCB pCB); // Add CB to list
+        XnCallbackHandle RegisterSwipeLeft(void* cxt, SwipeCB pCB); // Add CB to list
+        XnCallbackHandle RegisterSwipeRight(void* cxt, SwipeCB pCB); // Add CB to list
+        XnCallbackHandle RegisterSwipe(void* cxt, GeneralSwipeCB pCB);
+*/
+        void SetMotionSpeedThreshold(XnFloat fThreshold);
+        XnFloat GetMotionSpeedThreshold() const;
+        void SetMotionTime(XnUInt32 nThreshold);
+        XnUInt32 GetMotionTime() const;
+        void SetXAngleThreshold(XnFloat fThreshold);
+        XnFloat GetXAngleThreshold() const;
+        void SetYAngleThreshold(XnFloat fThreshold);
+        XnFloat GetYAngleThreshold() const;
+        void SetSteadyMaxVelocity(XnFloat fVelocity);
+        XnFloat GetSteadyMaxVelocity() const;
+        void SetSteadyDuration(XnUInt32 nDuration);
+        XnUInt32 GetSteadyDuration() const;
+        void SetUseSteady(XnBool bUse);
+        XnBool GetUseSteady() const;
+protected:
+        void AddPoint(const XnPoint3D& pt, XnFloat fTime);
+
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSwipeDetector{
+
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSwipeDetector,SwipeUp)
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSwipeDetector,SwipeDown)
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSwipeDetector,SwipeLeft)
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSwipeDetector,SwipeRight)
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSwipeDetector,Swipe)
+}
 }; 
 
 
