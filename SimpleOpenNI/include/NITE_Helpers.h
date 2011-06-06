@@ -47,6 +47,15 @@ void XN_CALLBACK_TYPE OnFocusStartDetectedCB(const XnChar* strFocus, const XnPoi
     
 void XN_CALLBACK_TYPE OnCircleCB(XnFloat fTimes, XnBool bConfident, const XnVCircle* pCircle, void* pUserCxt);
 
+void XN_CALLBACK_TYPE OnPushCB(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+void XN_CALLBACK_TYPE OnStabilizedCB(XnFloat fVelocity, void* pUserCxt);
+
+//direction will be one of NITE_DIRECTION_XX
+void XN_CALLBACK_TYPE OnSwipeCB(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+void XN_CALLBACK_TYPE OnSwipeUpCB( XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+void XN_CALLBACK_TYPE OnSwipeDownCB(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+void XN_CALLBACK_TYPE OnSwipeLeftCB(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
+void XN_CALLBACK_TYPE OnSwipeRightCB(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt);
 
 ///////////////////////////////////////////////////////////////////////////////
 // JavaCbContainer

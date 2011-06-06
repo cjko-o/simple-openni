@@ -260,6 +260,139 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointDestroy)(XnUInt32 n
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// XnVPushDetector
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Push)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+{
+    JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+    if(p == NULL)
+        return;
+
+    JNIEnv* env = p->env();
+    if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL))
+    {
+        jclass      localClass = env->GetObjectClass(p->obj());
+        jmethodID   mid = NULL;
+
+        mid = env->GetMethodID(localClass,
+                               "onPush",
+                               "(FF)V");
+                              // float,float
+
+        if(mid != 0)
+        {
+            // call the java method
+            env->CallVoidMethod(p->obj(),
+                                mid,
+                                (jfloat)fVelocity,(jfloat)fAngle);
+        }
+    }
+}
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Stabilized)        (XnFloat fVelocity, void* pUserCxt)
+{
+    JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+    if(p == NULL)
+        return;
+
+    JNIEnv* env = p->env();
+    if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL))
+    {
+        jclass      localClass = env->GetObjectClass(p->obj());
+        jmethodID   mid = NULL;
+
+        mid = env->GetMethodID(localClass,
+                               "onPush",
+                               "(F)V");
+                              // float,float
+
+        if(mid != 0)
+        {
+            // call the java method
+            env->CallVoidMethod(p->obj(),
+                                mid,
+                                (jfloat)fVelocity);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// XnVSwipeDetector
+
+void doTheSwipe(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt, const char* direction)
+{
+    JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+    if(p == NULL)
+        return;
+
+    JNIEnv* env = p->env();
+    if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL))
+    {
+        jclass      localClass = env->GetObjectClass(p->obj());
+        jmethodID   mid = NULL;
+
+        mid = env->GetMethodID(localClass,
+                               direction,
+                               "(FF)V");
+                              // float,float
+
+        if(mid != 0)
+        {
+            // call the java method
+            env->CallVoidMethod(p->obj(),
+                                mid,
+                                (jfloat)fVelocity,(jfloat)fAngle);
+        }
+    }
+
+}
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeUp)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+{
+    doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeUp");
+}
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeDown)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+{
+    doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeDown");
+}
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeLeft)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+{
+    doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeLeft");
+}
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeRight)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+{
+    doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeRight");
+}
+
+void  XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Swipe)            (XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+{
+    JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+    if(p == NULL)
+        return;
+
+    JNIEnv* env = p->env();
+    if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL))
+    {
+        jclass      localClass = env->GetObjectClass(p->obj());
+        jmethodID   mid = NULL;
+
+        mid = env->GetMethodID(localClass,
+                               "onSwipe",
+                               "(IFF)V");
+                              // int-XnVDirection,float,float
+
+        if(mid != 0)
+        {
+            // call the java method
+            env->CallVoidMethod(p->obj(),
+                                mid,
+                                (jint)eDir,(jfloat)fVelocity,(jfloat)fAngle);
+        }
+    }
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // XnVCircleDetector
 
 void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Circle)(XnFloat fTimes, XnBool bConfident, const XnVCircle* pCircle, void* UserCxt)
@@ -492,6 +625,21 @@ NITE_JNI_CALLBACK(XnVPointControl,PointUpdate)
 
 NITE_JNI_CALLBACK(XnVPointControl,PrimaryPointCreate)	
 NITE_JNI_CALLBACK(XnVPointControl,PrimaryPointDestroy)	
+
+///////////////////////////////////////////////////////////////////////////////
+// XnVPushDetector Java method export
+
+NITE_JNI_CALLBACK(XnVPushDetector,Push)
+NITE_JNI_CALLBACK(XnVPushDetector,Stabilized)
+
+///////////////////////////////////////////////////////////////////////////////
+// XnVSwipeDetector Java method export
+
+NITE_JNI_CALLBACK(XnVSwipeDetector,SwipeUp)
+NITE_JNI_CALLBACK(XnVSwipeDetector,SwipeDown)
+NITE_JNI_CALLBACK(XnVSwipeDetector,SwipeLeft)
+NITE_JNI_CALLBACK(XnVSwipeDetector,SwipeRight)
+NITE_JNI_CALLBACK(XnVSwipeDetector,Swipe)
 
 
 ///////////////////////////////////////////////////////////////////////////////
