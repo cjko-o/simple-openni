@@ -16,4 +16,5 @@
   * Multiple cameras
   * Motor control
   * Add 64bit version to all distributions
+  * Use new OpenNI v1.1.041, Nite v1.3.1.5
   
