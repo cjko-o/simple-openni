@@ -1099,8 +1099,175 @@ protected:
 
 
 # -----------------------------------------------------------------------------
+# XnVMultipleHands
+# add some defitions to use the inner classes of XnVMultipleHands
+
+// Suppress SWIG warning
+#pragma SWIG nowarn=SWIGWARN_PARSE_NESTED_CLASS
+
+class ConstIterator
+{
+public:
+    friend class XnVMultipleHands;
+
+    ConstIterator(const ConstIterator& other);
+
+    ConstIterator& operator++();
+    ConstIterator operator++(int);
+
+    XnBool operator==(const ConstIterator& other) const;
+    XnBool operator!=(const ConstIterator& other) const;
+
+    const XnVHandPointContext* operator*() const;
+
+    XnBool IsNew() const;
+    XnBool IsActive() const;
+    XnBool IsValid() const;
+protected:
+    ConstIterator(const XnVMultipleHands* pHands);
+    ConstIterator(const XnVMultipleHands* pHands, XnUInt32 nPosition);
+
+    const XnVMultipleHands* m_pHands;
+    XnUInt32 m_nPosition;
+    XnBool m_bValid;
+};
+
+class Iterator : public ConstIterator
+{
+public:
+    friend class XnVMultipleHands;
+
+    Iterator(const Iterator& other);
+
+    Iterator& operator++();
+    Iterator operator++(int);
+
+    XnVHandPointContext* operator*() const;
+protected:
+    Iterator(XnVMultipleHands* pHands);
+    Iterator(XnVMultipleHands* pHands, XnUInt32 nPosition);
+};
+
+%{
+// SWIG thinks that Inner is a global class, so we need to trick the C++
+// compiler into understanding this so called global type.
+typedef XnVMultipleHands::ConstIterator ConstIterator;
+typedef XnVMultipleHands::Iterator      Iterator;
+%}
+
+
+
+%feature("director") XnVMultipleHands;
+class XnVMultipleHands
+{
+public:
+    XnVMultipleHands();
+    XnVMultipleHands(const XnVMultipleHands& other);
+    ~XnVMultipleHands();
+
+    XnStatus Add(const XnVHandPointContext* pContext);
+    XnStatus Remove(XnUInt32 nID);
+
+    XnVHandPointContext* GetContext(XnUInt32 nID);
+    const XnVHandPointContext* GetContext(XnUInt32 nID) const;
+    XnVHandPointContext* GetPrimaryContext();
+    const XnVHandPointContext* GetPrimaryContext() const;
+
+    void MarkNew(XnUInt32 nID);
+    void MarkOld(XnUInt32 nID);
+    void MarkActive(XnUInt32 nID);
+
+    void RemoveNew(XnUInt32 nID);
+    void RemoveOld(XnUInt32 nID);
+    void RemoveActive(XnUInt32 nID);
+
+    XnUInt32 NewEntries() const;
+    XnUInt32 OldEntries() const;
+    XnUInt32 ActiveEntries() const;
+
+    void Clone(XnVMultipleHands& other) const;
+
+    void Clear();
+    void ClearLists();
+    void ClearNewList();
+    void ClearOldList();
+
+/*
+    class ConstIterator
+    {
+    public:
+        friend class XnVMultipleHands;
+
+        ConstIterator(const ConstIterator& other);
+
+        ConstIterator& operator++();
+        ConstIterator operator++(int);
+
+        XnBool operator==(const ConstIterator& other) const;
+        XnBool operator!=(const ConstIterator& other) const;
+
+        const XnVHandPointContext* operator*() const;
+
+        XnBool IsNew() const;
+        XnBool IsActive() const;
+        XnBool IsValid() const;
+    protected:
+        ConstIterator(const XnVMultipleHands* pHands);
+        ConstIterator(const XnVMultipleHands* pHands, XnUInt32 nPosition);
+
+        const XnVMultipleHands* m_pHands;
+        XnUInt32 m_nPosition;
+        XnBool m_bValid;
+    };
+
+    class Iterator : public ConstIterator
+    {
+    public:
+        friend class XnVMultipleHands;
+
+        Iterator(const Iterator& other);
+
+        Iterator& operator++();
+        Iterator operator++(int);
+
+        XnVHandPointContext* operator*() const;
+    protected:
+        Iterator(XnVMultipleHands* pHands);
+        Iterator(XnVMultipleHands* pHands, XnUInt32 nPosition);
+    };
+*/
+
+    Iterator begin();
+    ConstIterator begin() const;
+    Iterator end();
+    ConstIterator end() const;
+
+    Iterator Find(XnUInt32 nID);
+    ConstIterator Find(XnUInt32 nID) const;
+    XnBool IsNew(XnUInt32 nID) const;
+    XnBool IsOld(XnUInt32 nID) const;
+    XnBool IsActive(XnUInt32 nID) const;
+
+    /*
+    XnVIntList::Iterator beginOld();
+    XnVIntList::ConstIterator beginOld() const;
+    XnVIntList::Iterator endOld();
+    XnVIntList::ConstIterator endOld() const;
+    */
+
+    void ReassignPrimary(XnUInt32 nHint = 0);
+
+    void SetFocusPoint(const XnPoint3D& ptFocusPoint);
+    const XnPoint3D& GetFocusPoint() const;
+
+};
+
+
+# -----------------------------------------------------------------------------
 # XnVSlider1D
 
+
+%feature("director") XnVSlider1D;
 class XnVSlider1D
 {
 public:
@@ -1166,6 +1333,7 @@ public:
 # -----------------------------------------------------------------------------
 # XnVSlider2D
 
+%feature("director") XnVSlider2D;
 class XnVSlider2D
 {
 public:
@@ -1212,6 +1380,7 @@ public:
 # -----------------------------------------------------------------------------
 # XnVSlider3D
 
+%feature("director") XnVSlider3D;
 class XnVSlider3D
 {
 public:
