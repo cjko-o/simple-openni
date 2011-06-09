@@ -42,7 +42,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	19		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	20		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 

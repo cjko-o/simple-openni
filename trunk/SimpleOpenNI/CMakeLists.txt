@@ -49,16 +49,24 @@ ENDIF()
 
 # -----------------------------------------------------------------------------
 # boost
-FIND_PACKAGE(Boost)
+FIND_PACKAGE(Boost REQUIRED)
 IF(Boost_INCLUDE_DIRS MATCHES "Boost_INCLUDE_DIR-NOTFOUND")
 	MESSAGE("Boost should be set, for example:")
-	MESSAGE("> cmake -DOBOOST_ROOT=/usr/??? ..")	
+	MESSAGE("> cmake -DBOOST_ROOT=/usr/??? ..")	
 ELSE()
 	INCLUDE_DIRECTORIES ( ${Boost_INCLUDE_DIRS} )
 	LINK_DIRECTORIES ( ${Boost_LIBRARY_DIRS} )
-	IF(NOT WIN32)
-		# osx / linux
+	message(${Boost_INCLUDE_DIRS})
+	message(${Boost_LIBRARY_DIRS})
+  
+	IF(APPLE)
+		# osx
 		set(Boost_LIBRARIES  "boost_thread.a")
+		set(Boost_LIBRARIES  "boost_filesystem.a")
+	ELSE()
+		# unix/linux,shared libs of boost should be installed
+		set(Boost_LIBRARIES  "boost_thread")
+
 	ENDIF()
 ENDIF()
 # -----------------------------------------------------------------------------
