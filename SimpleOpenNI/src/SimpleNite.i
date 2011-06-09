@@ -2,31 +2,9 @@
 # SimpleNite
 # -----------------------------------------------------------------------------
 # Processing Wrapper for the OpenNI/Kinect library
-# prog:  Max Rheiner / Interaction Design / zhdh / http://iad.zhdk.ch/
+# prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
 # -----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
-# Virtual method test
-
-
-
-/*
-%feature("director") TestClass;
-class TestClass
-{
-public:
-	TestClass()
-	{}
-
-	virtual void test1(int i);
-	virtual void testX(XnVector3D* p);
-	static void test(TestClass* p);
-
-protected:
-
-};
-
-*/
 
 # -----------------------------------------------------------------------------
 # NITE
@@ -36,6 +14,7 @@ protected:
 #include <XnCppWrapper.h>
 #include <XnVNite.h>
 #include <XnVSessionGenerator.h> 
+#include <XnVSlider3D.h>    // not definec in XnVNite.h ?
 %}
 
 # now docs for the nite part
@@ -433,8 +412,28 @@ public:
 
 };
 
+# -----------------------------------------------------------------------------
+# XnVPointFilter
+
+class XnVPointFilter :
+    public XnVPointControl
+//    public XnVMessageGenerator // java doesnt allow multiple inheritance
+{
+public:
+    XnVPointFilter(const XnChar* strName = "XnVPointFilter");
+
+    void Update(XnVMessage* pMessage);
+
+    void ClearQueue();
+    void GenerateReplaced(XnVMessage* pMessage, XnVMultipleHands& newHands);
+
+    void OverridePrimary(XnUInt32 nNewPrimary);
 
 
+// add the XnVMessageGenerator methods
+
+
+};
 
 
 # -----------------------------------------------------------------------------
@@ -512,6 +511,65 @@ protected:
 }
 };
 
+# -----------------------------------------------------------------------------
+# XnVSteadyDetector
+
+%feature("director") XnVSteadyDetector;
+class XnVSteadyDetector : public XnVPointControl
+{
+public:
+/*
+    typedef void (XN_CALLBACK_TYPE *SteadyCB)(XnUInt32 nId, XnFloat fStdDev, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *NotSteadyCB)(XnUInt32 nId, XnFloat fStdDev, void* pUserCxt);
+*/
+    XnVSteadyDetector(XnUInt32 nCooldownFrames = ms_nDefaultInitialCooldown,
+                      XnUInt32 nDetectionDuration = ms_nDefaultDetectionDuration,
+                      XnFloat fMaximumStdDevForSteady = ms_fDefaultMaximumStdDevForSteady,
+                      const XnChar* strName = "XnVSteadyDetector");
+    ~XnVSteadyDetector();
+
+/*
+    XnCallbackHandle RegisterSteady(void* cxt, SteadyCB CB);
+    void UnregisterSteady(XnCallbackHandle hCB);
+
+    XnCallbackHandle RegisterNotSteady(void* cxt, NotSteadyCB CB);
+    void UnregisterNotSteady(XnCallbackHandle hCB);
+    void Reset();
+*/
+
+    XnUInt32 GetDetectionDuration() const;
+    XnFloat GetMaximumStdDevForSteady() const;
+    XnFloat GetMinimumStdDevForNotSteady() const;
+
+    void SetDetectionDuration(XnUInt32 nDuration);
+    void SetMaximumStdDevForSteady(XnFloat fStdDev);
+    void SetMinimumStdDevForNotSteady(XnFloat fStdDev);
+
+    static const XnUInt32 ms_nDefaultDetectionDuration;     // = 200 ms
+    static const XnUInt32 ms_nDefaultInitialCooldown;       // = 0
+    static const XnFloat ms_fDefaultMaximumStdDevForSteady; // 0.01 m/s
+    static const XnFloat ms_fDefaultMinimumStdDevForNotSteady;  // 0.02 m/s
+
+    void OnPointCreate(const XnVHandPointContext* cxt);
+    void OnPointUpdate(const XnVHandPointContext* cxt);
+protected:
+    void Reset(XnUInt32 id);
+    // called whenever we have a new point
+    XnStatus DetectSteady(XnUInt32 nId, const XnPoint3D& pt, XnFloat fTime);
+
+    // broadcasts the event to all listeners
+    virtual void OnSteadyDetected(XnUInt32 nId, XnFloat fStdDev);
+    virtual void OnNotSteadyDetected(XnUInt32 nId, XnFloat fStdDev);
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSteadyDetector{
+
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSteadyDetector,Steady)
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVSteadyDetector,NotSteady)
+}
+
+}; // XnVSteadyDetector
 
 # -----------------------------------------------------------------------------
 # XnVSwipeDetector
@@ -545,8 +603,14 @@ public:
         XnFloat GetXAngleThreshold() const;
         void SetYAngleThreshold(XnFloat fThreshold);
         XnFloat GetYAngleThreshold() const;
+
+		/*	v1.3.0
         void SetSteadyMaxVelocity(XnFloat fVelocity);
         XnFloat GetSteadyMaxVelocity() const;
+		*/
+        void SetSteadyMaxStdDev(XnFloat fVelocity);
+        XnFloat GetSteadyMaxStdDev() const;
+
         void SetSteadyDuration(XnUInt32 nDuration);
         XnUInt32 GetSteadyDuration() const;
         void SetUseSteady(XnBool bUse);
@@ -567,6 +631,51 @@ protected:
 }
 }; 
 
+
+# -----------------------------------------------------------------------------
+# XnVWaveDetector 
+
+%feature("director") XnVSwipeDetector;
+class XnVWaveDetector  : public XnVPointControl
+{
+public:
+/*
+        typedef void (XN_CALLBACK_TYPE *WaveCB)(void* pUserCxt);
+*/
+
+  XnVWaveDetector(const XnChar* strName = "XnVWaveDetector");
+  ~XnVWaveDetector();
+
+  void OnPrimaryPointCreate(const XnVHandPointContext* pContext, const XnPoint3D& ptFocus);
+  void OnPrimaryPointUpdate(const XnVHandPointContext* pContext);
+  void OnPrimaryPointReplace(XnUInt32 nOldId, const XnVHandPointContext* pContext);
+  void OnPrimaryPointDestroy(XnUInt32 nID);
+
+
+
+/*
+    XnCallbackHandle RegisterWave(void* cxt, WaveCB pCB);
+    void UnregisterWave(XnCallbackHandle handle);
+*/
+
+    void Reset();
+
+    void SetFlipCount(XnInt32 nFlipCount);
+    void SetMinLength(XnInt32 nMinLength);
+    void SetMaxDeviation(XnInt32 nMaxDeviation);
+
+    XnInt32 GetFlipCount() const;
+    XnInt32 GetMinLength() const;
+    XnInt32 GetMaxDeviation() const;
+
+protected:
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVWaveDetector{
+    NITE_JNI_JAVA_CALLBACK_DECL(XnVWaveDetector,Wave)
+}
+}; 
 
 # -----------------------------------------------------------------------------
 # XnVSessionListener
@@ -603,7 +712,7 @@ public:
 # XnVSessionManager
 
 %feature("director") XnVSessionManager;
-class XnVSessionManager :public XnVSessionGenerator // ,public XnVContextControl // java doesn't allow multiple inheritance !!!!!!! 
+    class XnVSessionManager :public XnVSessionGenerator // ,public XnVContextControl // java doesnt allow multiple inheritance
 {
 public:
     XnVSessionManager(const XnChar* strName = "XnVSessionManager");
@@ -614,16 +723,21 @@ public:
                         xn::HandsGenerator* pTracker = NULL, xn::GestureGenerator* pFocusGenerator = NULL,
                         xn::GestureGenerator* pQuickRefocusGenerator = NULL);
 
-    XnStatus Initialize(XnVGesture* pFocusGesture, XnVGesture* pQuickRefocusGesture, XnVPointTracker* pTracker);
 
     void Update(XnVMessage* pMessage);
     void Update(const xn::Context* pContext);
-    void ProcessPoints(const XnVMultipleHands* pHands);
+    void ProcessPoints(XnVMultipleHands* pHands);
+
+
+    /*  deprecated
+    XnStatus Initialize(XnVGesture* pFocusGesture, XnVGesture* pQuickRefocusGesture, XnVPointTracker* pTracker);
 
     void SetGesture(XnVGesture* pGesture);
     void SetGesture(xn::GestureGenerator gestureGenerator, const XnChar* strGestures);
     void SetQRGesture(XnVGesture* pGesture);
     void SetQRGesture(xn::GestureGenerator gestureGenerator, const XnChar* strGestures);
+    */
+
     void SetTracker(XnVPointTracker* pTracker);
     void SetTracker(xn::HandsGenerator generator);
 
@@ -645,6 +759,24 @@ public:
     void GetQuickRefocusArea(XnFloat& fLengthX, XnFloat& fLengthY, XnFloat& fLengthZ);
     void ForceQuickRefocus(XnBoundingBox3D* pbbForcedArea, XnUInt32 nForcedTimeout);
  
+
+    XnUInt32 AddGesture(XnVGesture* pGesture);
+    XnUInt32 AddGesture(xn::GestureGenerator& generator, const XnChar* strName);
+    XnUInt32 AddGesture(xn::Context& context, const XnChar* strName);
+    void RemoveGesture(XnUInt32 nId);
+
+    XnUInt32 AddQuickRefocus(XnVGesture* pGesture);
+    XnUInt32 AddQuickRefocus(xn::GestureGenerator& generator, const XnChar* strName);
+    XnUInt32 AddQuickRefocus(xn::Context& context, const XnChar* strName);
+    void RemoveQuickRefocus(XnUInt32 nId);
+
+    void StartPrimaryStatic();
+    void StopPrimaryStatic();
+    void SetPrimaryStaticTimeout(XnFloat fTimeout);
+    XnFloat GetPrimarySteadyTimeout() const;
+
+    void SetPrimaryStaticBoundingBox(XnFloat fX, XnFloat fY, XnFloat fZ);
+    void GetPrimaryStaticBoundingBox(XnFloat& fX, XnFloat& fY, XnFloat& fZ);
 
 // add manually the XnVContextControl methods, due the multiple inheritance problem
 /*
@@ -784,25 +916,86 @@ protected:
 
 	NITE_JNI_JAVA_CALLBACK_DECL(XnVCircleDetector,Circle)
 	NITE_JNI_JAVA_CALLBACK_DECL(XnVCircleDetector,NoCircle)
-/*
-	public void RegisterCircle(Object objCb)
-	{
-		RegisterCircleSub(objCb,XnVCircleDetector.getCPtr(this));
-	}
-
-	public void RegisterNoCircle(Object objCb)
-	{
-		RegisterNoCircleSub(objCb,XnVCircleDetector.getCPtr(this));
-	}
-
-	public native void RegisterCircleSub(Object objCb,long ptr);
-	public native void RegisterNoCircleSub(Object objCb,long ptr);
-	
-	/*
-	public native void UnregisterCircleSub();
-	*/
 }
 };
+
+# -----------------------------------------------------------------------------
+# XnVBorderScrollController1D
+
+class XnVBorderScrollController1D;
+
+class XnVSelectableSlider1D :  public XnVPointControl
+{
+public:
+/*
+    typedef void (XN_CALLBACK_TYPE *ItemHoverCB)(XnInt32 nItemIndex, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *ItemSelectCB)(XnInt32 nItemIndex, XnVDirection nDirection, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *ScrollCB)(XnFloat fScrollValue, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *ValueChangeCB)(XnFloat fValue, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *OffAxisMovementCB)(XnVDirection dir, void* pUserCxt);
+*/
+
+    XnVSelectableSlider1D(XnInt32 nCount, XnFloat fBorderWidth = 0, XnVAxis eAxis = AXIS_X,
+                          XnBool bRecenter = TRUE,
+                          XnFloat fHysteresisRatio = XnVMultiItemHysteresis1D::ms_fDefaultHysteresisRatio,
+                          XnFloat fPrimarySliderSize = ms_fDefaultPrimarySliderSize, XnFloat fFirstValue = 0.5,
+                          const XnChar* strName = "XnVSelectableSlider1D");
+    ~XnVSelectableSlider1D();
+
+    void OnPrimaryPointCreate(const XnVHandPointContext* pContext, const XnPoint3D& ptFocus);
+    void OnPrimaryPointUpdate(const XnVHandPointContext* pContext);
+    void OnPrimaryPointDestroy(XnUInt32 nID);
+
+    static const XnFloat ms_fDefaultPrimarySliderSize;  // = 250
+
+/*
+    XnCallbackHandle RegisterItemHover(void* cxt, ItemHoverCB pCB);
+    XnCallbackHandle RegisterItemSelect(void* cxt, ItemSelectCB pCB);
+    XnCallbackHandle RegisterScroll(void* cxt, ScrollCB pCB);
+    XnCallbackHandle RegisterValueChange(void* cxt, ValueChangeCB pCB);
+    XnCallbackHandle RegisterOffAxisMovement(void* cxt, OffAxisMovementCB pCB);
+
+    void UnregisterItemHover(XnCallbackHandle handle);
+    void UnregisterItemSelect(XnCallbackHandle handle);
+    void UnregisterScroll(XnCallbackHandle handle);
+    void UnregisterValueChange(XnCallbackHandle handle);
+    void UnregisterOffAxisMovement(XnCallbackHandle handle);
+*/
+
+    void ItemHover(XnInt32 nItemIndex);
+    void ItemSelect(XnVDirection nDirection);
+    void Scroll(XnFloat fScrollValue);
+
+    void Reposition(const XnPoint3D& ptCenter);
+    void GetCenter(XnPoint3D& ptCenter) const;
+
+    XnUInt32 GetItemCount() const;
+    void SetItemCount(XnUInt32 nItems);
+
+    XnFloat GetBorderWidth() const;
+    XnStatus SetBorderWidth(XnFloat fWidth);
+
+    XnFloat GetSliderSize() const;
+    void SetSliderSize(XnFloat fSliderSize);
+
+    void SetValueChangeOnOffAxis(XnBool bReport);
+    XnBool GetValueChangeOnOffAxis() const;
+
+    void SetHysteresisRatio(XnFloat fRatio);
+    XnFloat GetHysteresisRatio() const;
+protected:
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSelectableSlider1D{
+
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider1D,ItemHover)
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider1D,ItemSelect)
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider1D,Scroll)
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider1D,ValueChange)
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSelectableSlider1D,OffAxisMovement)
+}
+
+}; // XnVSelectableSlider1D
 
 # -----------------------------------------------------------------------------
 # XnVSelectableSlider2D
@@ -901,5 +1094,146 @@ protected:
     static void XN_CALLBACK_TYPE SecondarySlider_ValueChange(XnFloat fValue, void* cxt);
     static void XN_CALLBACK_TYPE OffAxisHysteresis_ItemSelected(XnInt32 nItem, void* cxt);
 */
+
+};
+
+
+# -----------------------------------------------------------------------------
+# XnVSlider1D
+
+class XnVSlider1D
+{
+public:
+/*
+    typedef void (XN_CALLBACK_TYPE* ValueChangeCB)(XnFloat fValue, void* cxt);
+    typedef void (XN_CALLBACK_TYPE* OffAxisMovementCB)(XnVDirection eDir, void* cxt);
+*/
+    XnVSlider1D(XnVAxis eAxis, const XnPoint3D& ptInitialPosition, XnPoint3D ptMinPoint, XnPoint3D ptMaxPoint,
+                XnFloat fMinOutput, XnFloat fMaxOutput,
+                XnFloat fOffAxisDetectionAngle = ms_fOffAxisDefaultDetectionAngle,
+                XnFloat fOffAxisDetectionMinimumVelocity = ms_fDefaultMinimumOffAxisVelocity);
+    XnVSlider1D(XnVAxis eAxis, const XnPoint3D& ptInitialPosition, XnFloat fSliderLength, XnFloat fInitialValue,
+                XnFloat fMinOutput, XnFloat fMaxOutput,
+                XnFloat fOffAxisDetectionAngle = ms_fOffAxisDefaultDetectionAngle,
+                XnFloat fOffAxisDetectionMinimumVelocity = ms_fDefaultMinimumOffAxisVelocity);
+
+    ~XnVSlider1D();
+
+    void Reinitialize(XnVAxis eAxis, const XnPoint3D& ptInitialPoint, const XnPoint3D& ptMinPoint,
+                      const XnPoint3D& ptMaxPoint, XnFloat fMinOutput, XnFloat fMaxOutput);
+    void Reinitialize(XnVAxis eAxis, const XnPoint3D& ptInitialPoint, XnFloat fSliderLength,
+                      XnFloat fInitialValue, XnFloat fMinOutput, XnFloat fMaxOutput);
+
+    XnFloat ValueAtPosition(const XnPoint3D& pt);
+
+    XnStatus Update(const XnPoint3D& pt, XnFloat fTime, XnBool bCheckOffAxis = true);
+
+    void LostPoint();
+
+/*
+    XnCallbackHandle RegisterValueChange(void* cxt, ValueChangeCB CB);
+    XnCallbackHandle RegisterOffAxisMovement(void* cxt, OffAxisMovementCB CB);
+
+    void UnregisterValueChange(XnCallbackHandle hCB);
+    void UnregisterOffAxisMovement(XnCallbackHandle hCB);
+*/
+
+    XnFloat GetValue() const;
+    const XnPoint3D& GetPosition() const;
+    XnBool IsValid() const;
+
+    XnVAxis GetAxis() const;
+
+    XnFloat  GetOffAxisDetectionVelocity() const;
+    XnFloat  GetOffAxisDetectionAngle() const;
+    XnUInt32 GetOffAxisDetectionTime() const;
+
+    void SetOffAxisDetectionVelocity(XnFloat fVelocity);
+    void SetOffAxisDetectionAngle(XnFloat fAngle);
+    void SetOffAxisDetectionTime(XnUInt32 nTime);
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSlider1D{
+
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSlider1D,ValueChange)
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSlider1D,OffAxisMovement)
+}
+
+};
+
+
+# -----------------------------------------------------------------------------
+# XnVSlider2D
+
+class XnVSlider2D
+{
+public:
+/*
+    typedef void (XN_CALLBACK_TYPE *ValueChangeCB)(XnFloat fXValue, XnFloat fYValue, void* pUserCxt);
+    typedef void (XN_CALLBACK_TYPE *OffAxisMovementCB)(XnVDirection eDir, void* pUserCxt);
+*/
+
+    XnVSlider2D(const XnPoint3D& ptMin ,const XnPoint3D& ptMax);
+    XnVSlider2D(const XnPoint3D& ptInitialPosition, XnFloat fSliderXLength, XnFloat fSliderYLength,
+                XnFloat fInitialXValue, XnFloat fInitialYValue);
+
+    ~XnVSlider2D();
+    XnStatus Update(const XnPoint3D& pt, XnFloat fTime, XnBool bCheckOffAxis = true);
+
+/*
+    XnCallbackHandle RegisterValueChange(void* cxt, ValueChangeCB CB); // Add CB to list
+    XnCallbackHandle RegisterOffAxisMovement(void* cxt, OffAxisMovementCB CB);
+    void UnregisterValueChange(XnCallbackHandle hCB);
+    void UnregisterOffAxisMovement(XnCallbackHandle hCB);
+*/
+
+    XnPoint3D GetPosition() const {return m_ptCurrentPosition;}
+
+    XnFloat  GetOffAxisDetectionVelocity() const;
+    XnFloat  GetOffAxisDetectionAngle() const;
+    XnUInt32 GetOffAxisDetectionTime() const;
+
+    void SetOffAxisDetectionVelocity(XnFloat fVelocity);
+    void SetOffAxisDetectionAngle(XnFloat fAngle);
+    void SetOffAxisDetectionTime(XnUInt32 nTime);
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSlider2D{
+
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSlider2D,ValueChange)
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSlider2D,OffAxisMovement)
+}
+
+};
+
+
+# -----------------------------------------------------------------------------
+# XnVSlider3D
+
+class XnVSlider3D
+{
+public:
+/*
+    typedef void (XN_CALLBACK_TYPE *ValueChangeCB)(XnFloat fXValue, XnFloat fYValue, XnFloat fZValue, void* pUserCxt);
+*/
+    XnVSlider3D(const XnPoint3D& ptMin ,const XnPoint3D& ptMax);
+
+    ~XnVSlider3D();
+
+    XnStatus Update(const XnPoint3D& pt);
+
+/*
+    XnCallbackHandle RegisterValueChange(void* cxt, ValueChangeCB CB); // Add CB to list
+    void UnregisterValueChange(XnCallbackHandle hCB);
+*/
+
+///////////////////////////////////////////////////////////////////////////////
+// add java methods to register callbacks
+%typemap(javacode,noblock=1) XnVSlider3D{
+
+        NITE_JNI_JAVA_CALLBACK_DECL(XnVSlider3D,ValueChange)
+}
 
 };

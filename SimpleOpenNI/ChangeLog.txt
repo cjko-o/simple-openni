@@ -5,11 +5,23 @@ http://code.google.com/p/simple-openni/
 vx.xx status, mm/dd/yyyy
 
 v0.20 alpha,
-	New
-
-v0.19 alpha, xx/xx/2011
 	New:
-		- Ported some more NITE classes(XnVSelectableSlider2D)
+		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
+		- Tested the library with Processing 1.5.1
+		- Added Nite extensions XnVPushDetector/XnVSwipeDetector from David Buchman. Had to change it a bit, due to changes
+		  of Nite in the current version, this functions where removed:
+			SetSteadyMaxVelocity
+			GetSteadyMaxVelocity
+		- Ported some more NITE classes:
+			- XnVSelectableSlider2D
+			- XnVWaveDetector
+			- XnVSelectableSlider1D
+			- XnVSlider1D
+			- XnVSlider2D
+			- XnVSlider3D
+		- Changed some Nite files, because of deprecated methods
+			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
+		- Reorganized the sample folder structure and the names of the examples
 		- Added new example:
 		  SimpleOpenNI_NITE_Slider2d	- Shows how to use 2D Sliders
 		- Fixed a bug: If you play a redord, skeletons were not displayed
