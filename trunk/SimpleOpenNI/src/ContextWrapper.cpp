@@ -87,7 +87,7 @@ _threadMode(RunMode_Default),
 _threadRun(false)
 {
 	std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
-
+	
 	_depthImageColor[0] = 1.0f;
 	_depthImageColor[1] = 1.0f;
 	_depthImageColor[2] = 1.0f;
@@ -231,6 +231,21 @@ void ContextWrapper::logOut(int msgType,const char* msg,...)
 	std::cout << _strBuffer << std::endl;
 }
 
+bool ContextWrapper::checkLicenses()
+{
+	XnLicense* 	licenses;
+	XnUInt32	count;
+	
+	_context.EnumerateLicenses(licenses,count);
+	if(count<=0)
+	{	// write 
+	  logOut(MsgNode_Error,"ContextWrapper::checkLicenses, there is no valid license, please check your installation !\n");
+	  return false;
+	}
+  
+	return true;
+}
+
 bool ContextWrapper::init(const char* xmlInitFile,int runMode)
 {
 	_threadMode = runMode;
@@ -245,6 +260,8 @@ bool ContextWrapper::init(const char* xmlInitFile,int runMode)
 		logOut(MsgNode_Error,"ContextWrapper::init: Can't init %s\n",xmlInitFile);
 		return false;
 	}
+	
+	checkLicenses();
 
 	_initFlag = true;
 	return true;
@@ -264,6 +281,8 @@ bool ContextWrapper::init(int runMode)
 		logOut(MsgNode_Error,"ContextWrapper::init\n");
 		return false;
 	}
+
+	checkLicenses();
 
 	_initFlag = true;
 	return true;
@@ -558,6 +577,8 @@ bool ContextWrapper::createHands(bool force)
 	}
 
 	// set the callbacks
+	std::cout << "hands callback: " << _rc << std::endl;
+	
 	_handsGenerator.RegisterHandCallbacks(createHandsCb,
 										  updateHandsCb,
 										  destroyHandsCb,
@@ -632,6 +653,7 @@ bool ContextWrapper::createGesture(bool force)
 													 progressGestureCb,
 													 this, 
 													 _hGestureCb);
+
 	/*
 	XnChar* strArray =(XnChar*) new XnChar[200][200];
 	XnUInt16 count=200;
