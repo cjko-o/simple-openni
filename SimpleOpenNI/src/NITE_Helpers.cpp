@@ -30,7 +30,7 @@
 // callback macros
 //#define		NITE_DEBUG_CALLBACK
 
-#define		NITE_VIRTUAL_CALLBACK_FUNC(FuncName) On##FuncName##CB
+#define		NITE_VIRTUAL_CALLBACK_FUNC(Class,FuncName) On_##Class##_##FuncName##CB
 
 #define		NITE_JNI_CALLBACK_DECL(Class,FuncName) \
 JNIEXPORT void JNICALL Java_SimpleOpenNI_##Class##_Register##FuncName##Sub(JNIEnv *env, jobject  obj, jobject objCb, jlong ptr);
@@ -45,7 +45,7 @@ JNIEXPORT void JNICALL Java_SimpleOpenNI_##Class##_Register##FuncName##Sub(JNIEn
 													   objCb, \
 													   (void*)ptr); \
 	_cbContainerList.push_back(cbContainer); \
-	p->Register##FuncName(cbContainer, NITE_VIRTUAL_CALLBACK_FUNC(FuncName) ); \
+	p->Register##FuncName(cbContainer, NITE_VIRTUAL_CALLBACK_FUNC(Class,FuncName) ); \
 } \
 
 
@@ -53,7 +53,7 @@ JNIEXPORT void JNICALL Java_SimpleOpenNI_##Class##_Register##FuncName##Sub(JNIEn
 ///////////////////////////////////////////////////////////////////////////////
 // session callbacks
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SessionStart)(const XnPoint3D& ptPosition, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSessionListener,SessionStart)	(const XnPoint3D& ptPosition, void* UserCxt)
 {
 	XnVSessionListener* p = static_cast<XnVSessionListener*>(UserCxt);
 	if(p == NULL)
@@ -61,7 +61,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SessionStart)(const XnPoint3D& 
 	p->OnSessionStart(ptPosition);
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SessionEnd)(void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSessionListener,SessionEnd)	(void* UserCxt)
 {
 	XnVSessionListener* p = static_cast<XnVSessionListener*>(UserCxt);
 	if(p == NULL)
@@ -69,7 +69,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SessionEnd)(void* UserCxt)
 	p->OnSessionEnd();
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(FocusStartDetected)(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSessionListener,FocusStartDetected)	(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)
 {
 	XnVSessionListener* p = static_cast<XnVSessionListener*>(UserCxt);
 	if(p == NULL)
@@ -80,7 +80,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(FocusStartDetected)(const XnCha
 ///////////////////////////////////////////////////////////////////////////////
 // XnVPointControl
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointCreate)(const XnVHandPointContext* pContext, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPointControl,PointCreate)	(const XnVHandPointContext* pContext, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -117,7 +117,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointCreate)(const XnVHandPoint
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointDestroy)(XnUInt32 nID, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPointControl,PointDestroy)	(XnUInt32 nID, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -145,7 +145,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointDestroy)(XnUInt32 nID, voi
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointUpdate)(const XnVHandPointContext* pContext, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPointControl,PointUpdate)	(const XnVHandPointContext* pContext, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -182,7 +182,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PointUpdate)(const XnVHandPoint
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointCreate)(const XnVHandPointContext* pContext,const XnPoint3D& ptFocus, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPointControl,PrimaryPointCreate)	(const XnVHandPointContext* pContext,const XnPoint3D& ptFocus, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -230,7 +230,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointCreate)(const XnVHa
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointDestroy)(XnUInt32 nID, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPointControl,PrimaryPointDestroy)	(XnUInt32 nID, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -262,7 +262,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(PrimaryPointDestroy)(XnUInt32 n
 ///////////////////////////////////////////////////////////////////////////////
 // XnVPushDetector
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Push)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPushDetector,Push)	(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
 {
     JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
     if(p == NULL)
@@ -288,7 +288,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Push)        (XnFloat fVelocity
         }
     }
 }
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Stabilized)        (XnFloat fVelocity, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVPushDetector,Stabilized)	(XnFloat fVelocity, void* pUserCxt)
 {
     JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
     if(p == NULL)
@@ -346,24 +346,24 @@ void doTheSwipe(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt, const char* d
 
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeUp)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSwipeDetector,SwipeUp)	(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
 {
     doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeUp");
 }
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeDown)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSwipeDetector,SwipeDown)	(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
 {
     doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeDown");
 }
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeLeft)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSwipeDetector,SwipeLeft)	(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
 {
     doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeLeft");
 }
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(SwipeRight)        (XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSwipeDetector,SwipeRight)	(XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
 {
     doTheSwipe(fVelocity, fAngle, pUserCxt, "onSwipeRight");
 }
 
-void  XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Swipe)            (XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
+void  XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSwipeDetector,Swipe)	(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void* pUserCxt)
 {
     JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
     if(p == NULL)
@@ -395,7 +395,7 @@ void  XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Swipe)            (XnVDirectio
 ///////////////////////////////////////////////////////////////////////////////
 // XnVCircleDetector
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Circle)(XnFloat fTimes, XnBool bConfident, const XnVCircle* pCircle, void* UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVCircleDetector,Circle)	(XnFloat fTimes, XnBool bConfident, const XnVCircle* pCircle, void* UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -434,7 +434,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Circle)(XnFloat fTimes, XnBool 
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(NoCircle)(XnFloat fLastValue, XnVCircleDetector::XnVNoCircleReason eReason, void *UserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVCircleDetector,NoCircle)	(XnFloat fLastValue, XnVCircleDetector::XnVNoCircleReason eReason, void *UserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(UserCxt);
 	if(p == NULL)
@@ -464,9 +464,150 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(NoCircle)(XnFloat fLastValue, X
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// XnVSelectableSlider1D Java method export
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider1D,ItemHover)	(XnInt32 nItemIndex, void* pUserCxt)
+{
+	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+	if(p == NULL)
+		return;
+
+	JNIEnv* env = p->env();
+	if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL)) 
+	{
+		jclass		localClass = env->GetObjectClass(p->obj());
+		jmethodID	mid = NULL;
+
+		mid = env->GetMethodID(localClass,
+							   "onItemHover",
+							   "(I)V");
+							  // integer,integer/void
+
+		if(mid != 0)
+		{
+			// call the java method
+			env->CallVoidMethod(p->obj(), 
+								mid,
+								(jint)nItemIndex);
+		}
+		
+	}
+}
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider1D,ItemSelect)	(XnInt32 nItemIndex, XnVDirection eDir, void* pUserCxt)
+{
+	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+	if(p == NULL)
+		return;
+
+	JNIEnv* env = p->env();
+	if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL)) 
+	{
+		jclass		localClass = env->GetObjectClass(p->obj());
+		jmethodID	mid = NULL;
+
+		mid = env->GetMethodID(localClass,
+							   "onItemSelect",
+							   "(II)V");
+							  // int,int,int-XnVDirection
+
+		if(mid != 0)
+		{
+			// call the java method
+			env->CallVoidMethod(p->obj(), 
+								mid,
+								(jint)nItemIndex,(jint)eDir);
+		}
+	}
+}
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider1D,OffAxisMovement)	(XnVDirection eDir, void* pUserCxt)
+{
+	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+	if(p == NULL)
+		return;
+
+	JNIEnv* env = p->env();
+	if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL)) 
+	{
+		jclass		localClass = env->GetObjectClass(p->obj());
+		jmethodID	mid = NULL;
+
+		mid = env->GetMethodID(localClass,
+							   "onOffAxisMovement",
+							   "(I)V");
+							  // int-XnVDirection
+
+		if(mid != 0)
+		{
+			// call the java method
+			env->CallVoidMethod(p->obj(), 
+								mid,
+								(jint)eDir);
+		}
+	}
+}
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider1D,ValueChange)	(XnFloat fValue, void* pUserCxt)
+{
+	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+	if(p == NULL)
+		return;
+
+	JNIEnv* env = p->env();
+	if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL)) 
+	{
+		jclass		localClass = env->GetObjectClass(p->obj());
+		jmethodID	mid = NULL;
+
+		mid = env->GetMethodID(localClass,
+							   "onValueChange",
+							   "(F)V");
+							  // float,float
+
+		if(mid != 0)
+		{
+			// call the java method
+			env->CallVoidMethod(p->obj(), 
+								mid,
+								(jfloat)fValue);
+		}
+	}
+}
+
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider1D,Scroll)	(XnFloat fScrollValue, void* pUserCxt)
+{
+	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
+	if(p == NULL)
+		return;
+
+	JNIEnv* env = p->env();
+	if (! p->gJvm()->AttachCurrentThread((void**)&env, NULL)) 
+	{
+		jclass		localClass = env->GetObjectClass(p->obj());
+		jmethodID	mid = NULL;
+
+		mid = env->GetMethodID(localClass,
+							   "onScroll",
+							   "(F)V");
+							  // float,float
+
+		if(mid != 0)
+		{
+			// call the java method
+			env->CallVoidMethod(p->obj(), 
+								mid,
+								(jfloat)fScrollValue);
+		}
+	}
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // XnVSelectableSlider2D Java method export
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(ItemHover)			(XnInt32 nXIndex, XnInt32 nYIndex, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider2D,ItemHover)	(XnInt32 nXIndex, XnInt32 nYIndex, void* pUserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
 	if(p == NULL)
@@ -495,7 +636,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(ItemHover)			(XnInt32 nXIndex, 
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(ItemSelect)		(XnInt32 nXIndex, XnInt32 nYIndex, XnVDirection eDir, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider2D,ItemSelect)	(XnInt32 nXIndex, XnInt32 nYIndex, XnVDirection eDir, void* pUserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
 	if(p == NULL)
@@ -522,7 +663,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(ItemSelect)		(XnInt32 nXIndex, 
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(OffAxisMovement)	(XnVDirection eDir, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider2D,OffAxisMovement)		(XnVDirection eDir, void* pUserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
 	if(p == NULL)
@@ -549,7 +690,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(OffAxisMovement)	(XnVDirection 
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(ValueChange)		(XnFloat fXValue, XnFloat fYValue, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider2D,ValueChange)	(XnFloat fXValue, XnFloat fYValue, void* pUserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
 	if(p == NULL)
@@ -576,7 +717,7 @@ void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(ValueChange)		(XnFloat fXValue,
 	}
 }
 
-void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(Scroll)			(XnFloat fXValue, XnFloat fYValue, void* pUserCxt)
+void XN_CALLBACK_TYPE NITE_VIRTUAL_CALLBACK_FUNC(XnVSelectableSlider2D,Scroll)	(XnFloat fXValue, XnFloat fYValue, void* pUserCxt)
 {
 	JavaCbContainer* p = static_cast<JavaCbContainer*>(pUserCxt);
 	if(p == NULL)
@@ -648,6 +789,15 @@ NITE_JNI_CALLBACK(XnVSwipeDetector,Swipe)
 NITE_JNI_CALLBACK(XnVCircleDetector,Circle)	
 NITE_JNI_CALLBACK(XnVCircleDetector,NoCircle)	
 
+
+///////////////////////////////////////////////////////////////////////////////
+// XnVSelectableSlider1D Java method export
+
+NITE_JNI_CALLBACK(XnVSelectableSlider1D,ItemHover)	
+NITE_JNI_CALLBACK(XnVSelectableSlider1D,Scroll)	
+NITE_JNI_CALLBACK(XnVSelectableSlider1D,ValueChange)	
+NITE_JNI_CALLBACK(XnVSelectableSlider1D,ItemSelect)	
+NITE_JNI_CALLBACK(XnVSelectableSlider1D,OffAxisMovement)
 
 ///////////////////////////////////////////////////////////////////////////////
 // XnVSelectableSlider2D Java method export

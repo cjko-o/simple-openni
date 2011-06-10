@@ -314,6 +314,8 @@ protected:
 
 	void logOut(int msgType,const char* msg,...);	// must end with null
 	char	_strBuffer[STRING_BUFFER];
+	
+	bool checkLicenses();
 
 	//////////////////////////////////////////////////////////////////////////////
 	// internal callback wrappers

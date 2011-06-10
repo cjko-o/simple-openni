@@ -12,13 +12,17 @@ v0.20 alpha,
 		  of Nite in the current version, this functions where removed:
 			SetSteadyMaxVelocity
 			GetSteadyMaxVelocity
+		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
+		  key was not proper installed, in this case there will be an error message.
 		- Ported some more NITE classes:
 			- XnVSelectableSlider2D
-			- XnVWaveDetector
 			- XnVSelectableSlider1D
+			- XnVWaveDetector
+			- XnVSteadyDetector
 			- XnVSlider1D
 			- XnVSlider2D
 			- XnVSlider3D
+			- XnVMultipleHands
 		- Changed some Nite files, because of deprecated methods
 			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
 		- Reorganized the sample folder structure and the names of the examples

@@ -522,11 +522,19 @@ public:
     typedef void (XN_CALLBACK_TYPE *SteadyCB)(XnUInt32 nId, XnFloat fStdDev, void* pUserCxt);
     typedef void (XN_CALLBACK_TYPE *NotSteadyCB)(XnUInt32 nId, XnFloat fStdDev, void* pUserCxt);
 */
+
+    XnVSteadyDetector(XnUInt32 nCooldownFrames,
+                      XnUInt32 nDetectionDuration,
+                      XnFloat fMaximumStdDevForSteady ,
+                      const XnChar* strName = "XnVSteadyDetector");
+
+/*
     XnVSteadyDetector(XnUInt32 nCooldownFrames = ms_nDefaultInitialCooldown,
                       XnUInt32 nDetectionDuration = ms_nDefaultDetectionDuration,
                       XnFloat fMaximumStdDevForSteady = ms_fDefaultMaximumStdDevForSteady,
                       const XnChar* strName = "XnVSteadyDetector");
     ~XnVSteadyDetector();
+*/
 
 /*
     XnCallbackHandle RegisterSteady(void* cxt, SteadyCB CB);
@@ -545,10 +553,12 @@ public:
     void SetMaximumStdDevForSteady(XnFloat fStdDev);
     void SetMinimumStdDevForNotSteady(XnFloat fStdDev);
 
+%immutable;
     static const XnUInt32 ms_nDefaultDetectionDuration;     // = 200 ms
     static const XnUInt32 ms_nDefaultInitialCooldown;       // = 0
-    static const XnFloat ms_fDefaultMaximumStdDevForSteady; // 0.01 m/s
-    static const XnFloat ms_fDefaultMinimumStdDevForNotSteady;  // 0.02 m/s
+   // static const XnFloat ms_fDefaultMaximumStdDevForSteady; // 0.01 m/s
+   // static const XnFloat ms_fDefaultMinimumStdDevForNotSteady;  // 0.02 m/s
+%mutable;
 
     void OnPointCreate(const XnVHandPointContext* cxt);
     void OnPointUpdate(const XnVHandPointContext* cxt);
@@ -1105,7 +1115,7 @@ protected:
 // Suppress SWIG warning
 #pragma SWIG nowarn=SWIGWARN_PARSE_NESTED_CLASS
 
-class ConstIterator
+class XnVMultipleHands_ConstIterator
 {
 public:
     friend class XnVMultipleHands;
@@ -1132,7 +1142,7 @@ protected:
     XnBool m_bValid;
 };
 
-class Iterator : public ConstIterator
+class XnVMultipleHands_Iterator : public XnVMultipleHands_ConstIterator
 {
 public:
     friend class XnVMultipleHands;
@@ -1151,8 +1161,8 @@ protected:
 %{
 // SWIG thinks that Inner is a global class, so we need to trick the C++
 // compiler into understanding this so called global type.
-typedef XnVMultipleHands::ConstIterator ConstIterator;
-typedef XnVMultipleHands::Iterator      Iterator;
+typedef XnVMultipleHands::ConstIterator XnVMultipleHands_ConstIterator;
+typedef XnVMultipleHands::Iterator      XnVMultipleHands_Iterator;
 %}
 
 
@@ -1237,13 +1247,13 @@ public:
     };
 */
 
-    Iterator begin();
-    ConstIterator begin() const;
-    Iterator end();
-    ConstIterator end() const;
+    XnVMultipleHands_Iterator begin();
+    XnVMultipleHands_ConstIterator begin() const;
+    XnVMultipleHands_Iterator end();
+    XnVMultipleHands_ConstIterator end() const;
 
-    Iterator Find(XnUInt32 nID);
-    ConstIterator Find(XnUInt32 nID) const;
+    XnVMultipleHands_Iterator Find(XnUInt32 nID);
+    XnVMultipleHands_ConstIterator Find(XnUInt32 nID) const;
     XnBool IsNew(XnUInt32 nID) const;
     XnBool IsOld(XnUInt32 nID) const;
     XnBool IsActive(XnUInt32 nID) const;
