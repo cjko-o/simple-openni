@@ -86,9 +86,8 @@ Those programs have to be on your system in order to install OpenNI:
 = Linux =
 
   * Download the install files:
-   - [http://openni.org/downloadfiles/2-openni-binaries OpenNI]
-
-    - [http://openni.org/downloadfiles/2-openni-binaries Nite]
-    - [http://openni.org/downloadfiles/2-openni-binaries Kinect Drivers] , [http://openni.org/downloadfiles/2-openni-binaries Primsense 
+  [http://openni.org/downloadfiles/2-openni-binaries OpenNI]
+  [http://openni.org/downloadfiles/2-openni-binaries Nite]
+  [http://openni.org/downloadfiles/2-openni-binaries Kinect Drivers] , [http://openni.org/downloadfiles/2-openni-binaries Primsense 
   * If you don't have this folder then create it.
   * ...
