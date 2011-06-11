@@ -7,13 +7,14 @@ vx.xx status, mm/dd/yyyy
 v0.20 alpha,
 	New:
 		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
+		- Added 64bit libraries
 		- Tested the library with Processing 1.5.1
+		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
+		  key was not proper installed, in this case there will be an error message.
 		- Added Nite extensions XnVPushDetector/XnVSwipeDetector from David Buchman. Had to change it a bit, due to changes
 		  of Nite in the current version, this functions where removed:
 			SetSteadyMaxVelocity
 			GetSteadyMaxVelocity
-		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
-		  key was not proper installed, in this case there will be an error message.
 		- Ported some more NITE classes:
 			- XnVSelectableSlider2D
 			- XnVSelectableSlider1D
@@ -26,6 +27,8 @@ v0.20 alpha,
 		- Changed some Nite files, because of deprecated methods
 			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
 		- Reorganized the sample folder structure and the names of the examples
+		- Added FAQ, Screenshot section to the wiki
+		- Updated install instructions on the wiki for linux
 		- Added new example:
 		  SimpleOpenNI_NITE_Slider2d	- Shows how to use 2D Sliders
 		- Fixed a bug: If you play a redord, skeletons were not displayed
