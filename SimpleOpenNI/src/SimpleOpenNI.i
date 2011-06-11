@@ -384,7 +384,7 @@ public:
 };
 
 # -----------------------------------------------------------------------------
-# SkeletonCapability
+# PoseDetectionCapability
 
 class PoseDetectionCapability : public Capability
 {

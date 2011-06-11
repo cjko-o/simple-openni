@@ -1960,6 +1960,15 @@ void ContextWrapper::convertProjectiveToRealWorld(std::vector<XnVector3D>* projA
 	}
 }
 
+bool ContextWrapper::alternativeViewPointDepthToImage()
+{
+    if(!_depth.IsValid() || !_image.IsValid())
+            return false;
+
+    _rc = _depth.GetAlternativeViewPointCap().SetViewPoint(_image);
+    return (_rc == XN_STATUS_OK);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // access methods

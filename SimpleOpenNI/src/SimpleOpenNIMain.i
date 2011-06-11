@@ -253,6 +253,8 @@ public:
 	void convertProjectiveToRealWorld(XnVector3D* proj,XnVector3D* world);	
 	void convertProjectiveToRealWorld(std::vector<XnVector3D>* projArray,std::vector<XnVector3D>* worldArray);
 
+        bool alternativeViewPointDepthToImage();
+
 	///////////////////////////////////////////////////////////////////////////
 	// XnVSessionMananger
 	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
