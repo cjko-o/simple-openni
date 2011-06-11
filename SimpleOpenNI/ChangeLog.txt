@@ -7,13 +7,32 @@ vx.xx status, mm/dd/yyyy
 v0.20 alpha,
 	New:
 		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
-		- Added 64bit libraries
+		- Added 64bit support
 		- Tested the library with Processing 1.5.1
 		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
 		  key was not proper installed, in this case there will be an error message.
 		- Added skeleton calibration file load/save:
-		  saveCalibrationDataSkeleton, loadCalibrationDataSkeleton
-		  Also made an example for that: UserSaveCalib
+		  see saveCalibrationDataSkeleton, loadCalibrationDataSkeleton
+		  Also created an example for that: examples/SimpleOpenNI/UserSaveCalib
+		- Added native OpenNI classes, like the ones for NITE, see examples/SimpleOpenNI/UserSaveCalib, line 114
+		  This is not fully functional at the moment(some nasty problems with nested c++ classes), but in future i 
+		  would prefer to impelment those classes, that way you can use all the features implemented in OpenNI, not 
+		  only the ones exported through the SimpleOpenNI class.
+		  I also build in access methods in the SimpleOpenNI class: getUserGenerator(), this gives you the currently used 
+		  UserGenerator, if you have called enableUser before.
+		  Those classes are implemented(no callback till now):
+			- Capability
+			- SkeletonCapability
+			- PoseDetectionCapability
+			- MirrorCapability
+			- AlternativeViewPointCapability
+			- FrameSyncCapability
+			- NodeInfo
+			- NodeInfoList
+			- NodeWrapper
+			- ProductionNode
+			- Generator
+			- UserGenerator
 		- Added Nite extensions XnVPushDetector/XnVSwipeDetector from David Buchman. Had to change it a bit, due to changes
 		  of Nite in the current version, this functions where removed:
 			SetSteadyMaxVelocity

@@ -14,15 +14,16 @@ JAVA_ARRAYSOFCLASSES(XnPoint3D)
 
 
 
-typedef	bool				XnBool;
-typedef	char				XnChar;
-typedef	unsigned int		XnUInt32;
-typedef	int					XnInt32;
-typedef	float				XnFloat;
-typedef XnUInt32			XnVHandle;
-typedef XnUInt32			XnStatus;
-//typedef uint64_t			unsigned long;
+typedef	bool		XnBool;
+typedef	char		XnChar;
+typedef	unsigned int	XnUInt32;
+typedef	int		XnInt32;
+typedef	float		XnFloat;
+typedef XnUInt32	XnVHandle;
+typedef XnUInt32	XnStatus;
+//typedef uint64_t	unsigned long;
 
+typedef XnUInt32        XnUserID;
 
 typedef struct XnVector3D
 {
@@ -72,6 +73,11 @@ typedef struct XnBoundingBox3D
 
 %array_class(XnVector3D, XnVector3DArray);
 %array_class(XnPoint3D, XnPoint3DArray);
+
+# -----------------------------------------------------------------------------
+# Constants
+
+%constant int XN_STATUS_OK = XN_STATUS_OK;
 
 
 %{
