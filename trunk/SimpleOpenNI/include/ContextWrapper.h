@@ -177,13 +177,13 @@ public:
 	// users
 	virtual bool enableUser(int flags);
 
-	int		userWidth();
-	int		userHeight();
+        int	userWidth();
+        int	userHeight();
 
 	bool	getCoM(int user, XnPoint3D&  com);
-	int		getNumberOfUsers();
-	int		getUsers(std::vector<int>* userList);
-	int		getUserPixels(int user,int* userSceneData);
+        int	getNumberOfUsers();
+        int	getUsers(std::vector<int>* userList);
+        int	getUserPixels(int user,int* userSceneData);
 
 	bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
 
@@ -192,12 +192,15 @@ public:
 	void	requestCalibrationSkeleton(int user, bool force);
 	void	abortCalibrationSkeleton(int user);
 
-	bool	saveCalibrationDataSkeleton(int user,int slot);
-	bool	loadCalibrationDataSkeleton(int user,int slot);
-	void	clearCalibrationDataSkeleton(int slot);
-	bool	isCalibrationDataSkeleton(int slot);
+        bool	saveCalibrationDataSkeleton(int user,int slot);
+        bool	loadCalibrationDataSkeleton(int user,int slot);
+        void	clearCalibrationDataSkeleton(int slot);
+        bool	isCalibrationDataSkeleton(int slot);
 
-	void	setSmoothingSkeleton(float factor);
+        bool	saveCalibrationDataSkeleton(int user,const char* calibrationFile);
+        bool	loadCalibrationDataSkeleton(int user,const char* calibrationFile);
+
+        void	setSmoothingSkeleton(float factor);
 
 	bool	isTrackingSkeleton(int user);
 	void	startTrackingSkeleton(int user);
@@ -208,8 +211,12 @@ public:
 
 	bool	getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
 	bool	getJointOrientationSkeleton(int user,
-									    int joint,
-										XnSkeletonJointOrientation* jointOrientation);
+                                            int joint,
+                                            XnSkeletonJointOrientation* jointOrientation);
+
+
+        xn::UserGenerator& getUserGenerator() { return _userGenerator; }
+
 
 
 	//////////////////////////////////////////////////////////////////////////////
