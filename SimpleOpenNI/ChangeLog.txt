@@ -39,7 +39,7 @@ v0.20 alpha,
 		  of Nite in the current version, this functions where removed:
 			SetSteadyMaxVelocity
 			GetSteadyMaxVelocity
-		- Ported some more NITE classes:
+		- Ported some more NITE classes, not very well tested, need to build examples:
 			- XnVSelectableSlider2D
 			- XnVSelectableSlider1D
 			- XnVWaveDetector
@@ -47,13 +47,13 @@ v0.20 alpha,
 			- XnVSlider1D
 			- XnVSlider2D
 			- XnVSlider3D
+		- Added new example:
+		  SimpleOpenNI_NITE_Slider2d	- Shows how to use 2D Sliders
 		- Changed some Nite files, because of deprecated methods
 			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
 		- Reorganized the sample folder structure and the names of the examples
 		- Added FAQ, Screenshot section to the wiki
 		- Updated install instructions on the wiki for linux
-		- Added new example:
-		  SimpleOpenNI_NITE_Slider2d	- Shows how to use 2D Sliders
 		- Fixed a bug: If you play a redord, skeletons were not displayed
 
 v0.18 alpha, 03/27/2011
