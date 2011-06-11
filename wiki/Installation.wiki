@@ -111,3 +111,8 @@ Those programs have to be on your system in order to install OpenNI:
 > cd ./yourFolder/Sensor-Bin-Linux64-v5.0.1.32
 > sudo install
 }}}
+
+* Install SimpleOpenNI *
+  * Copy the 'SimpleOpenNI.zip' into this folder:
+      ~/sketchbook/libraries
+  * If you don't have this folder then create it.
