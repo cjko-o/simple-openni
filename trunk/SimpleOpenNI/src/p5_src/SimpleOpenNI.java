@@ -530,7 +530,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
         public boolean	loadCalibrationDataSkeleton(int user,String calibrationFile)
         {
             String path = _parent.dataPath(calibrationFile);
-            _parent.createPath(path);
             return (super.loadCalibrationDataSkeleton(user,path));
         }
 
