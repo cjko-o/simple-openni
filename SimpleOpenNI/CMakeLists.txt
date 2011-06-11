@@ -193,7 +193,7 @@ ENDIF()
 
 
 SET(SWIG_SOURCES 
-src/SimpleOpenNI.i
+src/SimpleOpenNIMain.i
 src/ContextWrapper.cpp
 src/NITE_Helpers.cpp
 )
