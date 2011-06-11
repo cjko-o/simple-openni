@@ -11,6 +11,9 @@ v0.20 alpha,
 		- Tested the library with Processing 1.5.1
 		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
 		  key was not proper installed, in this case there will be an error message.
+		- Added skeleton calibration file load/save:
+		  saveCalibrationDataSkeleton, loadCalibrationDataSkeleton
+		  Also made an example for that: UserSaveCalib
 		- Added Nite extensions XnVPushDetector/XnVSwipeDetector from David Buchman. Had to change it a bit, due to changes
 		  of Nite in the current version, this functions where removed:
 			SetSteadyMaxVelocity
@@ -23,7 +26,6 @@ v0.20 alpha,
 			- XnVSlider1D
 			- XnVSlider2D
 			- XnVSlider3D
-			- XnVMultipleHands
 		- Changed some Nite files, because of deprecated methods
 			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
 		- Reorganized the sample folder structure and the names of the examples

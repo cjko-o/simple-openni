@@ -1804,6 +1804,31 @@ bool ContextWrapper::loadCalibrationDataSkeleton(int user,int slot)
 	return(_rc == XN_STATUS_OK);
 }
 
+bool ContextWrapper::saveCalibrationDataSkeleton(int user,const char* calibrationFile)
+{
+    if(!_userGenerator.IsValid())
+        return false;
+    else
+        updateUser();
+
+    if(_userGenerator.GetSkeletonCap().IsCalibrated(user) == 0)
+        return false;
+
+    _rc = _userGenerator.GetSkeletonCap().SaveCalibrationDataToFile(user,calibrationFile);
+    return(_rc == XN_STATUS_OK);
+}
+
+bool ContextWrapper::loadCalibrationDataSkeleton(int user,const char* calibrationFile)
+{
+    if(!_userGenerator.IsValid())
+        return false;
+    else
+        updateUser();
+
+    _rc = _userGenerator.GetSkeletonCap().LoadCalibrationDataFromFile(user,calibrationFile);
+    return(_rc == XN_STATUS_OK);
+}
+
 void ContextWrapper::setSmoothingSkeleton(float factor)
 {
 	if(!_userGenerator.IsValid())

@@ -33,8 +33,8 @@
 
 
 %template(IntVector)	std::vector<int>;
-%template(Vector3D)		std::vector<XnVector3D>;
-%template(Point3D)		std::vector<XnPoint3D>;
+%template(Vector3D)	std::vector<XnVector3D>;
+%template(Point3D)	std::vector<XnPoint3D>;
 
 
 
@@ -174,12 +174,12 @@ public:
 	
 	int rgbWidth();
 	int rgbHeight();
-	int	rgbImage(int* map);	
+        int rgbImage(int* map);
 	
 	int irWidth();
 	int irHeight();
-	int	irMap(int* map);	
-	int	irImage(int* map);	
+        int irMap(int* map);
+        int irImage(int* map);
 
 	int sceneWidth();
 	int sceneHeight();
@@ -188,13 +188,13 @@ public:
 	void getSceneFloor(XnVector3D* point,
 					   XnVector3D* normal);
 	
-	int		userWidth();
-	int		userHeight();
+        int	userWidth();
+        int	userHeight();
 
 	bool	getCoM(int user, XnPoint3D&  com);
-	int		getNumberOfUsers();
-	int		getUsers(std::vector<int>* userList);
-	int		getUserPixels(int user,int* userSceneData);
+        int	getNumberOfUsers();
+        int	getUsers(std::vector<int>* userList);
+        int	getUserPixels(int user,int* userSceneData);
 
 	bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
 
@@ -209,6 +209,9 @@ public:
 	void	clearCalibrationDataSkeleton(int slot);
 	bool	isCalibrationDataSkeleton(int slot);
 
+        bool	saveCalibrationDataSkeleton(int user,const char* calibrationFile);
+        bool	loadCalibrationDataSkeleton(int user,const char* calibrationFile);
+
 	void	setSmoothingSkeleton(float factor);
 	
 	bool	isTrackingSkeleton(int user);
@@ -220,9 +223,11 @@ public:
 	
 	bool	getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
 	bool	getJointOrientationSkeleton(int user,
-									    int joint,
-										XnSkeletonJointOrientation* jointOrientation);
+                                            int joint,
+                                            XnSkeletonJointOrientation* jointOrientation);
 	
+        xn::UserGenerator& getUserGenerator() { return _userGenerator; }
+
 	
 	void	startTrackingHands(const XnVector3D& pos);
 	void	stopTrackingHands(int handId);
@@ -300,132 +305,6 @@ protected:
 
 };
 
-
-# -----------------------------------------------------------------------------
-# Context
-
-namespace xn{
-
-/*
-class EnumerationErrors
-{
-public:
-    EnumerationErrors();
-    EnumerationErrors(XnEnumerationErrors* pErrors, XnBool bOwn = FALSE);
-    
-    ~EnumerationErrors();
-
-    class Iterator
-    {
-    public:
-        friend class EnumerationErrors;
-
-        XnBool operator==(const Iterator& other) const;
-        XnBool operator!=(const Iterator& other) const;
-        Iterator& operator++();
-        Iterator operator++(int);
-
-        const XnProductionNodeDescription& Description();
-        XnStatus Error();
-		
-		Iterator(XnEnumerationErrorsIterator it);
-    };
-
-    Iterator Begin() const;
-    Iterator End() const;
-
-    XnStatus ToString(XnChar* csBuffer, XnUInt32 nSize);
-    void Free();
-    XnEnumerationErrors* GetUnderlying();
-};
-*/
-
-class Context
-{
-public:
-    
-    Context();
-    Context(XnContext* pContext);
-    Context(const Context& other);
-
-    ~Context();
-
-    XnContext* GetUnderlyingObject() const;
-
-    XnStatus Init();
-
-    /*
-    XnStatus RunXmlScript(const XnChar* strScript, EnumerationErrors* pErrors = NULL);
-
-    XnStatus RunXmlScriptFromFile(const XnChar* strFileName, EnumerationErrors* pErrors = NULL);
-	
-    XnStatus InitFromXmlFile(const XnChar* strFileName, EnumerationErrors* pErrors = NULL);
-	*/
-
-/*
-    XnStatus OpenFileRecording(const XnChar* strFileName);
-
-    XnStatus CreateMockNode(XnProductionNodeType type, const XnChar* strName, ProductionNode& node);
-
-    XnStatus CreateMockNodeBasedOn(ProductionNode& originalNode, const XnChar* strName, ProductionNode& mockNode);
-
-    XnStatus CreateCodec(XnCodecID codecID, ProductionNode& initializerNode, Codec& codec);
-
-    void Shutdown();
-
-    XnStatus AddLicense(const XnLicense& License);
-
-    XnStatus EnumerateLicenses(XnLicense*& aLicenses, XnUInt32& nCount) const;
-
-    static void FreeLicensesList(XnLicense aLicenses[]);
-
-//    EnumerateProductionTrees(XnProductionNodeType Type, Query* pQuery, NodeInfoList& TreesList, EnumerationErrors* pErrors = NULL) const;
- 
-    XnStatus CreateAnyProductionTree(XnProductionNodeType type, Query* pQuery, ProductionNode& node, EnumerationErrors* pErrors = NULL);
-
-    XnStatus CreateProductionTree(NodeInfo& Tree);
-
-    XnStatus EnumerateExistingNodes(NodeInfoList& list) const;
-
-    XnStatus EnumerateExistingNodes(NodeInfoList& list, XnProductionNodeType type) const;
-
-    XnStatus FindExistingNode(XnProductionNodeType type, ProductionNode& node) const;
-
-    XnStatus GetProductionNodeByName(const XnChar* strInstanceName, ProductionNode& node) const;
-
-    XnStatus GetProductionNodeInfoByName(const XnChar* strInstanceName, NodeInfo& nodeInfo) const;
-    
-    XnStatus StartGeneratingAll();
-
-    XnStatus StopGeneratingAll();
-
-    XnStatus SetGlobalMirror(XnBool bMirror);
-
-    XnBool GetGlobalMirror();
-
-    XnStatus GetGlobalErrorState();
-
-    XnStatus RegisterToErrorStateChange(XnErrorStateChangedHandler handler, void* pCookie, XnCallbackHandle& hCallback);
-
-    void UnregisterFromErrorStateChange(XnCallbackHandle hCallback);
-
-    XnStatus WaitAndUpdateAll();
-
-    XnStatus WaitAnyUpdateAll();
-
-    XnStatus WaitOneUpdateAll(ProductionNode& node);
-
-    XnStatus WaitNoneUpdateAll();
-
-    XnStatus AutoEnumerateOverSingleInput(NodeInfoList& List, XnProductionNodeDescription& description, const XnChar* strCreationInfo, XnProductionNodeType InputType, EnumerationErrors* pErrors, Query* pQuery = NULL) const;
-
-    void SetHandle(XnContext* pContext);
-    */
-    
-};
-
- 
-};
 
 
 

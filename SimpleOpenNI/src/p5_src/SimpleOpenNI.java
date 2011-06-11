@@ -519,6 +519,21 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			return false;
 	}
 	
+        public boolean	saveCalibrationDataSkeleton(int user,String calibrationFile)
+        {
+            String path = _parent.dataPath(calibrationFile);
+            _parent.createPath(path);
+            _parent.println(path);
+            return (super.saveCalibrationDataSkeleton(user,path));
+        }
+
+        public boolean	loadCalibrationDataSkeleton(int user,String calibrationFile)
+        {
+            String path = _parent.dataPath(calibrationFile);
+            _parent.createPath(path);
+            return (super.loadCalibrationDataSkeleton(user,path));
+        }
+
 	public int[] getUsersPixels(int user)
 	{
 		int size = userWidth() * userHeight();
