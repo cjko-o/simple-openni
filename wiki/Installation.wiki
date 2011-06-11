@@ -88,7 +88,7 @@ Those programs have to be on your system in order to install OpenNI:
   * Download the install files(stable or unstable, 32bit or 64bit):
   # [http://openni.org/downloadfiles/2-openni-binaries OpenNI]
   # [http://openni.org/downloadfiles/12-openni-compliant-middleware-binaries Nite]
-  # [http://openni.org/downloadfiles/2-openni-binaries Kinect Drivers] , [http://openni.org/downloadfiles/30-openni-compliant-hardware-binaries Primsense Drivers(Asus Xtion Pro,etc.)] 
+  # [https://github.com/avin2/SensorKinect Kinect Drivers] , [http://openni.org/downloadfiles/30-openni-compliant-hardware-binaries Primsense Drivers(Asus Xtion Pro,etc.)] 
   * Uncompress all files to a folder
   * Install OpenNI:
 {{{
@@ -100,8 +100,14 @@ Those programs have to be on your system in order to install OpenNI:
 > cd ./yourFolder/Nite-1.3.1.5
 > sudo install
 }}}
-  * Install Drivers:
+  * Install Driver Kinect:
+  # decompress ./yourFolder/avin2-SensorKinect-28738dc/SensorKinect-Bin-Linux64-v5.0.1.32.tar.bz2
 {{{
-> cd ./yourFolder/OpenNI-Bin-Linux64-v1.1.0.41 
+> cd ./yourFolder/SensorKinect-Bin-Linux64-v5.0.1.32
+> sudo install
+}}}
+  * Install Driver Primesense:
+{{{
+> cd ./yourFolder/Sensor-Bin-Linux64-v5.0.1.32
 > sudo install
 }}}
