@@ -1,1 +1,1 @@
-#summary A selection of project which use SimpleOpenNI
+#summary A selection of projects which use SimpleOpenNI
