@@ -262,6 +262,7 @@ public:
 	void convertProjectiveToRealWorld(XnVector3D* proj,XnVector3D* world);	
 	void convertProjectiveToRealWorld(std::vector<XnVector3D>* projArray,std::vector<XnVector3D>* worldArray);
 
+        bool alternativeViewPointDepthToImage();
 
 	///////////////////////////////////////////////////////////////////////////
 	// callbacks
@@ -411,19 +412,19 @@ protected:
 	xn::DepthGenerator	_depth;
 	xn::DepthMetaData	_depthMD;
 	XnMapOutputMode		_depthMapOutputMode;
-	float				_pDepthHist[MAX_DEPTH];
-	float				_pDepthGamma[MAX_DEPTH];
+        float			_pDepthHist[MAX_DEPTH];
+        float			_pDepthGamma[MAX_DEPTH];
 	XnRGB24Pixel*		_pDepthImage;
-	int					_depthBufSize;
-	float				_depthImageColor[3];
-	XnPoint3D*			_depthMapRealWorld;
-	int					_depthImageColorMode;
+        int			_depthBufSize;
+        float			_depthImageColor[3];
+        XnPoint3D*		_depthMapRealWorld;
+        int			_depthImageColorMode;
 
 	// cam image
 	xn::ImageGenerator	_image;
 	xn::ImageMetaData	_imageMD;
 	XnMapOutputMode		_imageMapOutputMode;
-	int					_rgbBufSize;
+        int			_rgbBufSize;
 
 	// ir
 	xn::IRGenerator		_ir;
