@@ -46,7 +46,7 @@ On windows i only used Visual Studio 2008
   * Now you should find in the 'SimpleOpenNI/build' folder the Visual Studio Projectfile
   * Open 'SimpleOpenNI.sln' and build it
 ----
-= OSX =
+= OSX 32/64bit =
 
 On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in order to compile the sources. Processing should be installed in the applications-folder.
 
@@ -63,13 +63,9 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
 
   * Download the souces from the svn
   * Open a terminal and go into the 'SimpleOpenNI' folder
+  * Change the paths to your local ones in those two files:  buildLinux64.sh or buildLinux32, installLinux.sh (There is more info in the files)
   * Type those commands:
 {{{
-> mkdir build
-> cd build
-> cmake -DOPEN_NI_INCLUDE=/usr/include/ni -DOPEN_NI_LIB=/usr/lib \
--DXN_NITE_INCLUDE=/usr/include/nite -DXN_NITE_LIB=/usr/lib \
--DP5_JAR='your path to the processing folder'/processing-1.2.1/lib/core.jar \
--DEIGEN3D_INCLUDE=/usr/local/include/eigen3 ..
-> make
+> ./buildOsx.sh
+> ./installOsx.sh
 }}}
