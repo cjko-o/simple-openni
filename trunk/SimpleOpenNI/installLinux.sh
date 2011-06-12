@@ -8,6 +8,9 @@
 # prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
 # date:  06/11/2011 (m/d/y)
 # ----------------------------------------------------------------------------
+# Change P5_Path to the folder where Processing stores the libraries
+# On linux it should be in '~/sketchbook' (Processing 1.5.1)
+# ----------------------------------------------------------------------------
 
 # copy the libs/doc/examples to the processing folders
 P5_Path=~/sketchbook
