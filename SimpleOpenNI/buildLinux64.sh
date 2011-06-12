@@ -9,7 +9,7 @@
 # date:  06/11/2011 (m/d/y)
 # ----------------------------------------------------------------------------
 
-# optional, but gives a clean buil
+# optional, but gives a clean build
 rm -r build64
 
 # check if build folder exists
@@ -20,12 +20,13 @@ fi
 cd ./build64
 
 echo "--- generate cmake ---"
+# changes this according to your environment
 cmake -DOPEN_NI_INCLUDE=/usr/include/openni/ \
 	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
 	  -DXN_NITE_LIB=/usr/lib/ \
 	  -DEIGEN3D_INCLUDE=/usr/include/eigen3/ \
 	  -DBOOST_ROOT=~/Documents/development/libs/boost/boost_1_46_1/ \
-	  -DBoost_LIBRARYDIR=/usr/local/lib/ \
+	  -DBOOST_LIBRARYDIR=/usr/local/lib/ \
 	  -DP5_JAR=~/Documents/localApps/processing-1.5.1/lib/core.jar \
 	  ..
 
@@ -36,5 +37,10 @@ echo "--- build ---"
 make -j 6
 
 echo "--- copy ---"
-cp SimpleOpenNI.jar ~/sketchbook/libraries/SimpleOpenNI/library/
-cp libSimpleOpenNI.so ~/sketchbook/libraries/SimpleOpenNI/library/
+# copy the library
+cp SimpleOpenNI.jar ../dist/all/SimpleOpenNI/library
+cp libSimpleOpenNI.so ../dist/all/SimpleOpenNI/library
+
+# copy the doc
+cp -r ./doc/* ../dist/all/SimpleOpenNI/documentation/
+
