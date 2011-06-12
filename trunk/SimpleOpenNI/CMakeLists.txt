@@ -152,7 +152,7 @@ IF(NOT HAVE_NITE_H)
 ENDIF()
 
 INCLUDE_DIRECTORIES(${XN_NITE_INCLUDE})
-FIND_LIBRARY(NITE_LIBRARY NAMES XnVNite PATHS ${XN_NITE_LIB})
+FIND_LIBRARY(NITE_LIBRARY NAMES XnVNite_1_3_1 PATHS ${XN_NITE_LIB})
 SET(LIBS ${LIBS} ${NITE_LIBRARY})
 
 # -----------------------------------------------------------------------------
