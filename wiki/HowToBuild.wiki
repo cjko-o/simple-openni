@@ -52,13 +52,11 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
 
   * Download the souces from the svn
   * Open a terminal and go into the 'SimpleOpenNI' folder
+  * Change the paths to your local ones in those two files:  buildOsx.sh, installOsx.sh (There is more info in the files)
   * Type those commands:
 {{{
-> mkdir build
-> cd build
-> cmake -DXN_NITE_INCLUDE=/usr/include/nite -DXN_NITE_LIB=/usr/lib \
--DEIGEN3D_INCLUDE=/usr/local/include/eigen3 ..
-> make
+> ./buildOsx.sh
+> ./installOsx.sh
 }}}
 ----
 = UNIX/Linux =
