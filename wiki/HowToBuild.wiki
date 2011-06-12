@@ -22,8 +22,7 @@ Before you can build the library you should install following tools:
 Boost build tips for OSX(32/64bit version)
 {{{
 > cd boost_folderXY
-> ./bjam link=static architecture=x86 address-model=32_64
-> sudo ./bjam install
+> sudo ./bjam link=static architecture=x86 address-model=32_64 install
 }}}
 ----
 = Windows =
