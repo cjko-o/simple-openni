@@ -14,13 +14,28 @@ v0.20 alpha,
 		- Added skeleton calibration file load/save:
 		  see saveCalibrationDataSkeleton, loadCalibrationDataSkeleton
 		  Also created an example for that: examples/SimpleOpenNI/UserSaveCalib
+		- Added AlternativeViewpoint capability, see: examples/SimpleOpenNI/AlternativeViewPoint3d
+		  The method 'alternativeViewPointDepthToImage()' aligns the Depth with the Image data
 		- Added native OpenNI classes, like the ones for NITE, see examples/SimpleOpenNI/UserSaveCalib, line 114
 		  This is not fully functional at the moment(some nasty problems with nested c++ classes), but in future i 
 		  would prefer to impelment those classes, that way you can use all the features implemented in OpenNI, not 
 		  only the ones exported through the SimpleOpenNI class.
-		  I also build in access methods in the SimpleOpenNI class: getUserGenerator(), this gives you the currently used 
-		  UserGenerator, if you have called enableUser before.
-		  Those classes are implemented(no callback till now):
+		  I also build in access methods in the SimpleOpenNI class, 
+		  this gives you the currently used generator(if you enabled it before): 
+			- getDepthGenerator()
+			- getImageGenerator()
+			- getIRGenerator()
+			- getSceneAnalyzer()
+			- getUserGenerator()
+			- getHandsGenerator()
+			- getGestureGenerator()
+		  Those classes are implemented(no callbacks till now !):
+			- OutputMetaData
+			- MapMetaData
+			- DepthMetaData
+			- ImageMetaData
+			- IRMetaData
+			- SceneMetaData			
 			- Capability
 			- SkeletonCapability
 			- PoseDetectionCapability
@@ -33,8 +48,12 @@ v0.20 alpha,
 			- ProductionNode
 			- Generator
 			- UserGenerator
-		- Added AlternativeViewpoint capability, see: examples/SimpleOpenNI/AlternativeViewPoint3d
-		  The method 'alternativeViewPointDepthToImage()' aligns the Depth with the Image data
+			- DepthGenerator
+			- ImageGenerator
+			- IRGenerator
+			- GestureGenerator
+			- HandsGenerator
+			- SceneAnalyzer
 		- Added Nite extensions XnVPushDetector/XnVSwipeDetector from David Buchman. Had to change it a bit, due to changes
 		  of Nite in the current version, this functions where removed:
 			SetSteadyMaxVelocity
@@ -47,8 +66,9 @@ v0.20 alpha,
 			- XnVSlider1D
 			- XnVSlider2D
 			- XnVSlider3D
-		- Added new example:
-		  SimpleOpenNI_NITE_Slider2d	- Shows how to use 2D Sliders
+		- Added some new example:
+		  examples/Nite/Slider2d	- Shows how to use 2D Sliders
+		  examples/eclipse/			- Shows how to use SimpleOpenNI in eclipse
 		- Changed some Nite files, because of deprecated methods
 			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
 		- Reorganized the sample folder structure and the names of the examples

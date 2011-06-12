@@ -112,8 +112,11 @@ public:
 	virtual bool enableDepth();
 	virtual bool enableDepth(int width,int height,int fps);
 
+        xn::DepthGenerator& getDepthGenerator() { return _depth; }
+
+
 	int depthWidth();
-	int	depthHeight();
+        int depthHeight();
 
 	int	depthImage(int* map);		// argb 4-Bytes / alpha is not used
 	void setDepthImageColor(int r,int g,int b);
@@ -142,6 +145,8 @@ public:
 	virtual bool enableRGB();
 	virtual bool enableRGB(int width,int height,int fps);
 
+        xn::ImageGenerator& getImageGenerator() { return _image; }
+
 	int rgbWidth();
 	int rgbHeight();
 
@@ -151,6 +156,8 @@ public:
 	// ir image
 	virtual bool enableIR();
 	virtual bool enableIR(int width,int height,int fps);
+
+        xn::IRGenerator& getIRGenerator() { return _ir; }
 
 	int irWidth();
 	int irHeight();
@@ -163,8 +170,10 @@ public:
 	virtual bool enableScene();
 	virtual bool enableScene(int width,int height,int fps);
 
+        xn::SceneAnalyzer& getSceneAnalyzer() { return _sceneAnalyzer; }
+
 	int sceneWidth();
-	int	sceneHeight();
+        int sceneHeight();
 
 	int sceneMap(int* map);
 	int sceneImage(int* map);		// 16-bit value, with the labels, size of the depth map
@@ -176,6 +185,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////////
 	// users
 	virtual bool enableUser(int flags);
+
+        xn::UserGenerator& getUserGenerator() { return _userGenerator; }
 
         int	userWidth();
         int	userHeight();
@@ -215,13 +226,12 @@ public:
                                             XnSkeletonJointOrientation* jointOrientation);
 
 
-        xn::UserGenerator& getUserGenerator() { return _userGenerator; }
-
-
-
 	//////////////////////////////////////////////////////////////////////////////
 	// hands
 	virtual bool enableHands();
+
+        xn::HandsGenerator& getHandsGenerator() { return _handsGenerator; }
+
 	void	startTrackingHands(const XnVector3D& pos);
 	void	stopTrackingHands(int handId);
 	void	stopTrackingAllHands();
@@ -230,7 +240,10 @@ public:
 	//////////////////////////////////////////////////////////////////////////////
 	// gesture
 	virtual bool enableGesture();
-	void addGesture(const char* gesture);
+
+        xn::GestureGenerator& getGestureGenerator() { return _gestureGenerator; }
+
+        void addGesture(const char* gesture);
 	void removeGesture(const char* gesture);
 	bool availableGesture(const char *strGesture);
 	// void addGesture(const char* gesture,XnBoundingBox3D *  pArea);
@@ -403,10 +416,10 @@ protected:
 	bool _initFlag;
 	bool _generatingFlag;
 	
-	XnStatus			_rc;
-	xn::Context			_context;
+        XnStatus		_rc;
+        xn::Context		_context;
 
-	int					_nodes;
+        int			_nodes;
 
 	// depht
 	xn::DepthGenerator	_depth;
@@ -431,7 +444,7 @@ protected:
 	xn::IRMetaData		_irMD;
 	XnMapOutputMode		_irMapOutputMode;
 	XnRGB24Pixel*		_pIrImage;
-	int					_irBufSize;
+        int			_irBufSize;
 
 	// scene
 	xn::DepthGenerator	_sceneDepth;
@@ -439,29 +452,29 @@ protected:
 	xn::SceneMetaData	_sceneMD;
 	XnMapOutputMode		_sceneMapOutputMode;
 	XnRGB24Pixel*		_pSceneImage;
-	int					_sceneBufSize;
+        int			_sceneBufSize;
 
 	// user
 	xn::UserGenerator	_userGenerator;
 	XnCallbackHandle	_hUserCb;
 	XnCallbackHandle	_hCalibrationCb;
 	XnCallbackHandle	_hPoseCb;
-	int					_userWidth;
-	int					_userHeight;
-	int					_userSceneBufSize;
+        int			_userWidth;
+        int			_userHeight;
+        int			_userSceneBufSize;
 
 	// hands
 	xn::HandsGenerator	 _handsGenerator;
 	XnCallbackHandle	 _hHandsCb;
 
 	// gesture
-	xn::GestureGenerator _gestureGenerator; 
+        xn::GestureGenerator     _gestureGenerator;
 	XnCallbackHandle	 _hGestureCb;
 		
 	// recorder / player
 	xn::Recorder		_recorder;
 
-	bool				_firstTimeUpdate;
+        bool			_firstTimeUpdate;
 
 	///////////////////////////////////////////////////////////////////////////
 	// NITE
@@ -532,8 +545,8 @@ private:
 	void run();
 
 	boost::shared_ptr<boost::thread>	_thread;
-	boost::mutex						_mainMutex;
-	bool								_threadRun;
+        boost::mutex				_mainMutex;
+        bool					_threadRun;
 	int									_threadMode;
 
 };
