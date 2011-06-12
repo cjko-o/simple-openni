@@ -64,7 +64,7 @@ ELSE()
 		set(Boost_LIBRARIES  "boost_thread.a")
 	ELSE()
 		# unix/linux,shared libs of boost should be installed
-		set(Boost_LIBRARIES  "boost_thread")
+		set(Boost_LIBRARIES  "boost_thread.a")
 
 	ENDIF()
 ENDIF()
