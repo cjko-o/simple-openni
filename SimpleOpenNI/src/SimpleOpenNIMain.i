@@ -138,19 +138,28 @@ public:
 	
 	virtual bool enableDepth();
 	virtual bool enableDepth(int width,int height,int fps);
+        xn::DepthGenerator& getDepthGenerator();
 
 	virtual bool enableRGB();
 	virtual bool enableRGB(int width,int height,int fps);
-	
+        xn::ImageGenerator& getImageGenerator();
+
 	virtual bool enableIR();
 	virtual bool enableIR(int width,int height,int fps);
+        xn::IRGenerator& getIRGenerator();
 
 	virtual bool enableScene();
 	virtual bool enableScene(int width,int height,int fps);
+        xn::SceneAnalyzer& getSceneAnalyzer();
 
 	virtual bool enableUser(int flags);
+        xn::UserGenerator& getUserGenerator();
+
 	virtual bool enableHands();
-	virtual bool enableGesture();
+        xn::HandsGenerator& getHandsGenerator();
+
+        virtual bool enableGesture();
+        xn::GestureGenerator& getGestureGenerator();
 
 	virtual void update();
 
@@ -226,7 +235,6 @@ public:
                                             int joint,
                                             XnSkeletonJointOrientation* jointOrientation);
 	
-        xn::UserGenerator& getUserGenerator() { return _userGenerator; }
 
 	
 	void	startTrackingHands(const XnVector3D& pos);
