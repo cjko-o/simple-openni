@@ -65,7 +65,7 @@ Those programs have to be on your system in order to install OpenNI:
 }}}
 ...
 
-* Install OpenNI the short way(OpenNI v1.1.0.41 and NITE v1.3.1.5) *
+* Install OpenNI the short way (OpenNI v1.1.0.41 and NITE v1.3.1.5) *
   * Download the [http://code.google.com/p/simple-openni/downloads/detail?name=OpenNI_NITE_Installer-OSX-0.20.zip&can=2&q=#makechanges Installer]
   * Unzip the file and open a terminal window
   * Go to the unzipped folder 'OpenNI_NITE_Installer-OSX'
@@ -101,7 +101,7 @@ Those programs have to be on your system in order to install OpenNI:
 > sudo install
 }}}
   * Install Driver Kinect:
-  # decompress ./yourFolder/avin2-SensorKinect-28738dc/SensorKinect-Bin-Linux64-v5.0.1.32.tar.bz2
+  decompress ./yourFolder/avin2-SensorKinect-28738dc/SensorKinect-Bin-Linux64-v5.0.1.32.tar.bz2
 {{{
 > cd ./yourFolder/SensorKinect-Bin-Linux64-v5.0.1.32
 > sudo install
