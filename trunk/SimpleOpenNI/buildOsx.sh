@@ -38,7 +38,7 @@ make -j 6 VERBOSE=1
 echo "--- copy ---"
 # copy the library
 cp SimpleOpenNI.jar ../dist/all/SimpleOpenNI/library
-cp libSimpleOpenNI.so ../dist/all/SimpleOpenNI/library
+cp libSimpleOpenNI.jnilib ../dist/all/SimpleOpenNI/library
 
 # copy the doc
 cp -r ./doc/* ../dist/all/SimpleOpenNI/documentation/
