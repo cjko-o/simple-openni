@@ -7,15 +7,15 @@ vx.xx status, mm/dd/yyyy
 v0.20 alpha,
 	New:
 		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
-		- Added 64bit support
 		- Tested the library with Processing 1.5.1
+		- Added 64bit support
 		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
 		  key was not proper installed, in this case there will be an error message.
 		- Added skeleton calibration file load/save:
 		  see saveCalibrationDataSkeleton, loadCalibrationDataSkeleton
 		  Also created an example for that: examples/SimpleOpenNI/UserSaveCalib
 		- Added AlternativeViewpoint capability, see: examples/SimpleOpenNI/AlternativeViewPoint3d
-		  The method 'alternativeViewPointDepthToImage()' aligns the Depth with the Image data
+		  The method 'alternativeViewPointDepthToImage()' aligns the Depth data with the Image data
 		- Added native OpenNI classes, like the ones for NITE, see examples/SimpleOpenNI/UserSaveCalib, line 114
 		  This is not fully functional at the moment(some nasty problems with nested c++ classes), but in future i 
 		  would prefer to impelment those classes, that way you can use all the features implemented in OpenNI, not 
@@ -72,6 +72,7 @@ v0.20 alpha,
 		- Changed some Nite files, because of deprecated methods
 			-  XnVSessionManager: Initialize,SetGesture, SetQRGesture
 		- Reorganized the sample folder structure and the names of the examples
+		- Added build scripts for linux, see /trunk/SimpleOpenNI/buildLinux64.sh
 		- Added FAQ, Screenshot section to the wiki
 		- Updated install instructions on the wiki for linux
 		- Fixed a bug: If you play a redord, skeletons were not displayed
