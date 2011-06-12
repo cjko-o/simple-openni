@@ -18,7 +18,7 @@ if [ ! -d $P5_Path/libraries ]; then
 fi
 
 # copie the files
-cp -r ./dist/all/SimpleOpenNI/  $P5_Path/libraries/
+cp -r ./dist/all/SimpleOpenNI  $P5_Path/libraries/
 
 # remove all subversion folders
 cd $P5_Path/libraries/SimpleOpenNI
