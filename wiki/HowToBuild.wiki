@@ -19,11 +19,18 @@ Before you can build the library you should install following tools:
   * [http://www.swig.org/download.html Swig] >= *v2.0.2*
   * [http://eigen.tuxfamily.org Eigen] >= *v3.0*
   * [http://www.boost.org/ Boost] >= *v1.46* (use the static build)
-Boost build tips for OSX(32/64bit version)
+Boost build tips for OSX(32/64bit version):
 {{{
 > cd boost_folderXY
 > sudo ./bjam link=static architecture=x86 address-model=32_64 install
 }}}
+Boost build tips for Linux(64bit version):
+{{{
+> cd boost_folderXY
+> ./bjam link=static cxxflags=-fPIC
+}}}
+I did run into troubles with the shared lib version of boost and the static lib version. Also i did get problems when i linked the static lib version to SimpleOpenNI without the -fPIC flag.
+
 ----
 = Windows =
 
