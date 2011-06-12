@@ -32,13 +32,15 @@ cp ./data/libXnCore.dylib /usr/lib/
 cp ./data/libXnDDK.dylib /usr/lib/
 cp ./data/libXnDeviceFile.dylib /usr/lib/
 cp ./data/libXnDeviceSensorV2.dylib /usr/lib/
+cp ./data/libXnDeviceSensorV2KM.dylib /usr/lib/
 cp ./data/libXnFormats.dylib /usr/lib/
-cp ./data/libXnVCNite.dylib /usr/lib/
-cp ./data/libXnVFeatures.dylib /usr/lib/
-cp ./data/libXnVHandGenerator.dylib /usr/lib/
-cp ./data/libXnVNite.dylib /usr/lib/
+cp ./data/libXnVCNite_1_3_1.dylib /usr/lib/
+cp ./data/libXnVFeatures_1_3_1.dylib /usr/lib/
+cp ./data/libXnVHandGenerator_1_3_1.dylib /usr/lib/
+cp ./data/libXnVNite_1_3_1.dylib /usr/lib/
 
 # libusb
+# this is a hack !!!!!!!!!!!!! Don't use it, just for testing
 echo "create the folders for libusb(macport)"
 mkdir /opt
 mkdir /opt/local
