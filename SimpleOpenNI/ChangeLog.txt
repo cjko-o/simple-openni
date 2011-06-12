@@ -8,7 +8,7 @@ v0.20 alpha,
 	New:
 		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
 		- Tested the library with Processing 1.5.1
-		- Added 64bit support
+		- Added 64bit support for Linux and OSX(32/64Bit), Windows will come later, the Kinect driver is still only 32bit
 		- Added a check to verify installed licenses, some error reports on the list where caused, because the license
 		  key was not proper installed, in this case there will be an error message.
 		- Added skeleton calibration file load/save:
