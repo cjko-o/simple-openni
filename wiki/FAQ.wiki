@@ -2,12 +2,12 @@
 
 === If i start an example under linux i've got always a 'java.lang.UnsatisfiedLinkError' ? ===
 
-Maybe you have the wrong version for your installation.
+Maybe you have the wrong version for your installation(32bit or 64bit).
 If this is your full error log:
 {{{
 Exception in thread "Animation Thread" java.lang.UnsatisfiedLinkError:
-/home/max/sketchbook/libraries/SimpleOpenNI/library/libSimpleOpenNI.so:
-/home/max/sketchbook/libraries/SimpleOpenNI/library/libSimpleOpenNI.so: wrong ELF class: ELFCLASS64 (Possible cause: architecture word width mismatch)
+/home/xx/sketchbook/libraries/SimpleOpenNI/library/libSimpleOpenNI.so:
+/home/xx/sketchbook/libraries/SimpleOpenNI/library/libSimpleOpenNI.so: wrong ELF class: ELFCLASS64 (Possible cause: architecture word width mismatch)
 	at java.lang.ClassLoader$NativeLibrary.load(Native Method)
 	at java.lang.ClassLoader.loadLibrary0(ClassLoader.java:1803)
 	at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1728)
@@ -19,3 +19,4 @@ Exception in thread "Animation Thread" java.lang.UnsatisfiedLinkError:
 	at processing.core.PApplet.run(Unknown Source)
 	at java.lang.Thread.run(Thread.java:662)
 }}}
+Install the right version for your system.
