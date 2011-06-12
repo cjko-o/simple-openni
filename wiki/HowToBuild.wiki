@@ -19,11 +19,11 @@ Before you can build the library you should install following tools:
   * [http://www.swig.org/download.html Swig] >= *v2.0.2*
   * [http://eigen.tuxfamily.org Eigen] >= *v3.0*
   * [http://www.boost.org/ Boost] >= *v1.46* (use the static build)
-osx-build tips
+Boost build tips for OSX(32/64bit version)
 {{{
-> mkdir build
-> cd build
-> cmake -DEIGEN3D_INCLUDE='path to the Eigen folder' -DBOOST_ROOT='path to the Boost folder' ..
+> cd boost_folderXY
+> ./bjam link=static architecture=x86 address-model=32_64
+> sudo ./bjam install
 }}}
 ----
 = Windows =
