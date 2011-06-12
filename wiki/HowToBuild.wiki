@@ -66,6 +66,6 @@ On OSX you need [http://developer.apple.com/technologies/xcode.html Xcode] in or
   * Change the paths to your local ones in those two files:  buildLinux64.sh or buildLinux32, installLinux.sh (There is more info in the files)
   * Type those commands:
 {{{
-> ./buildOsx.sh
-> ./installOsx.sh
+> ./buildLinux64.sh
+> ./installLinux.sh
 }}}
