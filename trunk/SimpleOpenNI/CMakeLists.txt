@@ -62,10 +62,11 @@ ELSE()
 	IF(APPLE)
 		# osx
 		set(Boost_LIBRARIES  "boost_thread.a")
-	ELSE()
+	ELSEIF(UNIX)
 		# unix/linux,shared libs of boost should be installed
 		set(Boost_LIBRARIES  "boost_thread.a")
-
+	ELSE()
+		# windows will find the right libs by itself
 	ENDIF()
 ENDIF()
 # -----------------------------------------------------------------------------
@@ -151,8 +152,15 @@ IF(NOT HAVE_NITE_H)
 ENDIF()
 
 INCLUDE_DIRECTORIES(${XN_NITE_INCLUDE})
-FIND_LIBRARY(NITE_LIBRARY NAMES XnVNite_1_3_1 PATHS ${XN_NITE_LIB})
-SET(LIBS ${LIBS} ${NITE_LIBRARY})
+IF(APPLE OR UNIX)
+	FIND_LIBRARY(NITE_LIBRARY NAMES XnVNITE_1_3_1 PATHS ${XN_NITE_LIB})
+	SET(LIBS ${LIBS} ${NITE_LIBRARY})
+ELSE()
+	# quite wired, cmake doesn't find the lib anymore, just delivers the path,
+	# setup the hole thing by hand(must be a problem with the backslash etc.)
+	FIND_LIBRARY(NITE_LIBRARY NAMES XnVNITE_1_3_1 PATHS ${XN_NITE_LIB})
+	SET(LIBS ${LIBS} ${NITE_LIBRARY}/XnVNITE_1_3_1.lib)	
+ENDIF()	
 
 # -----------------------------------------------------------------------------
 # processing wrappers
