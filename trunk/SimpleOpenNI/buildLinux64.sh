@@ -30,7 +30,7 @@ cd ./build64
 
 echo "--- generate cmake ---"
 # changes this according to your environment
-cmake -DOPEN_NI_INCLUDE=/usr/include/openni/ \
+cmake -DOPEN_NI_INCLUDE=/usr/include/ni/ \
 	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
 	  -DXN_NITE_LIB=/usr/lib/ \
 	  -DEIGEN3D_INCLUDE=/usr/include/eigen3/ \

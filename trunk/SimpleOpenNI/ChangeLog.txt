@@ -4,6 +4,10 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
+v0.21 alpha, 
+	New:
+
+
 v0.20 alpha, 06/12/2011
 	New:
 		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
