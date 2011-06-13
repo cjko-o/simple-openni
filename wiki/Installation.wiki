@@ -31,6 +31,19 @@ If everything worked out, you should see the camera in your Device Manager(under
 
 I made a little installer(see Install OpenNI the short way), if this doesn't work for you, than you should install it the offical way. For my tests i used only OSX 10.6., with 10.5 i had some problems.
 
+* Install OpenNI the short way (OpenNI v1.1.0.41 and NITE v1.3.1.5) *
+  * Download the [http://code.google.com/p/simple-openni/downloads/detail?name=OpenNI_NITE_Installer-OSX-0.20.zip&can=2&q=#makechanges Installer]
+  * Unzip the file and open a terminal window
+  * Go to the unzipped folder 'OpenNI_NITE_Installer-OSX'
+{{{
+> cd ./OpenNI_NITE_Installer-OSX 
+}}}
+  * Start the installer
+{{{
+> sudo ./install.sh
+}}}
+
+
 * Install OpenNI the official way *
 
 Those programs have to be on your system in order to install OpenNI:
@@ -67,18 +80,6 @@ Those programs have to be on your system in order to install OpenNI:
 > sudo ./install.sh
 }}}
 ...
-
-* Install OpenNI the short way (OpenNI v1.1.0.41 and NITE v1.3.1.5) *
-  * Download the [http://code.google.com/p/simple-openni/downloads/detail?name=OpenNI_NITE_Installer-OSX-0.20.zip&can=2&q=#makechanges Installer]
-  * Unzip the file and open a terminal window
-  * Go to the unzipped folder 'OpenNI_NITE_Installer-OSX'
-{{{
-> cd ./OpenNI_NITE_Installer-OSX 
-}}}
-  * Start the installer
-{{{
-> sudo ./install.sh
-}}}
 
 
 * Install SimpleOpenNI *
