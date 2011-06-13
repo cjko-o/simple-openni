@@ -294,12 +294,14 @@ bool ContextWrapper::init(int runMode)
                 std::cout << "kinect cam:" << node.GetCreationInfo() << std::endl;
                 xn::Context* context = new xn::Context();
 
+                /*
                 //_context->Init();
                 //_genList.push_back(context);
 
                 _rc = _context->CreateProductionTree(node);
                 CHECK_RC(_rc, "InitFromXml");
                 CHECK_ERRORS(_rc, errors, "InitFromXmlFile");
+                */
 
         }
 
