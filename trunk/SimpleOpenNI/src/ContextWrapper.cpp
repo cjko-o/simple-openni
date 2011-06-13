@@ -42,7 +42,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	20		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	21		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -283,6 +283,25 @@ bool ContextWrapper::init(int runMode)
 	}
 
 	checkLicenses();
+
+        // check the list of all devices
+        xn::NodeInfoList list;
+        _rc = _context.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
+        for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter)
+        {
+                xn::NodeInfo node = (*iter);
+
+                std::cout << "kinect cam:" << node.GetCreationInfo() << std::endl;
+                xn::Context* context = new xn::Context();
+
+                //_context->Init();
+                //_genList.push_back(context);
+
+                _rc = _context->CreateProductionTree(node);
+                CHECK_RC(_rc, "InitFromXml");
+                CHECK_ERRORS(_rc, errors, "InitFromXmlFile");
+
+        }
 
 	_initFlag = true;
 	return true;

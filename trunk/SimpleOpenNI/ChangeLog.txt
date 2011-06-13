@@ -6,6 +6,7 @@ vx.xx status, mm/dd/yyyy
 
 v0.21 alpha, 
 	New:
+		- Changed name of the InfraRed example 'IR' to 'DepthInfrared'.Processing had some troubles with the name.
 
 
 v0.20 alpha, 06/12/2011
