@@ -19,31 +19,32 @@
 # ----------------------------------------------------------------------------
 
 # optional, but gives a clean build
-rm -r build64
+rm -r build32
 
 # check if build folder exists
-if [ ! -d "build64" ]; then
-    mkdir build64
+if [ ! -d "build32" ]; then
+    mkdir build32
 fi
 
-cd ./build64
+cd ./build32
 
 echo "--- generate cmake ---"
 # changes this according to your environment
-cmake -DOPEN_NI_INCLUDE=/usr/include/openni/ \
+cmake -DOPEN_NI_INCLUDE=/usr/include/ni/ \
 	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
 	  -DXN_NITE_LIB=/usr/lib/ \
-	  -DEIGEN3D_INCLUDE=/usr/include/eigen3/ \
-	  -DBOOST_ROOT=~/Documents/development/libs/boost/boost_1_46_1/ \
-	  -DBOOST_LIBRARYDIR=~/Documents/development/libs/boost/boost_1_46_1/stage/lib \
+	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
 	  -DP5_JAR=~/Documents/localApps/processing-1.5.1/lib/core.jar \
 	  ..
+
+#	  -DBOOST_ROOT=~/Documents/development/libs/boost/boost_1_46_1/ \
+#	  -DBOOST_LIBRARYDIR=~/Documents/development/libs/boost/boost_1_46_1/stage/lib \
 
 
 echo "--- build ---"
 # build with 6 threads, verbose is optional, but otherwise you can't see the compiler directives
 # make -j 6 VERBOSE=1
-make -j 6
+make -j 2
 
 echo "--- copy ---"
 # copy the library
