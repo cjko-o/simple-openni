@@ -104,13 +104,13 @@ Those programs have to be on your system in order to install OpenNI:
 > cd ./yourFolder/Nite-1.3.1.5
 > sudo install
 }}}
-  * Install Driver Kinect(only if you use a Kinect):
+  * Install Driver Kinect (only if you use a Kinect):
   decompress ./yourFolder/avin2-SensorKinect-28738dc/SensorKinect-Bin-Linux64-v5.0.1.32.tar.bz2
 {{{
 > cd ./yourFolder/SensorKinect-Bin-Linux64-v5.0.1.32
 > sudo install
 }}}
-  * Install Driver Primesense(only if you use an Asus Xtion or the Primesense Developer Kit):
+  * Install Driver Primesense (only if you use an Asus Xtion or the Primesense Developer Kit):
 {{{
 > cd ./yourFolder/Sensor-Bin-Linux64-v5.0.1.32
 > sudo install
