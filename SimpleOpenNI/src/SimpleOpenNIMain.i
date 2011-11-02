@@ -30,13 +30,13 @@
 # stl
 
 %include "std_vector.i"
-
+%include "std_string.i"
 
 %template(IntVector)	std::vector<int>;
 %template(Vector3D)	std::vector<XnVector3D>;
 %template(Point3D)	std::vector<XnPoint3D>;
 
-
+%template(StrVector)	std::vector<std::string>;
 
 # ----------------------------------------------------------------------------
 # ContextWrapper
@@ -130,6 +130,7 @@ public:
 	bool init(int runMode=RunMode_MultiThreaded);
 
 	int nodes();
+        int nodeNames(std::vector<std::string>* nodeNames);
 
 	void addLicense(const char* vendor,const char* license);
 	

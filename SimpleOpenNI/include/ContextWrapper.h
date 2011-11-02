@@ -94,18 +94,23 @@ public:
 
 	int version();
 
-	// init methods
+        //////////////////////////////////////////////////////////////////////////////
+        // init methods
 	bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
 	bool init(int runMode=RunMode_SingleThreaded);
-
-	int nodes();
 
 	void addLicense(const char* vendor,const char* license);
 
 	bool isInit(){	return _initFlag; }
 	void close();
 
-	virtual void update();
+        virtual void update();
+
+        //////////////////////////////////////////////////////////////////////////////
+        // multiple devices
+        int nodes();
+        int nodeNames(std::vector<std::string>* nodeNames);
+
 
 	//////////////////////////////////////////////////////////////////////////////
 	// depth methods
