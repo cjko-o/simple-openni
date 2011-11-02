@@ -5,10 +5,20 @@ http://code.google.com/p/simple-openni/
 vx.xx status, mm/dd/yyyy
 
 v0.22 alpha, 
-	Fix:
-		- Updated new functiion names because of the changes of openNI + nite
 	New:
-		- Changed name of the InfraRed example 'IR' to 'DepthInfrared'.Processing had some troubles with the name.
+		- Updated code to use OpenNI v1.3.3.2, Nite v1.4.2.4
+		- Added methods to access multiple cameras:
+		- Added methods for highperformance drawing of the depthMap pointcloud (Opengl VBO)
+		- Added methods 
+
+	Fix:
+		- Updated new function names because of the function name changes of openNI + nite
+		- Had troubles with the newest OpenNI 64bit version on linux 11.10(Kubuntu). The depthMap was wrong(flashing) on 
+		  kinect + asus xtion pro. I had to change the OpenNI code + recompile the OpenNI library, see:
+		  http://dancingwithyourshadow.blogspot.com/2011/10/using-kinect-with-openni-on-ubuntu-1110.html
+		  The only thing i did was to replace the line 1057 in the file /Source/OpenNI/Linux-x86/XnUSBLinux-x86.cpp
+		  > memmove(pTransfer->buffer + nTotalBytes, pBuffer, pPacket->actual_length);  
+
 
 v0.21 , 
 	New:

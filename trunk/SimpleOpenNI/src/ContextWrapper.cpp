@@ -287,14 +287,16 @@ bool ContextWrapper::init(int runMode)
         // check the list of all devices
         xn::NodeInfoList list;
         _rc = _context.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
-        for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter)
+        int i=0;
+        for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter,i++)
         {
                 xn::NodeInfo node = (*iter);
 
-                std::cout << "kinect cam:" << node.GetCreationInfo() << std::endl;
-                xn::Context* context = new xn::Context();
+                // std::cout << "kinect cam:" << node.GetCreationInfo() << std::endl;
+                std::cout << i << ": " << std::string(node.GetDescription().strName) << "/" << std::string(node.GetDescription().strVendor) << std::endl;
 
                 /*
+                xn::Context* context = new xn::Context();
                 //_context->Init();
                 //_genList.push_back(context);
 
@@ -311,7 +313,37 @@ bool ContextWrapper::init(int runMode)
 	
 int ContextWrapper::nodes()
 {
-	return _nodes;
+    return _nodes;
+}
+
+int ContextWrapper::nodeNames(std::vector<std::string>* nodeNames)
+{
+    if(!_initFlag)
+        return 0;
+
+    nodeNames->clear();
+
+    // check the list of all devices
+    xn::NodeInfoList list;
+    _rc = _context.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
+    for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter)
+    {
+        xn::NodeInfo node = (*iter);
+
+        nodeNames->push_back(std::string(node.GetDescription().strName) + "/" + std::string(node.GetDescription().strVendor));
+
+               /*
+            xn::Context* context = new xn::Context();
+
+            //_context->Init();
+            //_genList.push_back(context);
+
+            _rc = _context->CreateProductionTree(node);
+            CHECK_RC(_rc, "InitFromXml");
+            CHECK_ERRORS(_rc, errors, "InitFromXmlFile");
+            */
+
+    }
 }
 
 
