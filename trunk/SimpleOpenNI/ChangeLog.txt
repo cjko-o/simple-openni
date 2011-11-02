@@ -4,12 +4,18 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
-v0.21 alpha, 
+v0.22 alpha, 
+	Fix:
+		- Updated new functiion names because of the changes of openNI + nite
+	New:
+		- Changed name of the InfraRed example 'IR' to 'DepthInfrared'.Processing had some troubles with the name.
+
+v0.21 , 
 	New:
 		- Changed name of the InfraRed example 'IR' to 'DepthInfrared'.Processing had some troubles with the name.
 
 
-v0.20 alpha, 06/12/2011
+v0.20 , 06/12/2011
 	New:
 		- Updated code to use OpenNI v1.1.041, Nite v1.3.1.5
 		- Tested the library with Processing 1.5.1
