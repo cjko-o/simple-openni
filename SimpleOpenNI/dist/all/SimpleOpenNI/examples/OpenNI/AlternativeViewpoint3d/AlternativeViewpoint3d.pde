@@ -36,7 +36,7 @@ void setup()
 
   stroke(255,255,255);
   smooth();
-  perspective(95,
+  perspective(radians(45),
               float(width)/float(height), 
               10,150000);
 }

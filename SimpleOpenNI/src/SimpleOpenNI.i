@@ -499,12 +499,12 @@ public:
 # -----------------------------------------------------------------------------
 # Capability
 
-class Capability
+class Capability: public NodeWrapper
 {
 public:
 
     Capability(XnNodeHandle hNode);
-    void SetUnderlyingHandle(XnNodeHandle hNode);
+   // void SetUnderlyingHandle(XnNodeHandle hNode);
 
 };
 
