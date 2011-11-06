@@ -156,6 +156,27 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	/**
 	* Creates the OpenNI context ands inits the modules
 	* 
+	* @param deviceIndex
+	*          int
+	* @param parent
+	*          PApplet
+	*/
+	public SimpleOpenNI(int deviceIndex,PApplet parent)
+	{
+		this._parent 	= parent;
+		parent.registerDispose(this);
+		initVars();
+		
+		// setup the callbacks
+		setupCallbackFunc();
+		
+		// load the initfile
+		this.initX(deviceIndex);
+	}
+	
+	/**
+	* Creates the OpenNI context ands inits the modules
+	* 
 	* @param parent
 	*          PApplet
 	* @param runMode
