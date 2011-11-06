@@ -127,16 +127,19 @@ public:
 	int version();
 
 	bool init(const char* xmlInitFile,int runMode=RunMode_MultiThreaded);
-	bool init(int runMode=RunMode_MultiThreaded);
+        bool init(int runMode=RunMode_MultiThreaded);
+        bool initX(int deviceIndex);
 
-	int nodes();
-        int nodeNames(std::vector<std::string>* nodeNames);
+        int nodes();
+
+        int deviceCount();
+        int deviceNames(std::vector<std::string>* nodeNames);
 
 	void addLicense(const char* vendor,const char* license);
 	
 	bool isInit();
 	void close();
-	
+
 	virtual bool enableDepth();
 	virtual bool enableDepth(int width,int height,int fps);
         xn::DepthGenerator& getDepthGenerator();

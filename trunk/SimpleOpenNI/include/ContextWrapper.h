@@ -88,7 +88,6 @@ class ContextWrapper
 {
 public:
 
-
 	ContextWrapper();
 	~ContextWrapper();
 
@@ -97,7 +96,9 @@ public:
         //////////////////////////////////////////////////////////////////////////////
         // init methods
 	bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
-	bool init(int runMode=RunMode_SingleThreaded);
+        bool init(int runMode=RunMode_SingleThreaded);
+
+        bool initX(int deviceIndex);
 
 	void addLicense(const char* vendor,const char* license);
 
@@ -106,10 +107,13 @@ public:
 
         virtual void update();
 
+        int nodes();
+
         //////////////////////////////////////////////////////////////////////////////
         // multiple devices
-        int nodes();
-        int nodeNames(std::vector<std::string>* nodeNames);
+        int deviceCount();
+        int deviceNames(std::vector<std::string>* nodeNames);
+        int deviceIndex() const { return _deviceIndex; }
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -332,16 +336,19 @@ public:
 protected:
 	
 	enum LogOutMsg{
-		MsgNode_End		= 0,
+                MsgNode_End	= 0,
 		MsgNode_Info	= 1,
 		MsgNode_Error	= 2,
 
 	};
 
-	void logOut(int msgType,const char* msg,...);	// must end with null
-	char	_strBuffer[STRING_BUFFER];
+        static void logOut(int msgType,const char* msg,...);	// must end with null
 	
+        static bool initContext();
 	bool checkLicenses();
+        static bool getNodeInfo(int nodeType,int index,xn::NodeInfo* pNodeInfo);
+
+        static std::vector<int> _deviceList;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// internal callback wrappers
@@ -421,10 +428,17 @@ protected:
 	bool _initFlag;
 	bool _generatingFlag;
 	
-        XnStatus		_rc;
-        xn::Context		_context;
+        static xn::Context      _globalContext;
+        static bool             _globalContextFlag;
 
-        int			_nodes;
+        xn::Device              _device;
+        std::string             _deviceCreationInfo;
+
+        XnStatus		_rc;
+
+        int                     _deviceIndex;
+        int			_deviceCount;
+        int                     _nodes;
 
 	// depht
 	xn::DepthGenerator	_depth;
