@@ -340,31 +340,32 @@ bool ContextWrapper::initContext()
         return _globalContextFlag;
 }
 
-bool ContextWrapper::getNodeInfo(int nodeType,int index,xn::NodeInfo* pNodeInfo)
+bool ContextWrapper::getNodeInfo(int nodeType,int index,
+                                 xn::NodeInfoList*   list,
+                                 xn::NodeInfo* pNodeInfo)
 {
-    xn::NodeInfoList    list;
     int                 i=0;
     XnStatus            rc;
 
-    rc = _globalContext.EnumerateProductionTrees(nodeType, NULL,list);
+    rc = _globalContext.EnumerateProductionTrees(nodeType, NULL,*list);
     logOut(MsgNode_Info,"Device List:");
-    for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter)
+    for(xn::NodeInfoList::Iterator iter = list->Begin(); iter != list->End(); ++iter)
     {
         xn::NodeInfo nodeInfo = *iter;
 
         if(strcmp(nodeInfo.GetInstanceName(),"") == 0)
         {   // prepared one
             if(i == index)
-            {   // found
+            {   // found, copy the InfoNode
                 *pNodeInfo = nodeInfo;
                 return true;
             }
-            i++;
+            else
+                i++;
         }
     }
     return false;
 }
-
 
 bool ContextWrapper::init(int runMode)
 {
@@ -551,22 +552,17 @@ bool ContextWrapper::createDepth(bool force)
     _nodes |= Node_Depth;
     return true;
     */
-/*
 
-    xn::NodeInfo depthNodeInfo(NULL);
-    if(getNodeInfo(XN_NODE_TYPE_DEPTH,_deviceIndex,&depthNodeInfo))
+
+    xn::NodeInfoList    list;
+    xn::NodeInfo        depthNodeInfo(NULL);
+
+    if(getNodeInfo(XN_NODE_TYPE_DEPTH,_deviceIndex,
+                   &list,&depthNodeInfo))
     {
-        logOut(MsgNode_Error,"FOUND node");
-        logOut(MsgNode_Info,"index=%d\tGetCreationInfo(): %s\tGetInstanceName:%s\tname: %s\tvendor: %s",_deviceIndex,depthNodeInfo.GetCreationInfo(),
-                                                                                      depthNodeInfo.GetInstanceName(),
-                                                                                      depthNodeInfo.GetDescription().strName,
-                                                                                      depthNodeInfo.GetDescription().strVendor);
-
         _rc = _globalContext.CreateProductionTree(depthNodeInfo,_depth);
-        logOut(MsgNode_Error,"FOUND node1");
-        if(_rc == XN_STATUS_OK || 1)
+        if(_rc == XN_STATUS_OK)
         {
-            logOut(MsgNode_Error,"createProductionTree ok");
             if(_depth.IsValid())
             {
                 logOut(MsgNode_Error,"depth valid");
@@ -583,8 +579,11 @@ bool ContextWrapper::createDepth(bool force)
             }
         }
     }
+
+    _nodes |= Node_Depth;
     return false;
-*/
+/*
+    // funkt.
 
     xn::NodeInfoList    list;
     int                 i=0;
@@ -629,63 +628,8 @@ bool ContextWrapper::createDepth(bool force)
           logOut(MsgNode_Info,"not taken depth: %s",nodeInfo.GetInstanceName());
     }
     return false;
+*/
 
-
-    /*
-    xn::NodeInfoList list;
-    xn::Query query;
-    query.SetCreationInfo(_deviceCreationInfo.c_str());
-    //_rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH, &query,list);
-    _rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH, NULL,list);
-
-    if (_rc == XN_STATUS_OK)
-    {
-        int index=0;
-
-        for(xn::NodeInfoList::Iterator itr = list.Begin(); itr != list.End(); ++itr,index++)
-        {
-                xn::NodeInfo info = *itr;
-
-                const XnProductionNodeDescription& description = info.GetDescription();
-                logOut(MsgNode_Error,"xxx depth info: vendor %s name %s, instance %s, GetCreationInfo %s",description.strVendor,
-                                                                                                          description.strName,
-                                                                                                          info.GetInstanceName(),
-                                                                                                          info.GetCreationInfo());
-        }
-
-        index=0;
-        for(xn::NodeInfoList::Iterator itr = list.Begin(); itr != list.End(); ++itr,index++)
-        {
-            if(index == _deviceIndex)
-            {
-                xn::NodeInfo info = *itr;
-                _rc = _globalContext.CreateProductionTree(info,_depth);
-                //info.GetInstance(_depth);
-
-
-                const XnProductionNodeDescription& description = info.GetDescription();
-                logOut(MsgNode_Error,"depth info: vendor %s name %s, instance %s",description.strVendor,  description.strName, info.GetInstanceName());
-                break;
-            }
-        }
-
-        if(_depth.IsValid())
-        {
-            logOut(MsgNode_Error,"depth valid");
-
-            _depth.SetMapOutputMode(_depthMapOutputMode);
-            _depth.GetMetaData(_depthMD);
-
-            _depthBufSize	= _depthMD.XRes() * _depthMD.YRes();
-            _pDepthImage	= (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
-            _depthMapRealWorld	= (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
-
-            _nodes |= Node_Depth;
-            return true;
-        }
-    }
-    return false;
-    */
 }
 
 bool ContextWrapper::enableDepth()
@@ -716,7 +660,7 @@ bool ContextWrapper::createRgb(bool force)
 {
     if(!_initFlag)
         return false;
-
+/*
     _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_IMAGE, _image);
     if(_rc != XN_STATUS_OK)
     {	// could not find the depth, create it by default
@@ -734,6 +678,35 @@ bool ContextWrapper::createRgb(bool force)
     _nodes |= Node_Image;
 
     return true;
+*/
+
+    xn::NodeInfoList    list;
+    xn::NodeInfo        rgbNodeInfo(NULL);
+
+    printf("image 0\n");
+    if(getNodeInfo(XN_NODE_TYPE_IMAGE,_deviceIndex,
+                   &list,&rgbNodeInfo))
+    {
+        _rc = _globalContext.CreateProductionTree(rgbNodeInfo,_image);
+        printf("image 1\n");
+        if(_rc == XN_STATUS_OK)
+        {
+            printf("image 2\n");
+            if(_image.IsValid())
+            {
+                logOut(MsgNode_Error,"image valid");
+
+                 _rc = _image.SetMapOutputMode(_imageMapOutputMode);
+                 _image.GetMetaData(_imageMD);
+
+                 _rgbBufSize = _imageMD.XRes() * _imageMD.YRes();
+
+                _nodes |= Node_Image;
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool ContextWrapper::enableRGB()
@@ -1366,6 +1339,12 @@ unsigned long count=0;
 
 #endif // WIN_PERF_DEBUG
 
+void ContextWrapper::updateAll()
+{
+
+}
+
+
 void ContextWrapper::update()
 {
     if(!_initFlag)
@@ -1408,7 +1387,7 @@ void ContextWrapper::updateSub()
 
     // update openNI
     if(_gestureGenerator.IsValid() || _handsGenerator.IsValid() ||
-            _userGenerator.IsValid())
+       _userGenerator.IsValid())
     {	// i don't know why, but it only works if i add 'WaitAndUpdateAll'
         //_rc = _globalContext.WaitAnyUpdateAll();
         _rc = _globalContext.WaitAndUpdateAll();

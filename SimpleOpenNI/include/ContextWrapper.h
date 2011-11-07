@@ -106,6 +106,7 @@ public:
 	void close();
 
         virtual void update();
+        static void updateAll();
 
         int nodes();
 
@@ -346,9 +347,14 @@ protected:
 	
         static bool initContext();
 	bool checkLicenses();
-        static bool getNodeInfo(int nodeType,int index,xn::NodeInfo* pNodeInfo);
 
-        static std::vector<int> _deviceList;
+        // need NodeInfoList as parameterm otherwise the result in NodeInfo will be destroyed with
+        // the destruction of the NodeInfoList
+        static bool getNodeInfo(int nodeType,int index,
+                                xn::NodeInfoList*   list,
+                                xn::NodeInfo*       pNodeInfo);
+
+        static std::vector<class ContextWrapper*> _classList;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// internal callback wrappers

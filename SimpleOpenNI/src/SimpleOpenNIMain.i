@@ -166,18 +166,19 @@ public:
         xn::GestureGenerator& getGestureGenerator();
 
 	virtual void update();
+        static void updateAll();
 
-	int depthWidth();
+        int     depthWidth();
 	int	depthHeight();
 	int	depthImage(int* map);	
-	void setDepthImageColor(int r,int g,int b);
-	void setDepthImageColorMode(int mode);
-	int depthImageColorMode();
+        void    setDepthImageColor(int r,int g,int b);
+        void    setDepthImageColorMode(int mode);
+        int     depthImageColorMode();
 	
-	int depthMapSize();
+        int     depthMapSize();
 	int	depthMap(int* map);					
-	int depthMapRealWorld(XnPoint3D map[]);	
-	int depthMapRealWorldA(XnPoint3DArray* map);	
+        int     depthMapRealWorld(XnPoint3D map[]);
+        int     depthMapRealWorldA(XnPoint3DArray* map);
 	//int depthMapRealWorldA(XnPoint3DArray map,int count);
 
 	XnPoint3DArray* depthMapRealWorldA();		
