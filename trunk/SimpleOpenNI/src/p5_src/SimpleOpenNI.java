@@ -31,8 +31,13 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	static 
 	{	// load the nativ shared lib
 		System.loadLibrary("SimpleOpenNI");
-	
 	}
+
+    public static void start()
+	{
+	  initContext();
+	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// callback vars
 	protected Method 			_newUserMethod;

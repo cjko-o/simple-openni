@@ -10,6 +10,8 @@
 %{
 #include "ContextWrapper.h"
 #include "NITE_Helpers.h"
+#include <string>
+#include <vector>
 %}
 
 %include "arrays_java.i"
@@ -37,6 +39,7 @@
 %template(Point3D)	std::vector<XnPoint3D>;
 
 %template(StrVector)	std::vector<std::string>;
+
 
 # ----------------------------------------------------------------------------
 # ContextWrapper
@@ -126,14 +129,16 @@ public:
 
 	int version();
 
-	bool init(const char* xmlInitFile,int runMode=RunMode_MultiThreaded);
+        static bool initContext();
+
+        bool init(const char* xmlInitFile,int runMode=RunMode_MultiThreaded);
         bool init(int runMode=RunMode_MultiThreaded);
         bool initX(int deviceIndex);
 
         int nodes();
 
-        int deviceCount();
-        int deviceNames(std::vector<std::string>* nodeNames);
+        static int deviceCount();
+        static int deviceNames(std::vector<std::string>* nodeNames);
 
 	void addLicense(const char* vendor,const char* license);
 	

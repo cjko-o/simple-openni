@@ -74,6 +74,8 @@ typedef Eigen::Hyperplane<float,3> HyperPlane3d;
 
 xn::Context ContextWrapper::_globalContext = NULL;
 bool ContextWrapper::_globalContextFlag = false;
+int ContextWrapper::_deviceCount=0;
+std::vector<class ContextWrapper*> ContextWrapper::_classList;
 
 
 ContextWrapper::ContextWrapper():
@@ -85,7 +87,6 @@ ContextWrapper::ContextWrapper():
     _generatingFlag(false),
     _firstTimeUpdate(true),
     _nodes(Node_None),
-    _deviceCount(0),
     _userWidth(0),
     _userHeight(0),
     _userSceneBufSize(0),
@@ -293,6 +294,8 @@ bool ContextWrapper::initContext()
             xn::NodeInfoList list;
             int i=0;
 
+            _deviceCount = 0;
+
             rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
             logOut(MsgNode_Info,"Device List:");
             for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter,i++)
@@ -304,7 +307,11 @@ bool ContextWrapper::initContext()
                                                                                               deviceNodeInfo.GetDescription().strName,
                                                                                               deviceNodeInfo.GetDescription().strVendor);
 
+                _deviceCount++;
             }
+
+
+
 
             i = 0;
             rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH, NULL,list);
@@ -332,6 +339,34 @@ bool ContextWrapper::initContext()
                                                                                               depthInfo.GetDescription().strVendor);
 
             }
+
+            i = 0;
+            rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_IR, NULL,list);
+            logOut(MsgNode_Info,"IR List:");
+            for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter,i++)
+            {
+                xn::NodeInfo    depthInfo = *iter;
+
+                logOut(MsgNode_Info,"index=%d\tGetCreationInfo(): %s\tGetInstanceName:%s\tname: %s\tvendor: %s",i,depthInfo.GetCreationInfo(),
+                                                                                              depthInfo.GetInstanceName(),
+                                                                                              depthInfo.GetDescription().strName,
+                                                                                              depthInfo.GetDescription().strVendor);
+
+            }
+
+            i = 0;
+            rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_SCENE, NULL,list);
+            logOut(MsgNode_Info,"Scene List:");
+            for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter,i++)
+            {
+                xn::NodeInfo    depthInfo = *iter;
+
+                logOut(MsgNode_Info,"index=%d\tGetCreationInfo(): %s\tGetInstanceName:%s\tname: %s\tvendor: %s",i,depthInfo.GetCreationInfo(),
+                                                                                              depthInfo.GetInstanceName(),
+                                                                                              depthInfo.GetDescription().strName,
+                                                                                              depthInfo.GetDescription().strVendor);
+
+            }
         }
 
         return _globalContextFlag;
@@ -342,10 +377,13 @@ bool ContextWrapper::initContext()
 
 bool ContextWrapper::getNodeInfo(int nodeType,int index,
                                  xn::NodeInfoList*   list,
-                                 xn::NodeInfo* pNodeInfo)
+                                 xn::NodeInfo* pNodeInfo,
+                                 int offset)
 {
     int                 i=0;
     XnStatus            rc;
+
+    index *= offset;
 
     rc = _globalContext.EnumerateProductionTrees(nodeType, NULL,*list);
     logOut(MsgNode_Info,"Device List:");
@@ -443,11 +481,6 @@ bool ContextWrapper::initX(int deviceIndex)
                 _rc = _globalContext.CreateProductionTree(deviceNodeInfo, _device);
                 // save the creationInfo as well
                 _deviceCreationInfo = deviceNodeInfo.GetCreationInfo();
-
-                logOut(MsgNode_Error,"index=%d deviceNodeInfo.GetCreationInfo(): %s name: %s vendor: %s",i,_deviceCreationInfo.c_str(),
-                                                                                                  deviceNodeInfo.GetDescription().strName,
-                                                                                                  deviceNodeInfo.GetDescription().strVendor);
-
                 if(_rc != XN_STATUS_OK)
                     return false;
             }
@@ -455,8 +488,9 @@ bool ContextWrapper::initX(int deviceIndex)
             if (_device.IsValid())
             {
                 _initFlag = true;
-                logOut(MsgNode_Error,"device ok");
 
+                // add to global list
+                _classList.push_back(this);
                 return true;
             }
             else
@@ -481,35 +515,19 @@ int ContextWrapper::deviceCount()
 
 int ContextWrapper::deviceNames(std::vector<std::string>* nodeNames)
 {
-    if(!_initFlag)
+    if(!_globalContextFlag)
         return 0;
 
     nodeNames->clear();
 
     // check the list of all devices
     xn::NodeInfoList list;
-    _rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
+    XnStatus rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
     for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter)
     {
         xn::NodeInfo node = (*iter);
 
         nodeNames->push_back(std::string(node.GetDescription().strName) + "/" + std::string(node.GetDescription().strVendor));
-    }
-
-
-
-    int i = 0;
-    _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH, NULL,list);
-    logOut(MsgNode_Info,"Depth List:");
-    for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter,i++)
-    {
-        xn::NodeInfo    depthInfo = *iter;
-
-        logOut(MsgNode_Info,"index=%d\tGetCreationInfo(): %s\tGetInstanceName:%s\tname: %s\tvendor: %s",i,depthInfo.GetCreationInfo(),
-                                                                                      depthInfo.GetInstanceName(),
-                                                                                      depthInfo.GetDescription().strName,
-                                                                                      depthInfo.GetDescription().strVendor);
-
     }
 
     return nodeNames->size();
@@ -737,7 +755,7 @@ bool ContextWrapper::createIr(bool force)
 {
     if(!_initFlag)
         return false;
-
+/*
     _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_IR, _ir);
     if(_rc != XN_STATUS_OK)
     {	// could not find the depth, create it by default
@@ -755,6 +773,31 @@ bool ContextWrapper::createIr(bool force)
 
     _nodes |= Node_Ir;
     return true;
+*/
+    xn::NodeInfoList    list;
+    xn::NodeInfo        irNodeInfo(NULL);
+
+    if(getNodeInfo(XN_NODE_TYPE_IR,_deviceIndex,
+                   &list,&irNodeInfo))
+    {
+        _rc = _globalContext.CreateProductionTree(irNodeInfo,_ir);
+        if(_rc == XN_STATUS_OK)
+        {
+            if(_ir.IsValid())
+            {
+                _rc = _ir.SetMapOutputMode(_irMapOutputMode);
+                _ir.GetMetaData(_irMD);
+
+                _irBufSize = _irMD.XRes() * _irMD.YRes();
+                _pIrImage  = (XnRGB24Pixel*)malloc( _irBufSize * sizeof(XnRGB24Pixel));
+
+                _nodes |= Node_Ir;
+                return true;
+
+            }
+        }
+    }
+    return false;
 }
 
 bool ContextWrapper::enableIR()
@@ -785,7 +828,7 @@ bool ContextWrapper::createScene(bool force)
 {
     if(!_initFlag)
         return false;
-
+/*
     _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_SCENE, _sceneAnalyzer);
     if(_rc != XN_STATUS_OK)
     {	// could not find the depth, create it by default
@@ -817,6 +860,35 @@ bool ContextWrapper::createScene(bool force)
     }
     else
         return false;
+*/
+
+    xn::NodeInfoList    list;
+    xn::NodeInfo        sceneNodeInfo(NULL);
+
+    if(getNodeInfo(XN_NODE_TYPE_SCENE,_deviceIndex,
+                   &list,&sceneNodeInfo,
+                   1))
+    {
+        _rc = _globalContext.CreateProductionTree(sceneNodeInfo,_sceneAnalyzer);
+        if(_rc == XN_STATUS_OK)
+        {
+            if(_sceneAnalyzer.IsValid())
+            {
+                std::cout << "sceneValdi:  " << _deviceIndex << std::endl;
+
+                _rc = _sceneAnalyzer.SetMapOutputMode(_sceneMapOutputMode);
+                _sceneAnalyzer.GetMetaData(_sceneMD);
+
+                _sceneBufSize = _sceneMD.XRes() * _sceneMD.YRes();
+                _pSceneImage  = (XnRGB24Pixel*)malloc( _sceneBufSize * sizeof(XnRGB24Pixel));
+
+                _nodes |= Node_Scene;
+                return true;
+            }
+        }
+    }
+    return false;
+
 }
 
 bool ContextWrapper::enableScene()
@@ -1341,7 +1413,29 @@ unsigned long count=0;
 
 void ContextWrapper::updateAll()
 {
+    static bool start = false;
+    if(!start)
+    {
+        _globalContext.StartGeneratingAll();
+    }
 
+    _globalContext.WaitAnyUpdateAll();
+
+    std::vector<class ContextWrapper*>::iterator itr = _classList.begin();
+    for(;itr != _classList.end();itr++)
+    {
+        // update timestamp
+        (*itr)->_updateTimeStamp = (*itr)->_updateSubTimeStamp;
+        (*itr)->_updateSubTimeStamp++;;
+    }
+
+    /*
+    std::vector<class ContextWrapper*>::iterator itr = _classList.begin();
+    for(;itr != _classList.end();itr++)
+    {
+        (*itr)->updateSub();
+    }
+    */
 }
 
 
