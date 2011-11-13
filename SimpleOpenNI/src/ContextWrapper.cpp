@@ -30,7 +30,9 @@
 #include <cmath>
 
 // opengl extensions
+/*
 #include <GL/glew.h>
+*/
 
 // openni
 #include <XnTypes.h>
