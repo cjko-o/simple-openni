@@ -72,14 +72,18 @@
 #define		MAX_DEPTH		10000	// 10m
 #define		STRING_BUFFER	255
 
-/*
-#define		SIMPELOPENNI_CALLBACK_FUNC(FuncName,...) \
-public: \
-	static void XN_CALLBACK_TYPE FuncName##Cb(__VA_ARGS__);\
-protected:\
-	virtual void on##FuncName##Cb(__VA_ARGS__);\
-	void on##FuncName##Cb(__VA_ARGS__);
-*/
+
+#define SOPENNI_CB_NAME(FuncName)     FuncName##Cb
+#define SOPENNI_CB_STATIC(FuncName,...)\
+    public: \
+            static void XN_CALLBACK_TYPE FuncName##Cb(__VA_ARGS__);
+#define SOPENNI_CB_MEMBER(FuncName,...)\
+    protected:\
+            void on##FuncName##Cb(__VA_ARGS__);
+#define SOPENNI_CB_VIRTUAL(FuncName,...)\
+    protected:\
+            virtual void on##FuncName##Cb(__VA_ARGS__){;}
+
 
 namespace sOpenNI{
 
@@ -95,10 +99,11 @@ public:
 
         //////////////////////////////////////////////////////////////////////////////
         // init methods
-	bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
+        static bool initContext();
+        bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
         bool init(int runMode=RunMode_SingleThreaded);
 
-        bool initX(int deviceIndex);
+        bool init(int deviceIndex,int runMode);
 
 	void addLicense(const char* vendor,const char* license);
 
@@ -112,8 +117,8 @@ public:
 
         //////////////////////////////////////////////////////////////////////////////
         // multiple devices
-        int deviceCount();
-        int deviceNames(std::vector<std::string>* nodeNames);
+        static int deviceCount();
+        static int deviceNames(std::vector<std::string>* nodeNames);
         int deviceIndex() const { return _deviceIndex; }
 
 
@@ -128,15 +133,15 @@ public:
 	int depthWidth();
         int depthHeight();
 
-	int	depthImage(int* map);		// argb 4-Bytes / alpha is not used
-	void setDepthImageColor(int r,int g,int b);
-	void setDepthImageColorMode(int mode);
-	int depthImageColorMode();
+        int     depthImage(int* map);		// argb 4-Bytes / alpha is not used
+        void    setDepthImageColor(int r,int g,int b);
+        void    setDepthImageColorMode(int mode);
+        int     depthImageColorMode();
 
-	int depthMapSize();
+        int     depthMapSize();
 	int	depthMap(int* map);					// in milimeters
-	int depthMapRealWorld(XnPoint3D map[]);
-	int depthMapRealWorldA(XnPoint3D* map)
+        int     depthMapRealWorld(XnPoint3D map[]);
+        int     depthMapRealWorldA(XnPoint3D* map)
 	{
 		return depthMapRealWorld(map);
 	}
@@ -291,12 +296,35 @@ public:
 	// callbacks
 
 	// user
-	static void XN_CALLBACK_TYPE newUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt);
-	static void XN_CALLBACK_TYPE lostUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt);
-	
+
+        SOPENNI_CB_STATIC(NewUser,
+                          xn::UserGenerator& generator, XnUserID user, void* cxt)
+        SOPENNI_CB_MEMBER(NewUser,
+                          xn::UserGenerator& generator, XnUserID user)
+        SOPENNI_CB_VIRTUAL(NewUser,
+                           unsigned int user)
+
+        SOPENNI_CB_STATIC(LostUser,
+                          xn::UserGenerator& generator, XnUserID user, void* cxt)
+        SOPENNI_CB_MEMBER(LostUser,
+                          xn::UserGenerator& generator, XnUserID user)
+        SOPENNI_CB_VIRTUAL(LostUser,
+                           unsigned int user)
 	// calibration
-	static void XN_CALLBACK_TYPE startCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt);
-	static void XN_CALLBACK_TYPE endCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt);
+        SOPENNI_CB_STATIC(StartCalibration,
+                          xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
+        SOPENNI_CB_MEMBER(StartCalibration,
+                          xn::SkeletonCapability& skeleton, XnUserID user)
+        SOPENNI_CB_VIRTUAL(StartCalibration,
+                           unsigned int user)
+
+        SOPENNI_CB_STATIC(EndCalibration,
+                          xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
+        SOPENNI_CB_MEMBER(EndCalibration,
+                          xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
+        SOPENNI_CB_VIRTUAL(EndCalibration,
+                           unsigned int user, bool bSuccess)
+public:
 
 	// pose
 	static void XN_CALLBACK_TYPE startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
@@ -345,52 +373,44 @@ protected:
 
         static void logOut(int msgType,const char* msg,...);	// must end with null
 	
-        static bool initContext();
 	bool checkLicenses();
 
         // need NodeInfoList as parameterm otherwise the result in NodeInfo will be destroyed with
         // the destruction of the NodeInfoList
         static bool getNodeInfo(int nodeType,int index,
                                 xn::NodeInfoList*   list,
-                                xn::NodeInfo*       pNodeInfo);
+                                xn::NodeInfo*       pNodeInfo,
+                                int offset = 1);
 
         static std::vector<class ContextWrapper*> _classList;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// internal callback wrappers
-	virtual void onNewUserCb(unsigned int userId);
-	virtual void onLostUserCb(unsigned int userId);
-	
-	virtual void onStartCalibrationCb(unsigned int userId);
-	virtual void onEndCalibrationCb(unsigned int userId,bool successFlag);
+
 
 	virtual void onStartPoseCb(const char* strPose, unsigned int user);
 	virtual void onEndPoseCb(const char* strPose, unsigned int user);
 
-	void onNewUserCb(xn::UserGenerator& generator, XnUserID user);
-	void onLostUserCb(xn::UserGenerator& generator, XnUserID user);
-	
-	void onStartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user);
-	void onEndCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess);
+        // calibration
 
 	void onStartPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user);
 	void onEndPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user);
 	
 	// hands
-	void			onCreateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
+        void		onCreateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
 	virtual void	onCreateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
 
-	void			onUpdateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
+        void		onUpdateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
 	virtual void	onUpdateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
 
-	void			onDestroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime);
+        void		onDestroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime);
 	virtual void	onDestroyHandsCb(unsigned int nId, float fTime);
 
 	// gesture
-	void			onRecognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
+        void		onRecognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
 	virtual void	onRecognizeGestureCb(const char* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
 
-	void			onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress);
+        void		onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress);
 	virtual void	onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress);
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -443,7 +463,7 @@ protected:
         XnStatus		_rc;
 
         int                     _deviceIndex;
-        int			_deviceCount;
+        static int		_deviceCount;
         int                     _nodes;
 
 	// depht
@@ -482,7 +502,11 @@ protected:
 	// user
 	xn::UserGenerator	_userGenerator;
 	XnCallbackHandle	_hUserCb;
-	XnCallbackHandle	_hCalibrationCb;
+        XnCallbackHandle	_hCalibrationCb;
+        XnCallbackHandle	_hToCalibrationCompleteCb;
+        XnCallbackHandle	_hToCalibrationStartCb;
+        XnCallbackHandle	_hCalibrationToJointConfigurationChangeCb;
+
 	XnCallbackHandle	_hPoseCb;
         int			_userWidth;
         int			_userHeight;

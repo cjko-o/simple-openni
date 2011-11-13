@@ -4,41 +4,55 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
-v0.22 , alpha, 
+v0.23 , in planning:
+		- *Remove all XML init. functions:
+		- *Added methods for highperformance drawing of the depthMap pointcloud (Opengl VBO)
+		- *Works with Processing 2.0
+		- *Multiple sensors with the generators
+		- *Remove all deprecated functions, some callbacks will change
+		- *Should make an example for calibration file
+
+v0.22 , 11/13/2011, 
 	New:
-		- Updated code to use OpenNI v1.3.3.2, Nite v1.4.2.4
+		- Updated code to use OpenNI v1.3.3.5, Nite v1.4.2.5
 		- Updated OSX installer
-		- Added methods to access multiple cameras:
+		- Added methods to access and query multiple cameras:
 		  Be aware that you shouln't put the cameras at the same usb bus(usb performance!).
 		  - SimpleOpenNI(int cameraIndex,PApplet parent) - setups the specific camera
 		  - SimpleOpenNI.updateAll() - updates all cameras	(static method)
-
-		- Added methods to query mutliple capture devices
-		  - int deviceCount() - returns  the count of cameras
-		  - int deviceNames(StrVector strList) - gives a list of the cameras that are available
-
+		  - int deviceCount() - returns  the count of cameras (static method)
+		  - int deviceNames(StrVector strList) - gives a list of the cameras that are available and
+			returns the count (static method)
+		- Added new example:
+		  - 'MultiCam.pde' - Shows how to use multiple cameras
+		  The multicamera support works at the moment only for the depthMap, rgbMap and the infraRedMap.
+		  I experienced stange troubles if i use generators like SceneAnalyzer or UserGenerator. Seams the mix up
+		  internaly the data. Have to find a fix for this behaviour.
 		- Added methods to get callbacks from SimpleOpenNI to different classes than only PApplet
-		  - enableDepth(Object cbClass) - all depth related callbacks will be send to cbClass
-		  - enableRgb(Object cbClass) -
-		  - enableHands(Object cbClass) -
-		  - enableGesture(Object cbClass) -
-
-
-		- Added methods for highperformance drawing of the depthMap pointcloud (Opengl VBO)
+		  - enableHands(Object cbClass)
+		  - enableGesture(Object cbClass)
+		  - enableUser(int flags,Object cbClass) -
+		- Added new example:
+		  - 'User3dCallback.pde'
 		- Added 64bit support for windows
-
-		- Remove all XML init. functions:
-
 		- Added a Sourcecode download, because the SVN is not always ready to compile
 		  
 	Fix:
-		- Updated new function names because of the function name changes of openNI + nite
-		- Had troubles with the newest OpenNI 64bit version on linux 11.10(Kubuntu). The depthMap was buggy(flashing) on 
+		- Updated new function names because of the function name changes of openNI + nite. Only internaly.
+
+		- Had big troubles with the newest OpenNI 64bit version on linux 11.10(Kubuntu). The depthMap was buggy(flashing) on 
 		  kinect + asus xtion pro. I had to change the OpenNI code + recompile the OpenNI library, see:
 		  http://dancingwithyourshadow.blogspot.com/2011/10/using-kinect-with-openni-on-ubuntu-1110.html
-		  The only thing i did was to replace the line 1057 in the file /Source/OpenNI/Linux-x86/XnUSBLinux-x86.cpp
+		  The only thing i did was to replace the line 1057 in the file /Source/OpenNI/Linux/XnUSBLinux-x86.cpp
 		  > memmove(pTransfer->buffer + nTotalBytes, pBuffer, pPacket->actual_length);  
-
+		  Also i had troubles to get the kinect and the asus xtion to run both at the same time.
+		  At the end it worked, i had to install the driver in a special order + use the right version:
+		  - install 'sensor-bin-linux64-v5.0.4.3' ('sensor-bin-linux64-v5.0.4.4' didn't worked in combination with the kinect,
+			at the end the kinect worked but displayed only blank data)
+		  - install 'SensorKinect-Bin-Linux64-v5.0.3.4'
+		  - install again 'sensor-bin-linux64-v5.0.4.3'
+		  In that way i managed that both sensors are working at the same time.
+		
 
 v0.21 , 
 	New:

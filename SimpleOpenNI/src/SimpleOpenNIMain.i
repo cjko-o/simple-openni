@@ -133,7 +133,7 @@ public:
 
         bool init(const char* xmlInitFile,int runMode=RunMode_MultiThreaded);
         bool init(int runMode=RunMode_MultiThreaded);
-        bool initX(int deviceIndex);
+        bool init(int deviceIndex,int runMode);
 
         int nodes();
 

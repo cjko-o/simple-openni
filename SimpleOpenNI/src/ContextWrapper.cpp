@@ -44,7 +44,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	21		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	22		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -95,8 +95,6 @@ ContextWrapper::ContextWrapper():
     _threadRun(false),
     _deviceIndex(0)
 {
-    std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
-
     _depthImageColor[0] = 1.0f;
     _depthImageColor[1] = 1.0f;
     _depthImageColor[2] = 1.0f;
@@ -281,6 +279,8 @@ bool ContextWrapper::initContext()
 {
     if(_globalContextFlag == false)
     {   // create context
+        std::cout << "SimpleOpenNI Version " << (SIMPLEOPENNI_VERSION / 100) << "." <<  (SIMPLEOPENNI_VERSION % 100) << std::endl;
+
         XnStatus rc = _globalContext.Init();
         if(rc == XN_STATUS_NO_NODE_PRESENT)
             // error;
@@ -289,7 +289,6 @@ bool ContextWrapper::initContext()
         {
             _globalContextFlag = true;
 
-
             // check the list of all devices
             xn::NodeInfoList list;
             int i=0;
@@ -297,22 +296,22 @@ bool ContextWrapper::initContext()
             _deviceCount = 0;
 
             rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL,list);
-            logOut(MsgNode_Info,"Device List:");
+            //logOut(MsgNode_Info,"Device List:");
             for(xn::NodeInfoList::Iterator iter = list.Begin(); iter != list.End(); ++iter,i++)
             {
                 xn::NodeInfo    deviceNodeInfo = *iter;
 
+                /*
                 logOut(MsgNode_Info,"index=%d\tGetCreationInfo(): %s\tGetInstanceName:%s\tname: %s\tvendor: %s",i,deviceNodeInfo.GetCreationInfo(),
                                                                                               deviceNodeInfo.GetInstanceName(),
                                                                                               deviceNodeInfo.GetDescription().strName,
                                                                                               deviceNodeInfo.GetDescription().strVendor);
-
+                */
                 _deviceCount++;
             }
 
 
-
-
+/*
             i = 0;
             rc = _globalContext.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH, NULL,list);
             logOut(MsgNode_Info,"Depth List:");
@@ -367,6 +366,7 @@ bool ContextWrapper::initContext()
                                                                                               depthInfo.GetDescription().strVendor);
 
             }
+*/
         }
 
         return _globalContextFlag;
@@ -386,7 +386,7 @@ bool ContextWrapper::getNodeInfo(int nodeType,int index,
     index *= offset;
 
     rc = _globalContext.EnumerateProductionTrees(nodeType, NULL,*list);
-    logOut(MsgNode_Info,"Device List:");
+    //logOut(MsgNode_Info,"Device List:");
     for(xn::NodeInfoList::Iterator iter = list->Begin(); iter != list->End(); ++iter)
     {
         xn::NodeInfo nodeInfo = *iter;
@@ -409,12 +409,7 @@ bool ContextWrapper::init(int runMode)
 {
     _threadMode = runMode;
 
-    // init the cam with the xml setup file
-    xn::EnumerationErrors errors;
-    _rc = _globalContext.Init();
-    if (_rc == XN_STATUS_NO_NODE_PRESENT)
-        return false;
-    else if (_rc != XN_STATUS_OK)
+    if (initContext() == false)
     {
         logOut(MsgNode_Error,"ContextWrapper::init\n");
         return false;
@@ -450,13 +445,13 @@ bool ContextWrapper::init(int runMode)
     return true;
 }
 
-bool ContextWrapper::initX(int deviceIndex)
+bool ContextWrapper::init(int deviceIndex,int runMode)
 {
-    logOut(MsgNode_Error,"start index init");
+  //  logOut(MsgNode_Error,"start index init");
 
     initContext();
+    _threadMode = runMode;
 
-    _threadMode = RunMode_SingleThreaded;
 
     //checkLicenses();
 
@@ -583,7 +578,7 @@ bool ContextWrapper::createDepth(bool force)
         {
             if(_depth.IsValid())
             {
-                logOut(MsgNode_Error,"depth valid");
+              //  logOut(MsgNode_Error,"depth valid");
 
                 _depth.SetMapOutputMode(_depthMapOutputMode);
                 _depth.GetMetaData(_depthMD);
@@ -712,7 +707,7 @@ bool ContextWrapper::createRgb(bool force)
             printf("image 2\n");
             if(_image.IsValid())
             {
-                logOut(MsgNode_Error,"image valid");
+               //logOut(MsgNode_Error,"image valid");
 
                  _rc = _image.SetMapOutputMode(_imageMapOutputMode);
                  _image.GetMetaData(_imageMD);
@@ -874,7 +869,7 @@ bool ContextWrapper::createScene(bool force)
         {
             if(_sceneAnalyzer.IsValid())
             {
-                std::cout << "sceneValdi:  " << _deviceIndex << std::endl;
+                //std::cout << "sceneValdi:  " << _deviceIndex << std::endl;
 
                 _rc = _sceneAnalyzer.SetMapOutputMode(_sceneMapOutputMode);
                 _sceneAnalyzer.GetMetaData(_sceneMD);
@@ -933,8 +928,18 @@ bool ContextWrapper::createUser(int flags,bool force)
     _userGenerator.GetSkeletonCap().SetSkeletonProfile((XnSkeletonProfile)flags);
 
     // set the callbacks
-    _userGenerator.RegisterUserCallbacks(newUserCb, lostUserCb, this, _hUserCb);
-    _userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(startCalibrationCb, endCalibrationCb, this, _hCalibrationCb);
+    _userGenerator.RegisterUserCallbacks(NewUserCb, LostUserCb, this, _hUserCb);
+
+    // deprecated
+    _userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(StartCalibrationCb, EndCalibrationCb, this, _hCalibrationCb);
+/*
+    _userGenerator.GetSkeletonCap().RegisterToCalibrationComplete(startCalibrationCb,this,_hToCalibrationStartCb);
+    _userGenerator.GetSkeletonCap().RegisterToCalibrationInProgress(startCalibrationCb,this,_hToCalibrationStartCb);
+    _userGenerator.GetSkeletonCap().RegisterToCalibrationStart(startCalibrationCb,this,_hToCalibrationStartCb);
+    _userGenerator.GetSkeletonCap().RegisterToJointConfigurationChange(startCalibrationCb,this,_hToCalibrationStartCb);
+
+*/
+
     _userGenerator.GetPoseDetectionCap().RegisterToPoseCallbacks(startPoseCb, endPoseCb, this, _hPoseCb);
 
     // get the scenemap + read out the size
@@ -997,7 +1002,7 @@ bool ContextWrapper::enableHands()
 {
     if(!_initFlag)
     {
-        logOut(MsgNode_Error,"enableHands: context is not initialized!");
+       // logOut(MsgNode_Error,"enableHands: context is not initialized!");
         return false;
     }
     else if(_handsGenerator.IsValid())
@@ -2423,7 +2428,7 @@ bool ContextWrapper::mirror()
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks
 
-void XN_CALLBACK_TYPE ContextWrapper::newUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::NewUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
 {
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
@@ -2431,7 +2436,7 @@ void XN_CALLBACK_TYPE ContextWrapper::newUserCb(xn::UserGenerator& generator, Xn
     context->onNewUserCb(generator,user);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::lostUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::LostUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
 {	
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
@@ -2439,7 +2444,7 @@ void XN_CALLBACK_TYPE ContextWrapper::lostUserCb(xn::UserGenerator& generator, X
     context->onLostUserCb(generator,user);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::startCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::StartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
 {
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
@@ -2447,7 +2452,7 @@ void XN_CALLBACK_TYPE ContextWrapper::startCalibrationCb(xn::SkeletonCapability&
     context->onStartCalibrationCb(skeleton,user);
 }
 
-void XN_CALLBACK_TYPE ContextWrapper::endCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
+void XN_CALLBACK_TYPE ContextWrapper::EndCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
 {
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
@@ -2505,11 +2510,14 @@ void ContextWrapper::onEndPoseCb(xn::PoseDetectionCapability& pose, const XnChar
 }
 
 // virtual methods for the java class which inherits this class
+/*
 void  ContextWrapper::onNewUserCb(unsigned int userId){;}
 void  ContextWrapper::onLostUserCb(unsigned int userId){;}
-
+*/
+/*
 void  ContextWrapper::onStartCalibrationCb(unsigned int userId){;}
 void  ContextWrapper::onEndCalibrationCb(unsigned int userId,bool successFlag){;}
+*/
 
 void  ContextWrapper::onStartPoseCb(const char* strPose, unsigned int user){;}
 void  ContextWrapper::onEndPoseCb(const char* strPose, unsigned int user){;}

@@ -35,11 +35,34 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
     public static void start()
 	{
+	  if(_initFlag)
+		return;
+
+	  _initFlag = true;
 	  initContext();
+	}
+    
+	public static int deviceCount()
+	{
+	  start();
+	  return ContextWrapper.deviceCount();
+	}
+
+    public static int deviceNames(StrVector nodeNames)
+	{
+	  start();
+	  return ContextWrapper.deviceNames(nodeNames);	  
 	}
 
 	///////////////////////////////////////////////////////////////////////////
 	// callback vars
+	protected Object			_userCbObject;
+	protected Object			_calibrationCbObject;
+	protected Object			_poseCbObject;
+	protected Object			_handsCbObject;
+	protected Object			_gestureCbObject;
+	protected Object			_sessionCbObject;
+
 	protected Method 			_newUserMethod;
 	protected Method 			_lostUserMethod;
 	
@@ -93,6 +116,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	protected long				_sceneMapTimeStamp;
 	protected long				_sceneImageTimeStamp;
+
+	static protected boolean	_initFlag = false;
 
 	
 	/**
@@ -176,7 +201,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		setupCallbackFunc();
 		
 		// load the initfile
-		this.initX(deviceIndex);
+                this.init(deviceIndex,RUN_MODE_SINGLE_THREADED);
 	}
 	
 	/**
@@ -218,18 +243,25 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	protected void setupCallbackFunc()
 	{
-		this._newUserMethod				= null;
-		this._lostUserMethod 			= null;
-		
-		this._startCalibrationMethod 	= null;
-		this._endCalibrationMethod		= null;
-		
-		this._startPoseMethod 			= null;
-		this._endPoseMethod				= null;
+		_userCbObject 			= _parent;
+		_calibrationCbObject 	= _parent;
+		_poseCbObject 			= _parent;
+		_handsCbObject 			= _parent;
+		_gestureCbObject 		= _parent;
+		_sessionCbObject 		= _parent;
 
-		this._createHandsMethod			= null;
-		this._updateHandsMethod			= null;
-		this._destroyHandsMethod		= null;
+		_newUserMethod			= null;
+		_lostUserMethod 		= null;
+		
+		_startCalibrationMethod = null;
+		_endCalibrationMethod	= null;
+		
+		_startPoseMethod 		= null;
+		_endPoseMethod			= null;
+
+		_createHandsMethod		= null;
+		_updateHandsMethod		= null;
+		_destroyHandsMethod		= null;
 	
 		// user callbacks
 		_newUserMethod = getMethodRef("onNewUser",new Class[] { int.class });
@@ -529,6 +561,19 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	private void setupUser()
 	{
 		_userRaw = new int[userWidth() * userHeight()];
+
+		// setup callbacks
+		// user callbacks
+		_newUserMethod = getMethodRef(_userCbObject,"onNewUser",new Class[] { int.class });
+		_lostUserMethod = getMethodRef(_userCbObject,"onLostUser",new Class[] { int.class });
+
+		// calibrations callbacks
+		_startCalibrationMethod = getMethodRef(_calibrationCbObject,"onStartCalibration",new Class[] { int.class });
+		_endCalibrationMethod = getMethodRef(_calibrationCbObject,"onEndCalibration",new Class[] { int.class, boolean.class });
+		
+		// pose callbacks
+		_startPoseMethod = getMethodRef(_poseCbObject,"onStartPose",new Class[] { String.class,int.class });
+		_endPoseMethod = getMethodRef(_poseCbObject,"onEndPose",new Class[] { String.class,int.class });
 	}
 	
 	/**
@@ -536,6 +581,18 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	*/  
 	public boolean enableUser(int flags) 
 	{
+	  return enableUser(flags,_parent);
+	}
+
+	/**
+	* Enable user 
+	*/  
+	public boolean enableUser(int flags,Object cbObject) 
+	{
+		_userCbObject 			= cbObject;
+		_calibrationCbObject 	= cbObject;
+		_poseCbObject 			= cbObject;
+
 		if(super.enableUser(flags))
 		{
 			setupUser();
@@ -587,13 +644,28 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 	
 	private void setupHands()
-	{}
+	{
+		// hands
+		_createHandsMethod = getMethodRef(_handsCbObject,"onCreateHands",new Class[] { int.class,PVector.class,float.class });
+		_updateHandsMethod = getMethodRef(_handsCbObject,"onUpdateHands",new Class[] { int.class,PVector.class,float.class });
+		_destroyHandsMethod = getMethodRef(_handsCbObject,"onDestroyHands",new Class[] { int.class,float.class });
+	}
 	
 	/**
 	* Enable hands  
 	*/  
-	public boolean enableHands() 
+	public boolean enableHands() 	
 	{
+	  return enableHands(_parent);
+	}
+
+	/**
+	* Enable hands  
+	*/  
+	public boolean enableHands(Object cbObject) 
+	{
+		_handsCbObject = cbObject;
+
 		if(super.enableHands())
 		{
 			setupHands();
@@ -613,13 +685,26 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	}
 
 	private void setupGesture()
-	{}
+	{
+		// gesture
+		_recognizeGestureMethod = getMethodRef(_gestureCbObject,"onRecognizeGesture",new Class[] { String.class,PVector.class,PVector.class  });
+		_progressGestureMethod = getMethodRef(_gestureCbObject,"onProgressGesture",new Class[] { String.class,PVector.class,float.class });
+	}
 	
+	/**
+	* Enable hands  
+	*/  
+	public boolean enableGesture() 	
+	{
+	  return enableGesture(_parent);
+	}
+
 	/**
 	* Enable gesture  
 	*/  
-	public boolean enableGesture() 
+	public boolean enableGesture(Object cbObject) 
 	{
+		_gestureCbObject = cbObject;
 		if(super.enableGesture())
 		{
 			setupGesture();
@@ -1037,7 +1122,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onNewUserCb(long userId) 
 	{
 		try {
-			_newUserMethod.invoke(_parent, new Object[] { (int)userId });
+			_newUserMethod.invoke(_userCbObject, new Object[] { (int)userId });
 		} 
 		catch (Exception e) 
 		{
@@ -1047,7 +1132,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onLostUserCb(long userId)
 	{
 		try {
-			_lostUserMethod.invoke(_parent, new Object[] { (int)userId });		
+			_lostUserMethod.invoke(_userCbObject, new Object[] { (int)userId });		
 		} 
 		catch (Exception e) 
 		{
@@ -1057,7 +1142,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onStartCalibrationCb(long userId) 
 	{
 		try {
-			_startCalibrationMethod.invoke(_parent, new Object[] { (int)userId });	
+			_startCalibrationMethod.invoke(_calibrationCbObject, new Object[] { (int)userId });	
 		} 
 		catch (Exception e) 
 		{
@@ -1067,7 +1152,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onEndCalibrationCb(long userId, boolean successFlag) 
 	{
 		try {
-			_endCalibrationMethod.invoke(_parent, new Object[] { (int)userId, successFlag});
+			_endCalibrationMethod.invoke(_calibrationCbObject, new Object[] { (int)userId, successFlag});
 		} 
 		catch (Exception e) 
 		{
@@ -1077,7 +1162,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onStartPoseCb(String strPose, long userId) 
 	{
 		try {
-			_startPoseMethod.invoke(_parent, new Object[] { strPose,(int)userId });
+			_startPoseMethod.invoke(_poseCbObject, new Object[] { strPose,(int)userId });
 		} 
 		catch (Exception e) 
 		{
@@ -1087,7 +1172,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onEndPoseCb(String strPose, long userId)
 	{
 		try {
-			_endPoseMethod.invoke(_parent, new Object[] { strPose,(int)userId });
+			_endPoseMethod.invoke(_poseCbObject, new Object[] { strPose,(int)userId });
 		} 
 		catch (Exception e) 
 		{
@@ -1098,7 +1183,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onCreateHandsCb(long nId, XnPoint3D pPosition, float fTime)
 	{
 		try {
-			_createHandsMethod.invoke(_parent, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
+			_createHandsMethod.invoke(_handsCbObject, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
 		} 
 		catch (Exception e) 
 		{}	
@@ -1107,7 +1192,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onUpdateHandsCb(long nId, XnPoint3D pPosition, float fTime)
 	{
 		try {
-			_updateHandsMethod.invoke(_parent, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
+			_updateHandsMethod.invoke(_handsCbObject, new Object[] { (int)nId,new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),fTime});
 		} 
 		catch (Exception e) 
 		{}	
@@ -1116,7 +1201,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onDestroyHandsCb(long nId, float fTime)
 	{
 		try {
-			_destroyHandsMethod.invoke(_parent, new Object[] { (int)nId,fTime});
+			_destroyHandsMethod.invoke(_handsCbObject, new Object[] { (int)nId,fTime});
 		} 
 		catch (Exception e) 
 		{}	
@@ -1125,7 +1210,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onRecognizeGestureCb(String strGesture, XnPoint3D pIdPosition, XnPoint3D pEndPosition) 
 	{
 		try {
-			_recognizeGestureMethod.invoke(_parent, new Object[] { strGesture,
+			_recognizeGestureMethod.invoke(_gestureCbObject, new Object[] { strGesture,
 																   new PVector(pIdPosition.getX(),pIdPosition.getY(),pIdPosition.getZ()),
 																   new PVector(pEndPosition.getX(),pEndPosition.getY(),pEndPosition.getZ())
 																 });
@@ -1137,7 +1222,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onProgressGestureCb(String strGesture, XnPoint3D pPosition, float fProgress) 
 	{
 		try {
-			_progressGestureMethod.invoke(_parent, new Object[] { strGesture,
+			_progressGestureMethod.invoke(_gestureCbObject, new Object[] { strGesture,
 																  new PVector(pPosition.getX(),pPosition.getY(),pPosition.getZ()),
 																  fProgress
 																 });
@@ -1150,7 +1235,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onStartSessionCb(XnPoint3D ptPosition)
 	{
 		try {
-			_startSessionMethod.invoke(_parent, new Object[] { new PVector(ptPosition.getX(),ptPosition.getY(),ptPosition.getZ()) });
+			_startSessionMethod.invoke(_sessionCbObject, new Object[] { new PVector(ptPosition.getX(),ptPosition.getY(),ptPosition.getZ()) });
 		} 
 		catch (Exception e) 
 		{}	
@@ -1159,7 +1244,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onEndSessionCb()
 	{
 		try {
-			_endSessionMethod.invoke(_parent, new Object[] { });
+			_endSessionMethod.invoke(_sessionCbObject, new Object[] { });
 		} 
 		catch (Exception e) 
 		{}		}
@@ -1167,7 +1252,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	protected void onFocusSessionCb(String strFocus, XnPoint3D ptPosition, float fProgress)
 	{
 		try {
-			_focusSessionMethod.invoke(_parent, new Object[] {strFocus, 
+			_focusSessionMethod.invoke(_sessionCbObject, new Object[] {strFocus, 
 															  new PVector(ptPosition.getX(),ptPosition.getY(),ptPosition.getZ()),
 															  fProgress });
 		} 
