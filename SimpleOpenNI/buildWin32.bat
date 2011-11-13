@@ -1,4 +1,4 @@
-rem "build SimpleOpenNI"
+rem "build SimpleOpenNI 32bit"
 mkdir build32
 cd build32
 cmake -G "Visual Studio 9 2008" ^
