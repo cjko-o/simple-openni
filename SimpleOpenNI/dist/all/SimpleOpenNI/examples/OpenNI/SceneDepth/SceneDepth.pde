@@ -15,8 +15,7 @@ SimpleOpenNI  context;
 
 void setup()
 {
-//  context = new SimpleOpenNI(this);
-  context = new SimpleOpenNI(this,,SimpleOpenNI.RUN_MODE_SINGLE_THREADED);
+  context = new SimpleOpenNI(this);
   
   // enable depthMap generation 
   context.enableDepth();
