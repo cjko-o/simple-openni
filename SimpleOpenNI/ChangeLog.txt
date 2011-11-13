@@ -14,7 +14,7 @@ v0.23 , in planning:
 
 v0.22 , 11/13/2011, 
 	New:
-		- Updated code to use OpenNI v1.3.3.5, Nite v1.4.2.5
+		- Updated code to use OpenNI v1.3.4.6, Nite v1.4.2.5
 		- Updated OSX installer
 		- Added methods to access and query multiple cameras:
 		  Be aware that you shouln't put the cameras at the same usb bus(usb performance!).
