@@ -18,6 +18,11 @@ INCLUDE(CheckIncludeFiles)
 
 PROJECT(SimpleOpenNI)
 
+IF(NOT MACH_ARCH)
+    # default 64bit
+    SET(MACH_ARCH "64")
+ENDIF()
+
 # -----------------------------------------------------------------------------
 # check swig
 FIND_PACKAGE(SWIG REQUIRED)
@@ -92,8 +97,13 @@ ENDIF()
 
 	
 # openNI lib	
-FIND_LIBRARY(OPEN_NI_LIBRARY NAMES openNI64 PATHS ${OPEN_NI_LIB})
-MESSAGE("OPEN_NI_LIB: " ${OPEN_NI_LIBRARY})	
+IF(WIN32)
+    SET(OPEN_LIBRARY_NAME openNI${MACH_ARCH})
+ELSE()
+    SET(OPEN_LIBRARY_NAME OpenNI)
+ENDIF()
+
+FIND_LIBRARY(OPEN_NI_LIBRARY NAMES ${OPEN_LIBRARY_NAME} PATHS ${OPEN_NI_LIB})
 
 IF(NOT OPEN_NI_LIBRARY)
 	#IF(NOT OPEN_NI_LIB)
@@ -107,7 +117,7 @@ IF(NOT OPEN_NI_LIBRARY)
 		ENDIF()
 	#ENDIF()
 ENDIF()
-MESSAGE("OPENni: " ${OPEN_NI_LIBRARY})	
+
 SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
 
 
@@ -154,15 +164,17 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(${XN_NITE_INCLUDE})
 IF(NOT NITE_VERSION)
-	SET(NITE_VERSION 1_4_2)
+        SET(NITE_VERSION 1_4_2)
 ENDIF()
 
-SET(NITE_LIB XnVNITE64)
 
 IF(APPLE OR UNIX)
-	FIND_LIBRARY(NITE_LIBRARY NAMES ${NITE_LIB}_${NITE_VERSION} PATHS ${XN_NITE_LIB})
-	SET(LIBS ${LIBS} ${NITE_LIBRARY})
+        SET(NITE_LIB XnVNite)
+        FIND_LIBRARY(NITE_LIBRARY NAMES ${NITE_LIB}_${NITE_VERSION} PATHS ${XN_NITE_LIB})
+        SET(LIBS ${LIBS} ${NITE_LIBRARY})
 ELSE()
+    SET(NITE_LIB XnVNITE64)
+    # windows
 	# quite wired, cmake doesn't find the lib anymore, just delivers the path,
 	# setup the hole thing by hand(must be a problem with the backslash etc.)
 	FIND_LIBRARY(NITE_LIBRARY NAMES ${NITE_LIB}_${NITE_VERSION} PATHS ${XN_NITE_LIB})
