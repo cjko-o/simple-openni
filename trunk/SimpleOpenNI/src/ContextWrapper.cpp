@@ -698,15 +698,12 @@ bool ContextWrapper::createRgb(bool force)
     xn::NodeInfoList    list;
     xn::NodeInfo        rgbNodeInfo(NULL);
 
-    printf("image 0\n");
     if(getNodeInfo(XN_NODE_TYPE_IMAGE,_deviceIndex,
                    &list,&rgbNodeInfo))
     {
         _rc = _globalContext.CreateProductionTree(rgbNodeInfo,_image);
-        printf("image 1\n");
-        if(_rc == XN_STATUS_OK)
+         if(_rc == XN_STATUS_OK)
         {
-            printf("image 2\n");
             if(_image.IsValid())
             {
                //logOut(MsgNode_Error,"image valid");
