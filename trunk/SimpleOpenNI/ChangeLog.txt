@@ -14,11 +14,12 @@ v0.23 , in planning:
 
 v0.22 , 11/13/2011, 
 	New:
-		- Updated code to use OpenNI v1.3.4.6, Nite v1.4.2.5
+		- Updated the library with the new OpenNI/Nite versions. If you download there is a note which versions
+		  where used for which platform
 		- Updated OSX installer
 		- Added methods to access and query multiple cameras:
-		  Be aware that you shouln't put the cameras at the same usb bus(usb performance!).
-		  - SimpleOpenNI(int cameraIndex,PApplet parent) - setups the specific camera
+		  Be aware that you shouldn't put the cameras at the same usb bus(usb performance!).
+		  - SimpleOpenNI(int cameraIndex,PApplet parent) - setup the specific camera
 		  - SimpleOpenNI.updateAll() - updates all cameras	(static method)
 		  - int deviceCount() - returns  the count of cameras (static method)
 		  - int deviceNames(StrVector strList) - gives a list of the cameras that are available and
@@ -26,7 +27,7 @@ v0.22 , 11/13/2011,
 		- Added new example:
 		  - 'MultiCam.pde' - Shows how to use multiple cameras
 		  The multicamera support works at the moment only for the depthMap, rgbMap and the infraRedMap.
-		  I experienced stange troubles if i use generators like SceneAnalyzer or UserGenerator. Seams the mix up
+		  I experienced stange troubles if i use generators like SceneAnalyzer or UserGenerator. Seams to mix up
 		  internaly the data. Have to find a fix for this behaviour.
 		- Added methods to get callbacks from SimpleOpenNI to different classes than only PApplet
 		  - enableHands(Object cbClass)
@@ -52,7 +53,10 @@ v0.22 , 11/13/2011,
 		  - install 'SensorKinect-Bin-Linux64-v5.0.3.4'
 		  - install again 'sensor-bin-linux64-v5.0.4.3'
 		  In that way i managed that both sensors are working at the same time.
-		
+	
+	Open Problems:
+		- On OSX i didn't get any configuration to run the Asus Xtion Pro and the Kinect at the same time,
+		  eather one of them worked or not. I tried with all current and old drivers
 
 v0.21 , 
 	New:
