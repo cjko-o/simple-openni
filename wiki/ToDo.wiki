@@ -19,4 +19,5 @@
   * ~~Use new OpenNI v1.1.041, Nite v1.3.1.5~~
   * ~~Reorganize the samples into theme folders~~
   * build for Android
+  * ply or stl export function for the pointcloud
   
