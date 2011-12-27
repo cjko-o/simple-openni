@@ -30,7 +30,25 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 {
 	static 
 	{	// load the nativ shared lib
-		System.loadLibrary("SimpleOpenNI");
+		try{
+		  //System.out.println("-- " + System.getProperty("user.dir"));
+		  System.loadLibrary("SimpleOpenNI");
+		}
+		catch(UnsatisfiedLinkError e)
+		{
+		  System.out.println("Can't find the SimpleOpenNI library : " + e);
+		  /*
+		  if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
+			// windows
+			System.load(System.getProperty("user.dir")+"/lib/SimpleOpenNI.dll");
+		  else if(System.getProperty("os.name").toLowerCase().indexOf("nix") >= 0)
+			// unix
+			System.load(System.getProperty("user.dir")+"/lib/libSimpleOpenNI.so");
+		  else if(System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0)
+			// mac
+			System.load(System.getProperty("user.dir")+"/lib/libSimpleOpenNI.jnilib");
+		  */
+		}
 	}
 
     public static void start()
@@ -201,7 +219,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		setupCallbackFunc();
 		
 		// load the initfile
-                this.init(deviceIndex,RUN_MODE_SINGLE_THREADED);
+		this.init(deviceIndex,RUN_MODE_SINGLE_THREADED);
 	}
 	
 	/**
