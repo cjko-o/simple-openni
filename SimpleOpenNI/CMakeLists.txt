@@ -164,7 +164,8 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(${XN_NITE_INCLUDE})
 IF(NOT NITE_VERSION)
-        SET(NITE_VERSION 1_4_2)
+        SET(NITE_VERSION 1_5_2)
+message("version call: " ${NITE_VERSION})
 ENDIF()
 
 
@@ -221,6 +222,7 @@ ENDIF()
 SET(SWIG_SOURCES 
 src/SimpleOpenNIMain.i
 src/ContextWrapper.cpp
+src/KinectMotor.cpp
 src/NITE_Helpers.cpp
 )
 
@@ -255,4 +257,4 @@ ADD_CUSTOM_COMMAND(TARGET SimpleOpenNI
 				   COMMAND cmake -E echo "Creating doc files..."
 				   COMMAND cmake -E make_directory ./doc
 				   #COMMAND ${JAVA_DOC} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${P5_WRAPPER}/*.java -version ${CMAKE_SWIG_OUTDIR}/ContextWrapper.java)
-				   COMMAND ${JAVA_DOC} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${CMAKE_SWIG_OUTDIR}/*.java)
+                                   COMMAND ${JAVA_DOC} -classpath ${P5_JAR} -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${CMAKE_SWIG_OUTDIR}/*.java)

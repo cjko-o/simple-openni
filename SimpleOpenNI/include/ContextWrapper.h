@@ -47,6 +47,8 @@
 #include <XnVSessionManager.h>
 #include <XnVSelectableSlider2D.h>
 
+#include "KinectMotor.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // defines
 
@@ -76,13 +78,13 @@
 #define SOPENNI_CB_NAME(FuncName)     FuncName##Cb
 #define SOPENNI_CB_STATIC(FuncName,...)\
     public: \
-            static void XN_CALLBACK_TYPE FuncName##Cb(__VA_ARGS__);
+    static void XN_CALLBACK_TYPE FuncName##Cb(__VA_ARGS__);
 #define SOPENNI_CB_MEMBER(FuncName,...)\
     protected:\
-            void on##FuncName##Cb(__VA_ARGS__);
+    void on##FuncName##Cb(__VA_ARGS__);
 #define SOPENNI_CB_VIRTUAL(FuncName,...)\
     protected:\
-            virtual void on##FuncName##Cb(__VA_ARGS__){;}
+    virtual void on##FuncName##Cb(__VA_ARGS__){;}
 
 
 namespace sOpenNI{
@@ -92,511 +94,516 @@ class ContextWrapper
 {
 public:
 
-	ContextWrapper();
-	~ContextWrapper();
+    ContextWrapper();
+    ~ContextWrapper();
 
-	int version();
+    int version();
 
-        //////////////////////////////////////////////////////////////////////////////
-        // init methods
-        static bool initContext();
-        bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
-        bool init(int runMode=RunMode_SingleThreaded);
+    //////////////////////////////////////////////////////////////////////////////
+    // init methods
+    static bool initContext();
+    bool init(const char* xmlInitFile,int runMode=RunMode_SingleThreaded);
+    bool init(int runMode=RunMode_SingleThreaded);
 
-        bool init(int deviceIndex,int runMode);
+    bool init(int deviceIndex,int runMode);
 
-	void addLicense(const char* vendor,const char* license);
+    void addLicense(const char* vendor,const char* license);
 
-	bool isInit(){	return _initFlag; }
-	void close();
+    bool isInit(){	return _initFlag; }
+    void close();
 
-        virtual void update();
-        static void updateAll();
+    virtual void update();
+    static void updateAll();
 
-        int nodes();
+    int nodes();
 
-        //////////////////////////////////////////////////////////////////////////////
-        // multiple devices
-        static int deviceCount();
-        static int deviceNames(std::vector<std::string>* nodeNames);
-        int deviceIndex() const { return _deviceIndex; }
+    //////////////////////////////////////////////////////////////////////////////
+    // multiple devices
+    static int deviceCount();
+    static int deviceNames(std::vector<std::string>* nodeNames);
+    int deviceIndex() const { return _deviceIndex; }
 
 
-	//////////////////////////////////////////////////////////////////////////////
-	// depth methods
-	virtual bool enableDepth();
-	virtual bool enableDepth(int width,int height,int fps);
+    //////////////////////////////////////////////////////////////////////////////
+    // depth methods
+    virtual bool enableDepth();
+    virtual bool enableDepth(int width,int height,int fps);
 
-        xn::DepthGenerator& getDepthGenerator() { return _depth; }
+    xn::DepthGenerator& getDepthGenerator() { return _depth; }
 
 
-	int depthWidth();
-        int depthHeight();
+    int depthWidth();
+    int depthHeight();
 
-        int     depthImage(int* map);		// argb 4-Bytes / alpha is not used
-        void    setDepthImageColor(int r,int g,int b);
-        void    setDepthImageColorMode(int mode);
-        int     depthImageColorMode();
+    int     depthImage(int* map);		// argb 4-Bytes / alpha is not used
+    void    setDepthImageColor(int r,int g,int b);
+    void    setDepthImageColorMode(int mode);
+    int     depthImageColorMode();
 
-        int     depthMapSize();
-	int	depthMap(int* map);					// in milimeters
-        int     depthMapRealWorld(XnPoint3D map[]);
-        int     depthMapRealWorldA(XnPoint3D* map)
-	{
-		return depthMapRealWorld(map);
-	}
+    int     depthMapSize();
+    int	depthMap(int* map);					// in milimeters
+    int     depthMapRealWorld(XnPoint3D map[]);
+    int     depthMapRealWorldA(XnPoint3D* map)
+    {
+        return depthMapRealWorld(map);
+    }
 
-	XnPoint3D* depthMapRealWorldA();	
-	int depthMapRealWorldA(XnPoint3D* map,int count);	
+    XnPoint3D* depthMapRealWorldA();
+    int depthMapRealWorldA(XnPoint3D* map,int count);
 
-	int depthHistSize();
-	int depthHistMap(float* histMap);
+    int depthHistSize();
+    int depthHistMap(float* histMap);
 
-	float hFieldOfView();
-	float vFieldOfView();
+    float hFieldOfView();
+    float vFieldOfView();
 
-	//////////////////////////////////////////////////////////////////////////////
-	// cam image
-	virtual bool enableRGB();
-	virtual bool enableRGB(int width,int height,int fps);
+    //////////////////////////////////////////////////////////////////////////////
+    // cam image
+    virtual bool enableRGB();
+    virtual bool enableRGB(int width,int height,int fps);
 
-        xn::ImageGenerator& getImageGenerator() { return _image; }
+    xn::ImageGenerator& getImageGenerator() { return _image; }
 
-	int rgbWidth();
-	int rgbHeight();
+    int rgbWidth();
+    int rgbHeight();
 
-	int	rgbImage(int* map);			// argb 4-Bytes / alpha is not used
+    int	rgbImage(int* map);			// argb 4-Bytes / alpha is not used
 
-	//////////////////////////////////////////////////////////////////////////////
-	// ir image
-	virtual bool enableIR();
-	virtual bool enableIR(int width,int height,int fps);
+    //////////////////////////////////////////////////////////////////////////////
+    // ir image
+    virtual bool enableIR();
+    virtual bool enableIR(int width,int height,int fps);
 
-        xn::IRGenerator& getIRGenerator() { return _ir; }
+    xn::IRGenerator& getIRGenerator() { return _ir; }
 
-	int irWidth();
-	int irHeight();
+    int irWidth();
+    int irHeight();
 
-	int irMap(int* map);			// 16-bit value
-	int irImage(int* map);			// argb 4-Bytes / alpha is not used
+    int irMap(int* map);			// 16-bit value
+    int irImage(int* map);			// argb 4-Bytes / alpha is not used
 
-	//////////////////////////////////////////////////////////////////////////////
-	// scene analyzer
-	virtual bool enableScene();
-	virtual bool enableScene(int width,int height,int fps);
+    //////////////////////////////////////////////////////////////////////////////
+    // scene analyzer
+    virtual bool enableScene();
+    virtual bool enableScene(int width,int height,int fps);
 
-        xn::SceneAnalyzer& getSceneAnalyzer() { return _sceneAnalyzer; }
+    xn::SceneAnalyzer& getSceneAnalyzer() { return _sceneAnalyzer; }
 
-	int sceneWidth();
-        int sceneHeight();
+    int sceneWidth();
+    int sceneHeight();
 
-	int sceneMap(int* map);
-	int sceneImage(int* map);		// 16-bit value, with the labels, size of the depth map
-	void getSceneFloor(XnVector3D* point,	
-					   XnVector3D* normal);
-	void getSceneFloorCoordsys(float* matrix);		// 4*4 matrix, rotation + translation to the nearest point
-												    // on the floor plane to the camera as null point
+    int sceneMap(int* map);
+    int sceneImage(int* map);		// 16-bit value, with the labels, size of the depth map
+    void getSceneFloor(XnVector3D* point,
+                       XnVector3D* normal);
+    void getSceneFloorCoordsys(float* matrix);		// 4*4 matrix, rotation + translation to the nearest point
+    // on the floor plane to the camera as null point
 
-	//////////////////////////////////////////////////////////////////////////////
-	// users
-	virtual bool enableUser(int flags);
+    //////////////////////////////////////////////////////////////////////////////
+    // users
+    virtual bool enableUser(int flags);
 
-        xn::UserGenerator& getUserGenerator() { return _userGenerator; }
+    xn::UserGenerator& getUserGenerator() { return _userGenerator; }
 
-        int	userWidth();
-        int	userHeight();
+    int	userWidth();
+    int	userHeight();
 
-	bool	getCoM(int user, XnPoint3D&  com);
-        int	getNumberOfUsers();
-        int	getUsers(std::vector<int>* userList);
-        int	getUserPixels(int user,int* userSceneData);
+    bool	getCoM(int user, XnPoint3D&  com);
+    int	getNumberOfUsers();
+    int	getUsers(std::vector<int>* userList);
+    int	getUserPixels(int user,int* userSceneData);
 
-	bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
+    bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
 
-	bool	isCalibratedSkeleton(int user);
-	bool	isCalibratingSkeleton(int user);
-	void	requestCalibrationSkeleton(int user, bool force);
-	void	abortCalibrationSkeleton(int user);
-
-        bool	saveCalibrationDataSkeleton(int user,int slot);
-        bool	loadCalibrationDataSkeleton(int user,int slot);
-        void	clearCalibrationDataSkeleton(int slot);
-        bool	isCalibrationDataSkeleton(int slot);
-
-        bool	saveCalibrationDataSkeleton(int user,const char* calibrationFile);
-        bool	loadCalibrationDataSkeleton(int user,const char* calibrationFile);
-
-        void	setSmoothingSkeleton(float factor);
-
-	bool	isTrackingSkeleton(int user);
-	void	startTrackingSkeleton(int user);
-	void	stopTrackingSkeleton(int user);
-
-	void	startPoseDetection(const char* pose,int user);
-	void	stopPoseDetection(int user);
-
-	bool	getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
-	bool	getJointOrientationSkeleton(int user,
-                                            int joint,
-                                            XnSkeletonJointOrientation* jointOrientation);
-
-
-	//////////////////////////////////////////////////////////////////////////////
-	// hands
-	virtual bool enableHands();
-
-        xn::HandsGenerator& getHandsGenerator() { return _handsGenerator; }
-
-	void	startTrackingHands(const XnVector3D& pos);
-	void	stopTrackingHands(int handId);
-	void	stopTrackingAllHands();
-	void	setSmoothingHands(float smoothingFactor);
-
-	//////////////////////////////////////////////////////////////////////////////
-	// gesture
-	virtual bool enableGesture();
-
-        xn::GestureGenerator& getGestureGenerator() { return _gestureGenerator; }
-
-        void addGesture(const char* gesture);
-	void removeGesture(const char* gesture);
-	bool availableGesture(const char *strGesture);
-	// void addGesture(const char* gesture,XnBoundingBox3D *  pArea);
-
-	//////////////////////////////////////////////////////////////////////////////
-	// audio
-	//bool enableAudio();
-
-	//////////////////////////////////////////////////////////////////////////////
-	// recorder
-	virtual bool enableRecorder(int recordMedium,const char* filePath);
-	bool addNodeToRecording(int nodeType,int compression);
-	bool removeNodeFromRecording(int nodeType);
-
-	//////////////////////////////////////////////////////////////////////////////
-	// player
-	virtual bool openFileRecording(const char* filePath);
-
-	//////////////////////////////////////////////////////////////////////////////
-	// access methods
-	void setMirror(bool flag);
-	bool mirror();
-
-	//////////////////////////////////////////////////////////////////////////////
-	// converter methods
-	void convertRealWorldToProjective(XnVector3D* world,XnVector3D* proj);	
-	void convertRealWorldToProjective(std::vector<XnVector3D>* worldArray,std::vector<XnVector3D>* projArray);
-
-	void convertProjectiveToRealWorld(XnVector3D* proj,XnVector3D* world);	
-	void convertProjectiveToRealWorld(std::vector<XnVector3D>* projArray,std::vector<XnVector3D>* worldArray);
-
-        bool alternativeViewPointDepthToImage();
-
-	///////////////////////////////////////////////////////////////////////////
-	// callbacks
-
-	// user
-
-        SOPENNI_CB_STATIC(NewUser,
-                          xn::UserGenerator& generator, XnUserID user, void* cxt)
-        SOPENNI_CB_MEMBER(NewUser,
-                          xn::UserGenerator& generator, XnUserID user)
-        SOPENNI_CB_VIRTUAL(NewUser,
-                           unsigned int user)
-
-        SOPENNI_CB_STATIC(LostUser,
-                          xn::UserGenerator& generator, XnUserID user, void* cxt)
-        SOPENNI_CB_MEMBER(LostUser,
-                          xn::UserGenerator& generator, XnUserID user)
-        SOPENNI_CB_VIRTUAL(LostUser,
-                           unsigned int user)
-	// calibration
-        SOPENNI_CB_STATIC(StartCalibration,
-                          xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
-        SOPENNI_CB_MEMBER(StartCalibration,
-                          xn::SkeletonCapability& skeleton, XnUserID user)
-        SOPENNI_CB_VIRTUAL(StartCalibration,
-                           unsigned int user)
-
-        SOPENNI_CB_STATIC(EndCalibration,
-                          xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
-        SOPENNI_CB_MEMBER(EndCalibration,
-                          xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
-        SOPENNI_CB_VIRTUAL(EndCalibration,
-                           unsigned int user, bool bSuccess)
-public:
-
-	// pose
-	static void XN_CALLBACK_TYPE startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
-	static void XN_CALLBACK_TYPE endPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
-
-	// hands
-	static void XN_CALLBACK_TYPE createHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt);
-	static void XN_CALLBACK_TYPE updateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt);
-	static void XN_CALLBACK_TYPE destroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime, void* cxt);
-
-	// gesture
-	static void XN_CALLBACK_TYPE recognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition, void* cxt);
-	static void XN_CALLBACK_TYPE progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt);
-	
-	///////////////////////////////////////////////////////////////////////////
-	// NITE
-
-	// session
-	static void XN_CALLBACK_TYPE onStartSessionCb(const XnPoint3D& ptPosition, void* cxt);
-	static void XN_CALLBACK_TYPE onEndSessionCb(void* cxt);
-	static void XN_CALLBACK_TYPE onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt);
-
-
-	///////////////////////////////////////////////////////////////////////////
-	// node helper
-	static int getNodeType(int internalType);
-	xn::ProductionNode* getNode(int internalType);
-
-
-	///////////////////////////////////////////////////////////////////////////
-	// XnVSessionManager
-	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
-											xn::HandsGenerator* pTracker = NULL, xn::GestureGenerator* pFocusGenerator = NULL,
-											xn::GestureGenerator* pQuickRefocusGenerator = NULL);
-
-	void update(XnVSessionManager* sessionManager);
+    bool	isCalibratedSkeleton(int user);
+    bool	isCalibratingSkeleton(int user);
+    void	requestCalibrationSkeleton(int user, bool force);
+    void	abortCalibrationSkeleton(int user);
+
+    bool	saveCalibrationDataSkeleton(int user,int slot);
+    bool	loadCalibrationDataSkeleton(int user,int slot);
+    void	clearCalibrationDataSkeleton(int slot);
+    bool	isCalibrationDataSkeleton(int slot);
+
+    bool	saveCalibrationDataSkeleton(int user,const char* calibrationFile);
+    bool	loadCalibrationDataSkeleton(int user,const char* calibrationFile);
+
+    void	setSmoothingSkeleton(float factor);
+
+    bool	isTrackingSkeleton(int user);
+    void	startTrackingSkeleton(int user);
+    void	stopTrackingSkeleton(int user);
+
+    void	startPoseDetection(const char* pose,int user);
+    void	stopPoseDetection(int user);
+
+    bool	getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos);
+    bool	getJointOrientationSkeleton(int user,
+                                        int joint,
+                                        XnSkeletonJointOrientation* jointOrientation);
+
+
+    //////////////////////////////////////////////////////////////////////////////
+    // hands
+    virtual bool enableHands();
+
+    xn::HandsGenerator& getHandsGenerator() { return _handsGenerator; }
+
+    void	startTrackingHands(const XnVector3D& pos);
+    void	stopTrackingHands(int handId);
+    void	stopTrackingAllHands();
+    void	setSmoothingHands(float smoothingFactor);
+
+    //////////////////////////////////////////////////////////////////////////////
+    // gesture
+    virtual bool enableGesture();
+
+    xn::GestureGenerator& getGestureGenerator() { return _gestureGenerator; }
+
+    void addGesture(const char* gesture);
+    void removeGesture(const char* gesture);
+    bool availableGesture(const char *strGesture);
+    // void addGesture(const char* gesture,XnBoundingBox3D *  pArea);
+
+    //////////////////////////////////////////////////////////////////////////////
+    // audio
+    //bool enableAudio();
+
+    //////////////////////////////////////////////////////////////////////////////
+    // recorder
+    virtual bool enableRecorder(int recordMedium,const char* filePath);
+    bool addNodeToRecording(int nodeType,int compression);
+    bool removeNodeFromRecording(int nodeType);
+
+    //////////////////////////////////////////////////////////////////////////////
+    // player
+    virtual bool openFileRecording(const char* filePath);
+
+    //////////////////////////////////////////////////////////////////////////////
+    // access methods
+    void setMirror(bool flag);
+    bool mirror();
+
+    //////////////////////////////////////////////////////////////////////////////
+    // converter methods
+    void convertRealWorldToProjective(XnVector3D* world,XnVector3D* proj);
+    void convertRealWorldToProjective(std::vector<XnVector3D>* worldArray,std::vector<XnVector3D>* projArray);
+
+    void convertProjectiveToRealWorld(XnVector3D* proj,XnVector3D* world);
+    void convertProjectiveToRealWorld(std::vector<XnVector3D>* projArray,std::vector<XnVector3D>* worldArray);
+
+    bool alternativeViewPointDepthToImage();
+
+    ///////////////////////////////////////////////////////////////////////////
+    // kinect motor
+    void moveKinect(float angle);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // callbacks
+
+    // user
+
+    SOPENNI_CB_STATIC(NewUser,
+                      xn::UserGenerator& generator, XnUserID user, void* cxt)
+    SOPENNI_CB_MEMBER(NewUser,
+                      xn::UserGenerator& generator, XnUserID user)
+    SOPENNI_CB_VIRTUAL(NewUser,
+                       unsigned int user)
+
+    SOPENNI_CB_STATIC(LostUser,
+                      xn::UserGenerator& generator, XnUserID user, void* cxt)
+    SOPENNI_CB_MEMBER(LostUser,
+                      xn::UserGenerator& generator, XnUserID user)
+    SOPENNI_CB_VIRTUAL(LostUser,
+                       unsigned int user)
+    // calibration
+    SOPENNI_CB_STATIC(StartCalibration,
+                      xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
+    SOPENNI_CB_MEMBER(StartCalibration,
+                      xn::SkeletonCapability& skeleton, XnUserID user)
+    SOPENNI_CB_VIRTUAL(StartCalibration,
+                       unsigned int user)
+
+    SOPENNI_CB_STATIC(EndCalibration,
+                      xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
+    SOPENNI_CB_MEMBER(EndCalibration,
+                      xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
+    SOPENNI_CB_VIRTUAL(EndCalibration,
+                       unsigned int user, bool bSuccess)
+    public:
+
+        // pose
+        static void XN_CALLBACK_TYPE startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
+    static void XN_CALLBACK_TYPE endPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
+
+    // hands
+    static void XN_CALLBACK_TYPE createHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt);
+    static void XN_CALLBACK_TYPE updateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt);
+    static void XN_CALLBACK_TYPE destroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime, void* cxt);
+
+    // gesture
+    static void XN_CALLBACK_TYPE recognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition, void* cxt);
+    static void XN_CALLBACK_TYPE progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // NITE
+
+    // session
+    static void XN_CALLBACK_TYPE onStartSessionCb(const XnPoint3D& ptPosition, void* cxt);
+    static void XN_CALLBACK_TYPE onEndSessionCb(void* cxt);
+    static void XN_CALLBACK_TYPE onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt);
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // node helper
+    static int getNodeType(int internalType);
+    xn::ProductionNode* getNode(int internalType);
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // XnVSessionManager
+    XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
+                                            xn::HandsGenerator* pTracker = NULL, xn::GestureGenerator* pFocusGenerator = NULL,
+                                            xn::GestureGenerator* pQuickRefocusGenerator = NULL);
+
+    void update(XnVSessionManager* sessionManager);
 
 protected:
-	
-	enum LogOutMsg{
-                MsgNode_End	= 0,
-		MsgNode_Info	= 1,
-		MsgNode_Error	= 2,
 
-	};
+    enum LogOutMsg{
+        MsgNode_End	= 0,
+        MsgNode_Info	= 1,
+        MsgNode_Error	= 2,
 
-        static void logOut(int msgType,const char* msg,...);	// must end with null
-	
-	bool checkLicenses();
+    };
 
-        // need NodeInfoList as parameterm otherwise the result in NodeInfo will be destroyed with
-        // the destruction of the NodeInfoList
-        static bool getNodeInfo(int nodeType,int index,
-                                xn::NodeInfoList*   list,
-                                xn::NodeInfo*       pNodeInfo,
-                                int offset = 1);
+    static void logOut(int msgType,const char* msg,...);	// must end with null
 
-        static std::vector<class ContextWrapper*> _classList;
+    bool checkLicenses();
 
-	//////////////////////////////////////////////////////////////////////////////
-	// internal callback wrappers
+    // need NodeInfoList as parameterm otherwise the result in NodeInfo will be destroyed with
+    // the destruction of the NodeInfoList
+    static bool getNodeInfo(int nodeType,int index,
+                            xn::NodeInfoList*   list,
+                            xn::NodeInfo*       pNodeInfo,
+                            int offset = 1);
 
+    static std::vector<class ContextWrapper*> _classList;
+    static KinectMotors _kinectMotors;
 
-	virtual void onStartPoseCb(const char* strPose, unsigned int user);
-	virtual void onEndPoseCb(const char* strPose, unsigned int user);
-
-        // calibration
-
-	void onStartPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user);
-	void onEndPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user);
-	
-	// hands
-        void		onCreateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
-	virtual void	onCreateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
-
-        void		onUpdateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
-	virtual void	onUpdateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
-
-        void		onDestroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime);
-	virtual void	onDestroyHandsCb(unsigned int nId, float fTime);
-
-	// gesture
-        void		onRecognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
-	virtual void	onRecognizeGestureCb(const char* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
-
-        void		onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress);
-	virtual void	onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress);
-	
-	///////////////////////////////////////////////////////////////////////////
-	// NITE
-
-	virtual void onStartSessionCb(const XnPoint3D& ptPosition);
-	virtual void onEndSessionCb();
-	virtual void onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress);
-
-	//////////////////////////////////////////////////////////////////////////////
-	// create methods
-	bool createDepth(bool force = true);
-	bool createRgb(bool force = true);
-	bool createIr(bool force = true);
-	bool createScene(bool force = true);
-	bool createUser(int flags,bool force = true);
-	bool createGesture(bool force = true);
-	bool createHands(bool force = true);
-
-	void calcHistogram();
-	void createDepthImage();
-	void calcDepthImageRealWorld();
-	void createIrImage();
-	void calcSceneData();
-
-	bool updateDepthData();
-	bool updateDepthImageData();
-	bool updateDepthRealWorldData();
-
-	void updateRgbData();
-
-	void updateIrData();
-
-	void updateSceneData();
-	void updateSceneImageData();
-
-	void updateUser();
-	void updateHands();
-	void updateGesture();
-
-	bool _initFlag;
-	bool _generatingFlag;
-	
-        static xn::Context      _globalContext;
-        static bool             _globalContextFlag;
-
-        xn::Device              _device;
-        std::string             _deviceCreationInfo;
-
-        XnStatus		_rc;
-
-        int                     _deviceIndex;
-        static int		_deviceCount;
-        int                     _nodes;
-
-	// depht
-	xn::DepthGenerator	_depth;
-	xn::DepthMetaData	_depthMD;
-	XnMapOutputMode		_depthMapOutputMode;
-        float			_pDepthHist[MAX_DEPTH];
-        float			_pDepthGamma[MAX_DEPTH];
-	XnRGB24Pixel*		_pDepthImage;
-        int			_depthBufSize;
-        float			_depthImageColor[3];
-        XnPoint3D*		_depthMapRealWorld;
-        int			_depthImageColorMode;
-
-	// cam image
-	xn::ImageGenerator	_image;
-	xn::ImageMetaData	_imageMD;
-	XnMapOutputMode		_imageMapOutputMode;
-        int			_rgbBufSize;
-
-	// ir
-	xn::IRGenerator		_ir;
-	xn::IRMetaData		_irMD;
-	XnMapOutputMode		_irMapOutputMode;
-	XnRGB24Pixel*		_pIrImage;
-        int			_irBufSize;
-
-	// scene
-	xn::DepthGenerator	_sceneDepth;
-	xn::SceneAnalyzer	_sceneAnalyzer;
-	xn::SceneMetaData	_sceneMD;
-	XnMapOutputMode		_sceneMapOutputMode;
-	XnRGB24Pixel*		_pSceneImage;
-        int			_sceneBufSize;
-
-	// user
-	xn::UserGenerator	_userGenerator;
-	XnCallbackHandle	_hUserCb;
-        XnCallbackHandle	_hCalibrationCb;
-        XnCallbackHandle	_hToCalibrationCompleteCb;
-        XnCallbackHandle	_hToCalibrationStartCb;
-        XnCallbackHandle	_hCalibrationToJointConfigurationChangeCb;
-
-	XnCallbackHandle	_hPoseCb;
-        int			_userWidth;
-        int			_userHeight;
-        int			_userSceneBufSize;
-
-	// hands
-	xn::HandsGenerator	 _handsGenerator;
-	XnCallbackHandle	 _hHandsCb;
-
-	// gesture
-        xn::GestureGenerator     _gestureGenerator;
-	XnCallbackHandle	 _hGestureCb;
-		
-	// recorder / player
-	xn::Recorder		_recorder;
-
-        bool			_firstTimeUpdate;
-
-	///////////////////////////////////////////////////////////////////////////
-	// NITE
-	std::vector<XnVSessionManager*>		_sessionManagerList;
+    //////////////////////////////////////////////////////////////////////////////
+    // internal callback wrappers
 
 
-	///////////////////////////////////////////////////////////////////////////
-	// update flags, performance 
+    virtual void onStartPoseCb(const char* strPose, unsigned int user);
+    virtual void onEndPoseCb(const char* strPose, unsigned int user);
 
-	// timestamps
-	unsigned long 	_depthMapTimeStamp;
-	unsigned long 	_depthImageTimeStamp;
-	unsigned long 	_depthRealWorldTimeStamp;
+    // calibration
 
-	unsigned long 	_imageTimeStamp;
-	
-	unsigned long 	_irTimeStamp;
+    void onStartPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user);
+    void onEndPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user);
 
-	unsigned long 	_sceneTimeStamp;
-	unsigned long	_sceneImageTimeStamp;
-	
-	unsigned long 	_userTimeStamp;
-	unsigned long 	_gestureTimeStamp;
-	unsigned long 	_handsTimeStamp;
+    // hands
+    void		onCreateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
+    virtual void	onCreateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
 
-	unsigned long 	_updateTimeStamp;
-	unsigned long 	_updateSubTimeStamp;
+    void		onUpdateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime);
+    virtual void	onUpdateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime);
+
+    void		onDestroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime);
+    virtual void	onDestroyHandsCb(unsigned int nId, float fTime);
+
+    // gesture
+    void		onRecognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
+    virtual void	onRecognizeGestureCb(const char* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition);
+
+    void		onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress);
+    virtual void	onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // NITE
+
+    virtual void onStartSessionCb(const XnPoint3D& ptPosition);
+    virtual void onEndSessionCb();
+    virtual void onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress);
+
+    //////////////////////////////////////////////////////////////////////////////
+    // create methods
+    bool createDepth(bool force = true);
+    bool createRgb(bool force = true);
+    bool createIr(bool force = true);
+    bool createScene(bool force = true);
+    bool createUser(int flags,bool force = true);
+    bool createGesture(bool force = true);
+    bool createHands(bool force = true);
+
+    void calcHistogram();
+    void createDepthImage();
+    void calcDepthImageRealWorld();
+    void createIrImage();
+    void calcSceneData();
+
+    bool updateDepthData();
+    bool updateDepthImageData();
+    bool updateDepthRealWorldData();
+
+    void updateRgbData();
+
+    void updateIrData();
+
+    void updateSceneData();
+    void updateSceneImageData();
+
+    void updateUser();
+    void updateHands();
+    void updateGesture();
+
+    bool _initFlag;
+    bool _generatingFlag;
+
+    static xn::Context      _globalContext;
+    static bool             _globalContextFlag;
+
+    xn::Device              _device;
+    std::string             _deviceCreationInfo;
+
+    XnStatus		_rc;
+
+    int                     _deviceIndex;
+    static int		_deviceCount;
+    int                     _nodes;
+
+    // depht
+    xn::DepthGenerator	_depth;
+    xn::DepthMetaData	_depthMD;
+    XnMapOutputMode		_depthMapOutputMode;
+    float			_pDepthHist[MAX_DEPTH];
+    float			_pDepthGamma[MAX_DEPTH];
+    XnRGB24Pixel*		_pDepthImage;
+    int			_depthBufSize;
+    float			_depthImageColor[3];
+    XnPoint3D*		_depthMapRealWorld;
+    int			_depthImageColorMode;
+
+    // cam image
+    xn::ImageGenerator	_image;
+    xn::ImageMetaData	_imageMD;
+    XnMapOutputMode		_imageMapOutputMode;
+    int			_rgbBufSize;
+
+    // ir
+    xn::IRGenerator		_ir;
+    xn::IRMetaData		_irMD;
+    XnMapOutputMode		_irMapOutputMode;
+    XnRGB24Pixel*		_pIrImage;
+    int			_irBufSize;
+
+    // scene
+    xn::DepthGenerator	_sceneDepth;
+    xn::SceneAnalyzer	_sceneAnalyzer;
+    xn::SceneMetaData	_sceneMD;
+    XnMapOutputMode		_sceneMapOutputMode;
+    XnRGB24Pixel*		_pSceneImage;
+    int			_sceneBufSize;
+
+    // user
+    xn::UserGenerator	_userGenerator;
+    XnCallbackHandle	_hUserCb;
+    XnCallbackHandle	_hCalibrationCb;
+    XnCallbackHandle	_hToCalibrationCompleteCb;
+    XnCallbackHandle	_hToCalibrationStartCb;
+    XnCallbackHandle	_hCalibrationToJointConfigurationChangeCb;
+
+    XnCallbackHandle	_hPoseCb;
+    int			_userWidth;
+    int			_userHeight;
+    int			_userSceneBufSize;
+
+    // hands
+    xn::HandsGenerator	 _handsGenerator;
+    XnCallbackHandle	 _hHandsCb;
+
+    // gesture
+    xn::GestureGenerator     _gestureGenerator;
+    XnCallbackHandle	 _hGestureCb;
+
+    // recorder / player
+    xn::Recorder		_recorder;
+
+    bool			_firstTimeUpdate;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // NITE
+    std::vector<XnVSessionManager*>		_sessionManagerList;
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // update flags, performance
+
+    // timestamps
+    unsigned long 	_depthMapTimeStamp;
+    unsigned long 	_depthImageTimeStamp;
+    unsigned long 	_depthRealWorldTimeStamp;
+
+    unsigned long 	_imageTimeStamp;
+
+    unsigned long 	_irTimeStamp;
+
+    unsigned long 	_sceneTimeStamp;
+    unsigned long	_sceneImageTimeStamp;
+
+    unsigned long 	_userTimeStamp;
+    unsigned long 	_gestureTimeStamp;
+    unsigned long 	_handsTimeStamp;
+
+    unsigned long 	_updateTimeStamp;
+    unsigned long 	_updateSubTimeStamp;
 
 public:
-	inline unsigned long depthMapTimeStamp(){ return _depthMapTimeStamp; }
-	inline unsigned long depthImageTimeStamp(){ return _depthImageTimeStamp; }
-	inline unsigned long depthRealWorldTimeStamp(){ return _depthRealWorldTimeStamp; }
-	inline unsigned long imageTimeStamp(){ return _imageTimeStamp; }
-	inline unsigned long irTimeStamp(){ return _irTimeStamp; }
-	inline unsigned long sceneTimeStamp(){ return _sceneTimeStamp; }
-	inline unsigned long userTimeStamp(){ return _userTimeStamp; }
-	inline unsigned long handsTimeStamp(){ return _handsTimeStamp; }
+    inline unsigned long depthMapTimeStamp(){ return _depthMapTimeStamp; }
+    inline unsigned long depthImageTimeStamp(){ return _depthImageTimeStamp; }
+    inline unsigned long depthRealWorldTimeStamp(){ return _depthRealWorldTimeStamp; }
+    inline unsigned long imageTimeStamp(){ return _imageTimeStamp; }
+    inline unsigned long irTimeStamp(){ return _irTimeStamp; }
+    inline unsigned long sceneTimeStamp(){ return _sceneTimeStamp; }
+    inline unsigned long userTimeStamp(){ return _userTimeStamp; }
+    inline unsigned long handsTimeStamp(){ return _handsTimeStamp; }
 
-	inline unsigned long updateTimeStamp(){ return _updateTimeStamp; }
-	inline unsigned long updateSubTimeStamp(){ return _updateSubTimeStamp; }
+    inline unsigned long updateTimeStamp(){ return _updateTimeStamp; }
+    inline unsigned long updateSubTimeStamp(){ return _updateSubTimeStamp; }
 
-	inline bool newThreadData()
-	{
-		return(_updateTimeStamp != _updateSubTimeStamp);
-	}
+    inline bool newThreadData()
+    {
+        return(_updateTimeStamp != _updateSubTimeStamp);
+    }
 
-	inline bool newDepthMapThreadData()
-	{
-		return(_depthMapTimeStamp != _updateTimeStamp) && newThreadData();
-	}
+    inline bool newDepthMapThreadData()
+    {
+        return(_depthMapTimeStamp != _updateTimeStamp) && newThreadData();
+    }
 
-	inline bool newDepthImageThreadData()
-	{
-		return(_depthImageTimeStamp != _updateTimeStamp) && newThreadData();
-	}
+    inline bool newDepthImageThreadData()
+    {
+        return(_depthImageTimeStamp != _updateTimeStamp) && newThreadData();
+    }
 
-	inline bool newDepthRealWorldThreadData()
-	{
-		return(_depthRealWorldTimeStamp != _updateTimeStamp) && newThreadData();
-	}
+    inline bool newDepthRealWorldThreadData()
+    {
+        return(_depthRealWorldTimeStamp != _updateTimeStamp) && newThreadData();
+    }
 
-///////////////////////////////////////////////////////////////////////////
-// threading
+    ///////////////////////////////////////////////////////////////////////////
+    // threading
 
 private:
-	
-	void updateSub();
-	void run();
 
-	boost::shared_ptr<boost::thread>	_thread;
-        boost::mutex				_mainMutex;
-        bool					_threadRun;
-	int									_threadMode;
+    void updateSub();
+    void run();
+
+    boost::shared_ptr<boost::thread>	_thread;
+    boost::mutex				_mainMutex;
+    bool					_threadRun;
+    int									_threadMode;
 
 };
 
@@ -609,23 +616,23 @@ private:
 class TestClass
 {
 public:
-	TestClass()
-	{}
+    TestClass()
+    {}
 
-	virtual void test1(int i)
-	{
-		std::cout << "TestClass::test1 - " << i << std::endl;
-	}
+    virtual void test1(int i)
+    {
+        std::cout << "TestClass::test1 - " << i << std::endl;
+    }
 
-	virtual void testX(XnVector3D* p)
-	{
-		std::cout << "TestClass::testX - " << std::endl;
-	}
+    virtual void testX(XnVector3D* p)
+    {
+        std::cout << "TestClass::testX - " << std::endl;
+    }
 
-	static void test(TestClass* p)
-	{
-		p->test1(100);
-	}
+    static void test(TestClass* p)
+    {
+        p->test1(100);
+    }
 
 protected:
 

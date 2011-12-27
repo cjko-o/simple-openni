@@ -4,13 +4,35 @@ http://code.google.com/p/simple-openni/
 
 vx.xx status, mm/dd/yyyy
 
-v0.23 , in planning:
+v0.xx , in planning:
 		- *Remove all XML init. functions:
 		- *Added methods for highperformance drawing of the depthMap pointcloud (Opengl VBO)
-		- *Works with Processing 2.0
 		- *Multiple sensors with the generators
 		- *Remove all deprecated functions, some callbacks will change
 		- *Should make an example for calibration file
+
+v0.24 , 12/27/2011, 
+		- Updated to versions:
+			OpenNI 1.5.2.7
+			NITE 1.5.2.7
+			SensorKinect 5.1.025	
+			Sensor 5.1.025	
+		- Use new Avin2 Kinect drivers, starts up much faster on the mac !
+		- Added better checks if SimpleOpenNI could be started. For example if the kinect can't be found, etc...
+		- Added OpenNI install files for every release and plattform 
+		- Added Kinect motor support(thanks to BitGriff ):
+			Example:
+		
+		- Added support for Processing 2.0
+		- Added support for export application(no applets), this application works on your machine, if you want to use the app on another machine,
+		  you still have to install OpenNI/NITE/Sensor libs.
+		  There is a bug in Processing 2.0 for linux, so the export won't work, only if you change the app script: 
+			-Djava.library.path="$APPDIR:$APPDIR\lib"
+			to
+			-Djava.library.path="$APPDIR:$APPDIR/lib"
+		- Updated install section on the wiki 
+		- Added classpaths to the JavaDoc generator
+
 
 v0.22 , 11/13/2011, 
 	New:

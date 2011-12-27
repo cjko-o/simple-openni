@@ -46,7 +46,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	22		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	24		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -78,7 +78,7 @@ xn::Context ContextWrapper::_globalContext = NULL;
 bool ContextWrapper::_globalContextFlag = false;
 int ContextWrapper::_deviceCount=0;
 std::vector<class ContextWrapper*> ContextWrapper::_classList;
-
+KinectMotors ContextWrapper::_kinectMotors;
 
 ContextWrapper::ContextWrapper():
     _pDepthImage(NULL),
@@ -97,6 +97,8 @@ ContextWrapper::ContextWrapper():
     _threadRun(false),
     _deviceIndex(0)
 {
+   // _kinectMotors.open();
+
     _depthImageColor[0] = 1.0f;
     _depthImageColor[1] = 1.0f;
     _depthImageColor[2] = 1.0f;
@@ -2404,6 +2406,13 @@ bool ContextWrapper::alternativeViewPointDepthToImage()
     return (_rc == XN_STATUS_OK);
 }
 
+void ContextWrapper::moveKinect(float angle)
+{
+    if(_kinectMotors.open() == false)
+        return;
+
+    _kinectMotors.move(angle);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // access methods

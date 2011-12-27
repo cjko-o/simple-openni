@@ -273,6 +273,10 @@ public:
 
         bool alternativeViewPointDepthToImage();
 
+        ///////////////////////////////////////////////////////////////////////////
+        // kinect motor
+        void moveKinect(float angle);
+
 	///////////////////////////////////////////////////////////////////////////
 	// XnVSessionMananger
 	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
