@@ -10,6 +10,7 @@ v0.xx , in planning:
 		- *Multiple sensors with the generators
 		- *Remove all deprecated functions, some callbacks will change
 		- *Should make an example for calibration file
+		- *Added support for Processing 2.0, still some open questions, but it works roughly
 
 v0.24 , 12/27/2011, 
 		- Updated to versions:
@@ -17,22 +18,21 @@ v0.24 , 12/27/2011,
 			NITE 1.5.2.7
 			SensorKinect 5.1.025	
 			Sensor 5.1.025	
-		- Use new Avin2 Kinect drivers, starts up much faster on the mac !
-		- Added better checks if SimpleOpenNI could be started. For example if the kinect can't be found, etc...
+		- Use new Avin2 Kinect drivers, now the mac starts up much faster!
+		- Added better checks if SimpleOpenNI could be started. Extended all examples.
 		- Added OpenNI install files for every release and plattform 
-		- Added Kinect motor support(thanks to BitGriff ):
-			Example:
-		
-		- Added support for Processing 2.0
+		- Added Kinect motor support(thanks to BitGriff):
+			- moveKinect(float angle) - tilts the kinect
+			
 		- Added support for export application(no applets), this application works on your machine, if you want to use the app on another machine,
 		  you still have to install OpenNI/NITE/Sensor libs.
 		  There is a bug in Processing 2.0 for linux, so the export won't work, only if you change the app script: 
 			-Djava.library.path="$APPDIR:$APPDIR\lib"
 			to
 			-Djava.library.path="$APPDIR:$APPDIR/lib"
+		  http://code.google.com/p/processing/issues/detail?id=945&q=mrn&colspec=Stars%20ID%20Type%20Status%20Priority%	20Owner%20Summary
 		- Updated install section on the wiki 
 		- Added classpaths to the JavaDoc generator
-
 
 v0.22 , 11/13/2011, 
 	New:

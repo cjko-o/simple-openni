@@ -35,12 +35,23 @@ void setup()
   cam2 = new SimpleOpenNI(1,this);
 
   // set the camera generators
-  cam1.enableDepth();
+  // enable depthMap generation 
+  if(cam1.enableDepth() == false)
+  {
+     println("Can't open the depthMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
   cam1.enableIR();
  
-  cam2.enableDepth();
+  // enable depthMap generation 
+  if(cam2.enableDepth() == false)
+  {
+     println("Can't open the depthMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
   cam2.enableIR();
- 
  
   background(10,200,20);
 }

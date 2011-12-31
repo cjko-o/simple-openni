@@ -49,23 +49,23 @@ bool KinectMotors::open()
     XnUInt32 count;
     XnStatus res;
 
-    std::cout << "xnUSBInit"  << std::endl;
+//    std::cout << "xnUSBInit"  << std::endl;
 
     // Init OpenNI USB
     res = xnUSBInit();
     if(res != XN_STATUS_OK)
     {
-        xnPrintError(res, "xnUSBInit failed");
+//        xnPrintError(res, "xnUSBInit failed");
         return false;
     }
 
-    std::cout << "xnUSBEnumerateDevices"  << std::endl;
+//    std::cout << "xnUSBEnumerateDevices"  << std::endl;
 
     // Open all "Kinect motor" USB devices
     res = xnUSBEnumerateDevices(0x045E /* VendorID */, 0x02B0 /*ProductID*/, &paths, &count);
     if(res != XN_STATUS_OK)
     {
-        xnPrintError(res, "xnUSBEnumerateDevices failed");
+ //       xnPrintError(res, "xnUSBEnumerateDevices failed");
         return false;
     }
 
@@ -76,7 +76,7 @@ bool KinectMotors::open()
         std::cout << "count = " << index << " : "<< paths[index]  << std::endl;
         if (res != XN_STATUS_OK)
         {
-            xnPrintError(res, "xnUSBOpenDeviceByPath failed");
+//            xnPrintError(res, "xnUSBOpenDeviceByPath failed");
             return false;
         }
     }
@@ -90,7 +90,7 @@ bool KinectMotors::open()
         res = xnUSBSendControl(_devs[index], (XnUSBControlType) 0xc0, 0x10, 0x00, 0x00, buf, sizeof(buf), 0);
         if (res != XN_STATUS_OK)
         {
-            xnPrintError(res, "xnUSBSendControl failed");
+  //          xnPrintError(res, "xnUSBSendControl failed");
             close();
             return false;
         }
@@ -98,7 +98,7 @@ bool KinectMotors::open()
         res = xnUSBSendControl(_devs[index], XN_USB_CONTROL_TYPE_VENDOR, 0x06, 0x01, 0x00, NULL, 0, 0);
         if (res != XN_STATUS_OK)
         {
-            xnPrintError(res, "xnUSBSendControl failed");
+//            xnPrintError(res, "xnUSBSendControl failed");
             close();
             return false;
         }
