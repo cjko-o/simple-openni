@@ -30,7 +30,12 @@ void setup()
   context.setMirror(false);
 
   // enable depthMap generation 
-  context.enableDepth();
+  if(context.enableDepth() == false)
+  {
+     println("Can't open the depthMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
 
   stroke(255,255,255);
   smooth();

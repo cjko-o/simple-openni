@@ -19,7 +19,12 @@ void setup()
   context = new SimpleOpenNI(this);
   
   // enable depthMap generation
-  context.enableScene();
+  if(context.enableScene() == false)
+  {
+     println("Can't open the sceneMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
  
   background(200,0,0);
   size(context.sceneWidth() , context.sceneHeight()); 

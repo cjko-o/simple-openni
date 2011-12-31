@@ -17,13 +17,23 @@ SimpleOpenNI  context;
 void setup()
 {
   context = new SimpleOpenNI(this);
-   
+
   // enable depthMap generation 
-  context.enableDepth();
+  if(context.enableDepth() == false)
+  {
+     println("Can't open the depthMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
   
   // enable ir generation
-  context.enableIR();
- 
+  if(context.enableIR() == false)
+  {
+     println("Can't open the depthMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
+  
   background(200,0,0);
   size(context.depthWidth() + context.irWidth() + 10, context.depthHeight()); 
 }

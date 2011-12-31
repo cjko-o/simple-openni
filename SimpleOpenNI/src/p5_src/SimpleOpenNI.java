@@ -384,7 +384,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	*          int
 	* @param fps
 	*          int
-	* @return
+	* @return returns true if depthMap generation was succesfull
 	*/
 	public boolean enableDepth(int width,int height,int fps) 
 	{
@@ -443,7 +443,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	*          int
 	* @param fps
 	*          int
-	* @return
+	* @return returns true if rgbMap generation was succesfull
 	*/
 	public boolean enableRGB(int width,int height,int fps) 
 	{
@@ -484,7 +484,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	
 	/**
 	* Enable the irMap data collection
-	* ir is only available if there is no rgbImage activated at the same time 
+	* ir is only available if there is no irImage activated at the same time 
 	* 
 	* @param width
 	*          int
@@ -492,7 +492,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	*          int
 	* @param fps
 	*          int
-	* @return
+	* @return returns true if irMap generation was succesfull
 	*/
 	public boolean enableIR(int width,int height,int fps) 
 	{
@@ -540,7 +540,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	*          int
 	* @param fps
 	*          int
-	* @return
+	* @return returns true if sceneMap generation was succesfull
 	*/
 	public boolean enableScene(int width,int height,int fps) 
 	{

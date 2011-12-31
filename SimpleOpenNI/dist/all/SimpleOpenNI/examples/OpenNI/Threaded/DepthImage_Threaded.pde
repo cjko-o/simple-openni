@@ -22,7 +22,12 @@ void setup()
   context.setMirror(true);
   
   // enable depthMap generation 
-  context.enableDepth();
+  if(context.enableDepth() == false)
+  {
+     println("Can't open the depthMap, maybe the camera is not connected!"); 
+     exit();
+     return;
+  }
   
   // enable ir generation
   context.enableRGB();

@@ -38,8 +38,21 @@ void setup()
   else
   {  
     // recording
-    context.enableDepth();
-    context.enableRGB();
+	// enable depthMap generation 
+	if(context.enableDepth() == false)
+	{
+	  println("Can't open the depthMap, maybe the camera is not connected!"); 
+	  exit();
+	  return;
+	}
+  
+	// enable ir generation
+	if(context.enableRGB() == false)
+	{
+	  println("Can't open the rgbMap, maybe the camera is not connected or there is no rgbSensor!"); 
+	  exit();
+	  return;
+	}
   
     // setup the recording 
     context.enableRecorder(SimpleOpenNI.RECORD_MEDIUM_FILE,"test.oni");
