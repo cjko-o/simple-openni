@@ -13,7 +13,7 @@ Before you can use SimpleOpenNI you have to install OpenNI. This can take quite 
 = Windows =
 
 * Install OpenNI,NITE and the Sensor Driver *
-  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=OpenNI_NITE_Installer+win32&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount Installation Package]
+  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=OpenNI_NITE_Installer+win64&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount Installation Package 64], or [http://code.google.com/p/simple-openni/downloads/list?can=2&q=OpenNI_NITE_Installer+win32&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount Installation Package 32]
   * Download and install [http://www.openni.org/downloadfiles/opennimodules/openni-compliant-middleware-binaries/33-latest-unstable NITE]. The installer will ask you for the key, set this key *0KOIk2JeIBYClPWVnMoRKn5cdY4=*
 Install Primesense Driver (Asus Xtion Pro, etc.)
   * Download and install [http://www.openni.org/downloadfiles/opennimodules/openni-compliant-hardware-binaries/31-latest-unstable Primesensor]
