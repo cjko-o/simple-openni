@@ -21,23 +21,24 @@ cp -R ./data/primesense /usr/etc/
 # copy all dyn.libs
 echo "copy OpenNI+NITE dynamic libs into /usr/lib"
 
+cp ./data/*.dylib /usr/lib/
 # OpenNI
-cp ./data/libOpenNI.dylib /usr/lib/
-cp ./data/libnimCodecs.dylib /usr/lib/
-cp ./data/libnimMockNodes.dylib /usr/lib/
-cp ./data/libnimRecorder.dylib /usr/lib/
-
-# NITE
-cp ./data/libXnCore.dylib /usr/lib/
-cp ./data/libXnDDK.dylib /usr/lib/
-cp ./data/libXnDeviceFile.dylib /usr/lib/
-cp ./data/libXnDeviceSensorV2.dylib /usr/lib/
-cp ./data/libXnDeviceSensorV2KM.dylib /usr/lib/
-cp ./data/libXnFormats.dylib /usr/lib/
-cp ./data/libXnVCNite_1_3_1.dylib /usr/lib/
-cp ./data/libXnVFeatures_1_3_1.dylib /usr/lib/
-cp ./data/libXnVHandGenerator_1_3_1.dylib /usr/lib/
-cp ./data/libXnVNite_1_3_1.dylib /usr/lib/
+# cp ./data/libOpenNI.dylib /usr/lib/
+# cp ./data/libnimCodecs.dylib /usr/lib/
+# cp ./data/libnimMockNodes.dylib /usr/lib/
+# cp ./data/libnimRecorder.dylib /usr/lib/
+# 
+# # NITE
+# cp ./data/libXnCore.dylib /usr/lib/
+# cp ./data/libXnDDK.dylib /usr/lib/
+# cp ./data/libXnDeviceFile.dylib /usr/lib/
+# cp ./data/libXnDeviceSensorV2.dylib /usr/lib/
+# cp ./data/libXnDeviceSensorV2KM.dylib /usr/lib/
+# cp ./data/libXnFormats.dylib /usr/lib/
+# cp ./data/libXnVCNite_1_3_1.dylib /usr/lib/
+# cp ./data/libXnVFeatures_1_3_1.dylib /usr/lib/
+# cp ./data/libXnVHandGenerator_1_3_1.dylib /usr/lib/
+# cp ./data/libXnVNite_1_3_1.dylib /usr/lib/
 
 # libusb
 # this is a hack !!!!!!!!!!!!! Don't use it, just for testing
