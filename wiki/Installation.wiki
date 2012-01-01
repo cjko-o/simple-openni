@@ -13,8 +13,7 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 
 = Processing =
 
-* Install OpenNI,NITE and the Sensor Driver *
-  * Download [http://code.google.com/p/simple-openni/downloads/list?
+  * Download [http://processing.org/download/ Processing] for your platform
 
 ----
 
