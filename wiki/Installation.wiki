@@ -13,7 +13,7 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 
 = Processing =
 
-  * Download [http://processing.org/download/ Processing] for your platform
+  * Download [http://processing.org/download/ Processing] for your platform and install it
 
 ----
 
