@@ -279,6 +279,18 @@ public:
     // player
     virtual bool openFileRecording(const char* filePath);
 
+    void setPlaybackSpeedPlayer(float speed);
+    float playbackSpeedPlayer();
+
+    void setRepeatPlayer(bool loop);
+    bool repeatPlayer();
+
+    unsigned int curFramePlayer();
+    unsigned int framesPlayer();
+    void seekPlayer(int offset,int seekType);
+
+    bool isEndPlayer();
+
     //////////////////////////////////////////////////////////////////////////////
     // access methods
     void setMirror(bool flag);
@@ -302,7 +314,6 @@ public:
     // callbacks
 
     // user
-
     SOPENNI_CB_STATIC(NewUser,
                       xn::UserGenerator& generator, XnUserID user, void* cxt)
     SOPENNI_CB_MEMBER(NewUser,
@@ -330,10 +341,11 @@ public:
                       xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
     SOPENNI_CB_VIRTUAL(EndCalibration,
                        unsigned int user, bool bSuccess)
-    public:
 
-        // pose
-        static void XN_CALLBACK_TYPE startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
+public:
+
+    // pose
+    static void XN_CALLBACK_TYPE startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
     static void XN_CALLBACK_TYPE endPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt);
 
     // hands
@@ -529,6 +541,8 @@ protected:
 
     // recorder / player
     xn::Recorder		_recorder;
+    xn::Player          _player;
+    bool                _playerRepeat;
 
     bool			_firstTimeUpdate;
 

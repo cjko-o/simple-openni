@@ -46,7 +46,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	24		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	25		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -95,7 +95,8 @@ ContextWrapper::ContextWrapper():
     _depthImageColorMode(DepthImgMode_Default),
     _threadMode(RunMode_Default),
     _threadRun(false),
-    _deviceIndex(0)
+    _deviceIndex(0),
+    _playerRepeat(true)
 {
    // _kinectMotors.open();
 
@@ -547,6 +548,7 @@ bool ContextWrapper::createDepth(bool force)
     if(!_initFlag)
         return false;
 
+
     /*
     _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_DEPTH, _depth);
     if(_rc != XN_STATUS_OK)
@@ -570,35 +572,52 @@ bool ContextWrapper::createDepth(bool force)
     return true;
     */
 
-
-    xn::NodeInfoList    list;
-    xn::NodeInfo        depthNodeInfo(NULL);
-
-    if(getNodeInfo(XN_NODE_TYPE_DEPTH,_deviceIndex,
-                   &list,&depthNodeInfo))
+    if(force == false)
     {
-        _rc = _globalContext.CreateProductionTree(depthNodeInfo,_depth);
-        if(_rc == XN_STATUS_OK)
+        _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_DEPTH, _depth);
+        if(_rc != XN_STATUS_OK)
+            return false;
+
+        _depth.GetMetaData(_depthMD);
+
+        _depthBufSize       = _depthMD.XRes() * _depthMD.YRes();
+        _pDepthImage        = (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
+        _depthMapRealWorld  = (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
+
+        _nodes |= Node_Depth;
+        return true;
+    }
+    else
+    {
+        xn::NodeInfoList    list;
+        xn::NodeInfo        depthNodeInfo(NULL);
+
+        if(getNodeInfo(XN_NODE_TYPE_DEPTH,_deviceIndex,
+                       &list,&depthNodeInfo))
         {
-            if(_depth.IsValid())
+            _rc = _globalContext.CreateProductionTree(depthNodeInfo,_depth);
+            if(_rc == XN_STATUS_OK)
             {
-              //  logOut(MsgNode_Error,"depth valid");
+                if(_depth.IsValid())
+                {
+                  //  logOut(MsgNode_Error,"depth valid");
 
-                _depth.SetMapOutputMode(_depthMapOutputMode);
-                _depth.GetMetaData(_depthMD);
+                    _depth.SetMapOutputMode(_depthMapOutputMode);
+                    _depth.GetMetaData(_depthMD);
 
-                _depthBufSize       = _depthMD.XRes() * _depthMD.YRes();
-                _pDepthImage        = (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
-                _depthMapRealWorld  = (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
+                    _depthBufSize       = _depthMD.XRes() * _depthMD.YRes();
+                    _pDepthImage        = (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
+                    _depthMapRealWorld  = (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
 
-                _nodes |= Node_Depth;
-                return true;
+                    _nodes |= Node_Depth;
+                    return true;
+                }
             }
         }
-    }
 
-    _nodes |= Node_Depth;
-    return false;
+        _nodes |= Node_Depth;
+        return false;
+    }
 /*
     // funkt.
 
@@ -697,30 +716,46 @@ bool ContextWrapper::createRgb(bool force)
     return true;
 */
 
-    xn::NodeInfoList    list;
-    xn::NodeInfo        rgbNodeInfo(NULL);
-
-    if(getNodeInfo(XN_NODE_TYPE_IMAGE,_deviceIndex,
-                   &list,&rgbNodeInfo))
+    if(force == false)
     {
-        _rc = _globalContext.CreateProductionTree(rgbNodeInfo,_image);
-         if(_rc == XN_STATUS_OK)
+        _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_IMAGE, _image);
+        if(_rc != XN_STATUS_OK)
+            return false;
+
+        _image.GetMetaData(_imageMD);
+
+        _rgbBufSize = _imageMD.XRes() * _imageMD.YRes();
+
+        _nodes |= Node_Image;
+        return true;
+    }
+    else
+    {
+        xn::NodeInfoList    list;
+        xn::NodeInfo        rgbNodeInfo(NULL);
+
+        if(getNodeInfo(XN_NODE_TYPE_IMAGE,_deviceIndex,
+                       &list,&rgbNodeInfo))
         {
-            if(_image.IsValid())
+            _rc = _globalContext.CreateProductionTree(rgbNodeInfo,_image);
+             if(_rc == XN_STATUS_OK)
             {
-               //logOut(MsgNode_Error,"image valid");
+                if(_image.IsValid())
+                {
+                   //logOut(MsgNode_Error,"image valid");
 
-                 _rc = _image.SetMapOutputMode(_imageMapOutputMode);
-                 _image.GetMetaData(_imageMD);
+                     _rc = _image.SetMapOutputMode(_imageMapOutputMode);
+                     _image.GetMetaData(_imageMD);
 
-                 _rgbBufSize = _imageMD.XRes() * _imageMD.YRes();
+                     _rgbBufSize = _imageMD.XRes() * _imageMD.YRes();
 
-                _nodes |= Node_Image;
-                return true;
+                    _nodes |= Node_Image;
+                    return true;
+                }
             }
         }
+        return false;
     }
-    return false;
 }
 
 bool ContextWrapper::enableRGB()
@@ -770,30 +805,47 @@ bool ContextWrapper::createIr(bool force)
     _nodes |= Node_Ir;
     return true;
 */
-    xn::NodeInfoList    list;
-    xn::NodeInfo        irNodeInfo(NULL);
-
-    if(getNodeInfo(XN_NODE_TYPE_IR,_deviceIndex,
-                   &list,&irNodeInfo))
+    if(force == false)
     {
-        _rc = _globalContext.CreateProductionTree(irNodeInfo,_ir);
-        if(_rc == XN_STATUS_OK)
+        _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_IR, _ir);
+        if(_rc != XN_STATUS_OK)
+            return false;
+
+        _ir.GetMetaData(_irMD);
+
+        _irBufSize = _irMD.XRes() * _irMD.YRes();
+        _pIrImage  = (XnRGB24Pixel*)malloc( _irBufSize * sizeof(XnRGB24Pixel));
+
+        _nodes |= Node_Ir;
+        return true;
+    }
+    else
+    {
+        xn::NodeInfoList    list;
+        xn::NodeInfo        irNodeInfo(NULL);
+
+        if(getNodeInfo(XN_NODE_TYPE_IR,_deviceIndex,
+                       &list,&irNodeInfo))
         {
-            if(_ir.IsValid())
+            _rc = _globalContext.CreateProductionTree(irNodeInfo,_ir);
+            if(_rc == XN_STATUS_OK)
             {
-                _rc = _ir.SetMapOutputMode(_irMapOutputMode);
-                _ir.GetMetaData(_irMD);
+                if(_ir.IsValid())
+                {
+                    _rc = _ir.SetMapOutputMode(_irMapOutputMode);
+                    _ir.GetMetaData(_irMD);
 
-                _irBufSize = _irMD.XRes() * _irMD.YRes();
-                _pIrImage  = (XnRGB24Pixel*)malloc( _irBufSize * sizeof(XnRGB24Pixel));
+                    _irBufSize = _irMD.XRes() * _irMD.YRes();
+                    _pIrImage  = (XnRGB24Pixel*)malloc( _irBufSize * sizeof(XnRGB24Pixel));
 
-                _nodes |= Node_Ir;
-                return true;
+                    _nodes |= Node_Ir;
+                    return true;
 
+                }
             }
         }
+        return false;
     }
-    return false;
 }
 
 bool ContextWrapper::enableIR()
@@ -858,32 +910,55 @@ bool ContextWrapper::createScene(bool force)
         return false;
 */
 
-    xn::NodeInfoList    list;
-    xn::NodeInfo        sceneNodeInfo(NULL);
-
-    if(getNodeInfo(XN_NODE_TYPE_SCENE,_deviceIndex,
-                   &list,&sceneNodeInfo,
-                   1))
+    if(force == false)
     {
-        _rc = _globalContext.CreateProductionTree(sceneNodeInfo,_sceneAnalyzer);
-        if(_rc == XN_STATUS_OK)
+        _rc = _globalContext.FindExistingNode(XN_NODE_TYPE_SCENE, _sceneAnalyzer);
+        if(_rc != XN_STATUS_OK)
+            return false;
+
+        if(_sceneAnalyzer.IsValid())
         {
-            if(_sceneAnalyzer.IsValid())
+            _sceneAnalyzer.GetMetaData(_sceneMD);
+
+            _sceneBufSize = _sceneMD.XRes() * _sceneMD.YRes();
+            _pSceneImage  = (XnRGB24Pixel*)malloc( _sceneBufSize * sizeof(XnRGB24Pixel));
+
+            _nodes |= Node_Scene;
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    {
+
+        xn::NodeInfoList    list;
+        xn::NodeInfo        sceneNodeInfo(NULL);
+
+        if(getNodeInfo(XN_NODE_TYPE_SCENE,_deviceIndex,
+                       &list,&sceneNodeInfo,
+                       1))
+        {
+            _rc = _globalContext.CreateProductionTree(sceneNodeInfo,_sceneAnalyzer);
+            if(_rc == XN_STATUS_OK)
             {
-                //std::cout << "sceneValdi:  " << _deviceIndex << std::endl;
+                if(_sceneAnalyzer.IsValid())
+                {
+                    //std::cout << "sceneValdi:  " << _deviceIndex << std::endl;
 
-                _rc = _sceneAnalyzer.SetMapOutputMode(_sceneMapOutputMode);
-                _sceneAnalyzer.GetMetaData(_sceneMD);
+                    _rc = _sceneAnalyzer.SetMapOutputMode(_sceneMapOutputMode);
+                    _sceneAnalyzer.GetMetaData(_sceneMD);
 
-                _sceneBufSize = _sceneMD.XRes() * _sceneMD.YRes();
-                _pSceneImage  = (XnRGB24Pixel*)malloc( _sceneBufSize * sizeof(XnRGB24Pixel));
+                    _sceneBufSize = _sceneMD.XRes() * _sceneMD.YRes();
+                    _pSceneImage  = (XnRGB24Pixel*)malloc( _sceneBufSize * sizeof(XnRGB24Pixel));
 
-                _nodes |= Node_Scene;
-                return true;
+                    _nodes |= Node_Scene;
+                    return true;
+                }
             }
         }
+        return false;
     }
-    return false;
 
 }
 
@@ -950,7 +1025,6 @@ bool ContextWrapper::createUser(int flags,bool force)
     _userWidth	= sceneMD.XRes();
     _userHeight = sceneMD.YRes();
     _userSceneBufSize = _userWidth * _userHeight;
-
 
     _nodes |= Node_User;
 
@@ -1227,7 +1301,9 @@ bool ContextWrapper::openFileRecording(const char* filePath)
         return false;
     }
 
-    _rc = _globalContext.OpenFileRecording(filePath);
+    _playerRepeat = true;
+
+    _rc = _globalContext.OpenFileRecording(filePath,_player);
     if(_rc != XN_STATUS_OK)
         return false;
 
@@ -1243,6 +1319,81 @@ bool ContextWrapper::openFileRecording(const char* filePath)
     _nodes |= Node_Player;
 
     return true;
+}
+
+void ContextWrapper::setPlaybackSpeedPlayer(float speed)
+{
+    if(_player.IsValid() == false)
+        return;
+    _player.SetPlaybackSpeed(speed);
+}
+
+float ContextWrapper::playbackSpeedPlayer()
+{
+    if(_player.IsValid() == false)
+        return 0.0f;
+    return  _player.GetPlaybackSpeed();
+}
+
+void ContextWrapper::setRepeatPlayer(bool loop)
+{
+    if(_player.IsValid() == false)
+        return;
+    _playerRepeat = loop;
+    _player.SetRepeat(loop);
+}
+
+bool ContextWrapper::repeatPlayer()
+{
+    if(_player.IsValid() == false)
+        return false;
+    return _playerRepeat;
+}
+unsigned int ContextWrapper::curFramePlayer()
+{
+    if(_player.IsValid() == false || _depth.IsValid() == false)
+        return 0;
+
+    XnUInt32 nNumFrames=0;
+    _player.TellFrame(_depth.GetName(), nNumFrames);
+
+    return nNumFrames;
+}
+
+unsigned int ContextWrapper::framesPlayer()
+{
+    if(_player.IsValid() == false || _depth.IsValid() == false)
+        return 0;
+
+    XnUInt32 nNumFrames=0;
+    _player.GetNumFrames(_depth.GetName(), nNumFrames);
+
+    return nNumFrames;
+}
+
+void ContextWrapper::seekPlayer(int offset,int seekType)
+{
+    if(_player.IsValid() == false)
+        return;
+
+    xn::ProductionNode* node = NULL;
+    if(_depth.IsValid())
+        node = &_depth;
+    else if(_image.IsValid())
+        node = &_image;
+    else
+        return;
+
+    _player.SeekToFrame(node->GetName(),
+                        offset,
+                        (XnPlayerSeekOrigin)seekType);
+}
+
+bool ContextWrapper::isEndPlayer()
+{
+    if(_player.IsValid() == false)
+        return false;
+    return _player.IsEOF();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1299,7 +1450,6 @@ void ContextWrapper::updateRgbData()
 
     // get the new data
     _image.GetMetaData(_imageMD);
-
     //boost::mutex::scoped_lock l(_mainMutex);
     _imageTimeStamp = _updateTimeStamp;
 }
@@ -1486,14 +1636,33 @@ void ContextWrapper::updateSub()
 #endif // WIN_PERF_DEBUG
 
     // update openNI
+
+    if(_player.IsValid())
+    {
+        /*
+        _rc = _player.ReadNext();
+        if(_rc != XN_STATUS_OK)
+        {
+            std::cout << "end !&%/" << std::endl;
+        }
+        else
+            _rc = _globalContext.WaitAndUpdateAll();
+            */
+        _rc = _globalContext.WaitAndUpdateAll();
+    }
+    else
+    {
+
     if(_gestureGenerator.IsValid() || _handsGenerator.IsValid() ||
-       _userGenerator.IsValid())
+       _userGenerator.IsValid() )
+      // || _player.IsValid())
     {	// i don't know why, but it only works if i add 'WaitAndUpdateAll'
         //_rc = _globalContext.WaitAnyUpdateAll();
         _rc = _globalContext.WaitAndUpdateAll();
     }
     else
         _rc = _globalContext.WaitAnyUpdateAll();
+    }
 
     // update timestamp
     _updateSubTimeStamp++;

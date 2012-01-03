@@ -101,20 +101,24 @@ JAVA_ARRAYSOFCLASSES(XnPoint3DArrayX)
 %constant int NODE_RECORDER		= Node_Recorder;		
 %constant int NODE_PLAYER		= Node_Player;		
 
-%constant int CODEC_NONE			= XN_CODEC_NULL;		
+%constant int CODEC_NONE		= XN_CODEC_NULL;
 %constant int CODEC_UNCOMPRESSED	= XN_CODEC_UNCOMPRESSED;		
-%constant int CODEC_JPEG			= XN_CODEC_JPEG;		
-%constant int CODEC_16Z				= XN_CODEC_16Z;		
+%constant int CODEC_JPEG		= XN_CODEC_JPEG;
+%constant int CODEC_16Z			= XN_CODEC_16Z;
 %constant int CODEC_16Z_EMB_TABLES	= XN_CODEC_16Z_EMB_TABLES;		
 %constant int CODEC_CODEC_8Z		= XN_CODEC_8Z;		
 
-%constant int RECORD_MEDIUM_FILE	= XN_CODEC_NULL;		
+%constant int RECORD_MEDIUM_FILE	= XN_CODEC_NULL;
+
+%constant int PLAYER_SEEK_SET           = XN_PLAYER_SEEK_SET;
+%constant int PLAYER_SEEK_CUR           = XN_PLAYER_SEEK_CUR;
+%constant int PLAYER_SEEK_END           = XN_PLAYER_SEEK_END;
 
 
-%constant int IMG_MODE_DEFAULT	= DepthImgMode_Default;		
-%constant int IMG_MODE_RGB_FADE	= DepthImgMode_RgbFade;		
+%constant int IMG_MODE_DEFAULT          = DepthImgMode_Default;
+%constant int IMG_MODE_RGB_FADE         = DepthImgMode_RgbFade;
 
-%constant int RUN_MODE_DEFAULT			= RunMode_Default;		
+%constant int RUN_MODE_DEFAULT		= RunMode_Default;
 %constant int RUN_MODE_SINGLE_THREADED	= RunMode_SingleThreaded;		
 %constant int RUN_MODE_MULTI_THREADED	= RunMode_MultiThreaded;		
 
@@ -261,7 +265,19 @@ public:
 	bool removeNodeFromRecording(int nodeType);	
 	
 	virtual bool openFileRecording(const char* filePath);
-				   
+        void setPlaybackSpeedPlayer(float speed);
+        float playbackSpeedPlayer();
+
+        void setRepeatPlayer(bool loop);
+        bool repeatPlayer();
+
+        unsigned int curFramePlayer();
+        unsigned int framesPlayer();
+        void seekPlayer(int offset,int seekType);
+
+        bool isEndPlayer();
+
+
 	void setMirror(bool flag);
 	bool mirror();
 		
