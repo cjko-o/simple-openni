@@ -16,7 +16,7 @@ v0.xx , in planning:
 		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
 v0.25 , 01/03/2012, 
-		- Fixed the bug which prevented the right playback of a recorded file
+		- Fixed the bug which prevented the valid playback of a recorded file
 		- Added new functions to control the playback if recorded files
 			- void setPlaybackSpeedPlayer(float speed)
 			  sets the playback speed
