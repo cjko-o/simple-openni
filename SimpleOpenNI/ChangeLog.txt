@@ -15,6 +15,30 @@ v0.xx , in planning:
 			- moveKinect(float angle) - tilts the kinect
 		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
+v0.25 , 01/03/2012, 
+		- Fixed the bug which prevented the right playback of a recorded file
+		- Added new functions to control the playback if recorded files
+			- void setPlaybackSpeedPlayer(float speed)
+			  sets the playback speed
+			- float playbackSpeedPlayer()
+			  returns the playback speed
+			- void setRepeatPlayer(bool loop)
+			  sets if the recorded file should be played in a loop(default: true)
+			- bool repeatPlayer()
+			  returns the playing mode
+			- unsigned int curFramePlayer()
+			  returns the current frame
+			- unsigned int framesPlayer()
+			  returns the maximum frames for this record
+			- void seekPlayer(int offset,int seekType)
+			  seeks to the offset
+			  seekType:
+				PLAYER_SEEK_SET - jumps to the absolute position
+				PLAYER_SEEK_CUR - jumps relative, offset can be positive or negative
+				PLAYER_SEEK_END - jumps backwards, from the end, offset must be a negative value
+			- bool isEndPlayer()
+			  returns if the player ended(works only if the repeatMode is set to false)
+
 v0.24 , 12/27/2011, 
 		- Updated to versions:
 			OpenNI 1.5.2.7
