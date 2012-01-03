@@ -38,6 +38,7 @@ v0.25 , 01/03/2012,
 				PLAYER_SEEK_END - jumps backwards, from the end, offset must be a negative value
 			- bool isEndPlayer()
 			  returns if the player ended(works only if the repeatMode is set to false)
+		- Updated and extended the RecordPlayer example. Now you have a timeline and you can control some playstates with the keys
 
 v0.24 , 12/27/2011, 
 		- Updated to versions:
