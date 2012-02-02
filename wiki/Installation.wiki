@@ -97,10 +97,9 @@ Those programs have to be on your system in order to install OpenNI:
 ----
 = Linux =
 
-  * Download the install files(stable or unstable, 32bit or 64bit):
-  # [http://openni.org/downloadfiles/2-openni-binaries OpenNI]
-  # [http://openni.org/downloadfiles/12-openni-compliant-middleware-binaries Nite]
-  # [https://github.com/avin2/SensorKinect Kinect Drivers] , [http://openni.org/downloadfiles/30-openni-compliant-hardware-binaries Primsense Drivers(Asus Xtion Pro,etc.)] 
+* Install OpenNI,NITE and the Sensor Driver *
+
+  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=Type%3DInstaller+OpSys%3DLinux+&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount]
   * Uncompress all files to a folder
   * Install OpenNI:
 {{{
