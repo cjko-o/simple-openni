@@ -28,7 +28,7 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 
 If everything worked out, you should see the camera in your Device Manager(under PrimeSensor : Kinect Camera, Kinect Motor).
 
-* Install SimpleOpenNI(Processing < 2.0) *
+* Install SimpleOpenNI (Processing < 2.0) *
   * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=win64+SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount SimpleOpenNI-Win64], or [http://code.google.com/p/simple-openni/downloads/list?can=2&q=win32+SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount SimpleOpenNI-Win32]
   * Copy the 'SimpleOpenNI.zip' into this folder:
       C:\Users\'your username'\Documents\Processing\libraries
@@ -90,7 +90,7 @@ Those programs have to be on your system in order to install OpenNI:
 ...
 
 
-* Install SimpleOpenNI *
+* Install SimpleOpenNI (Processing < 2.0) *
   * Copy the 'SimpleOpenNI.zip' into this folder:
       /Users/'your username'/Documents/Processing/libraries
   * If you don't have this folder then create it.
@@ -124,7 +124,7 @@ Those programs have to be on your system in order to install OpenNI:
 > sudo install
 }}}
 
-* Install SimpleOpenNI *
+* Install SimpleOpenNI (Processing < 2.0) *
   * Copy the 'SimpleOpenNI.zip' into this folder:
       ~/sketchbook/libraries
   * If you don't have this folder then create it.
