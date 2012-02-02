@@ -99,7 +99,7 @@ Those programs have to be on your system in order to install OpenNI:
 
 * Install OpenNI,NITE and the Sensor Driver *
 
-  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=Type%3DInstaller+OpSys%3DLinux+&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount]
+  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=Type%3DInstaller+OpSys%3DLinux+&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount Installation Package Linux64]
   * Uncompress all files to a folder
   * Install OpenNI:
 {{{
