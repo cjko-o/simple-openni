@@ -16,8 +16,7 @@ see [http://processing.org/learning/eclipse http://processing.org/learning/eclip
 [http://simple-openni.googlecode.com/svn/site/screenshots/eclipse2.png]
  * Right-Click “SimplelOpenNI.jar” and select “Build Path>Add to Buildpath” 
  * Copy the “libSimpleOpenNI.jnilib”(OSX), or "libSimpleOpenNI.so"(Linux), or "libSimpleOpenNI.dll"(Windows) file from the download package into the projects “bin” folder.
-Set the Native Library Location to your applications "bin" folder.
-
+ * Set the Native Library Location to your applications "bin" folder.
 [http://simple-openni.googlecode.com/svn/site/screenshots/nativLib.png]
  * Import library by adding “import SimpleOpenNI.*;” to your sourcecode
 
