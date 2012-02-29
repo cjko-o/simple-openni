@@ -19,6 +19,7 @@ float        zoomF =0.5f;
 float        rotX = radians(180);  // by default rotate the hole scene 180deg around the x-axis, 
                                    // the data from openni comes upside down
 float        rotY = radians(0);
+boolean      autoCalib=true;
 
 void setup()
 {
@@ -176,7 +177,10 @@ void onNewUser(int userId)
   println("onNewUser - userId: " + userId);
   println("  start pose detection");
   
-  context.startPoseDetection("Psi",userId);
+  if(autoCalib)
+    context.requestCalibrationSkeleton(userId,true);
+  else    
+    context.startPoseDetection("Psi",userId);
 }
 
 void onLostUser(int userId)

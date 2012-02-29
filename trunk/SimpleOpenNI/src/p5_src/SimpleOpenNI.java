@@ -29,26 +29,43 @@ import java.lang.reflect.Method;
 public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstants
 {
 	static 
-	{	// load the nativ shared lib
-		try{
-		  //System.out.println("-- " + System.getProperty("user.dir"));
-		  System.loadLibrary("SimpleOpenNI");
-		}
-		catch(UnsatisfiedLinkError e)
-		{
-		  System.out.println("Can't find the SimpleOpenNI library : " + e);
-		  /*
-		  if(System.getProperty("os.name").toLowerCase().indexOf("win") >= 0)
-			// windows
-			System.load(System.getProperty("user.dir")+"/lib/SimpleOpenNI.dll");
-		  else if(System.getProperty("os.name").toLowerCase().indexOf("nix") >= 0)
-			// unix
-			System.load(System.getProperty("user.dir")+"/lib/libSimpleOpenNI.so");
-		  else if(System.getProperty("os.name").toLowerCase().indexOf("mac") >= 0)
-			// mac
-			System.load(System.getProperty("user.dir")+"/lib/libSimpleOpenNI.jnilib");
-		  */
-		}
+        {   // load the nativ shared lib
+            String sysStr = System.getProperty("os.name").toLowerCase();
+            String libName = "SimpleOpenNI";
+            String archStr = System.getProperty("os.arch").toLowerCase();
+
+            // check which system + architecture
+            if(sysStr.indexOf("win") >= 0)
+            {   // windows
+                if(archStr.indexOf("86") >= 0)
+                    // 32bit
+                    libName += "32";
+                else if(archStr.indexOf("64") >= 0)
+                    libName += "64";
+             }
+            else if(sysStr.indexOf("nix") >= 0 || sysStr.indexOf("linux") >=  0 )
+            {   // unix
+                if(archStr.indexOf("86") >= 0)
+                    // 32bit
+                    libName += "32";
+                else if(archStr.indexOf("64") >= 0)
+                {
+                    System.out.println("----");
+                    libName += "64";
+                }
+            }
+            else if(sysStr.indexOf("mac") >= 0)
+            {     // mac
+            }
+
+            try{
+              //System.out.println("-- " + System.getProperty("user.dir"));
+              System.loadLibrary(libName);
+            }
+            catch(UnsatisfiedLinkError e)
+            {
+              System.out.println("Can't find the SimpleOpenNI library (" +  libName  + ") : " + e);
+            }
 	}
 
     public static void start()

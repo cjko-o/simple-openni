@@ -220,6 +220,7 @@ void keyPressed()
 public class UserManager
 {
   protected SimpleOpenNI  _context;
+  boolean       		  _autoCalib=true;
   
   public UserManager(SimpleOpenNI context)
   {
@@ -231,7 +232,11 @@ public class UserManager
     println("onNewUser - userId: " + userId);
     println("  start pose detection");
 
-    _context.startPoseDetection("Psi", userId);
+	if(_autoCalib)
+	  _context.requestCalibrationSkeleton(userId,true);
+	else    
+	  _context.startPoseDetection("Psi",userId);  
+	
   }
 
   public void onLostUser(int userId)

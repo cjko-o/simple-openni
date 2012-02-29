@@ -12,6 +12,7 @@
 import SimpleOpenNI.*;
 
 SimpleOpenNI  context;
+boolean       autoCalib=true;
 
 void setup()
 {
@@ -90,7 +91,10 @@ void onNewUser(int userId)
   println("onNewUser - userId: " + userId);
   println("  start pose detection");
   
-  context.startPoseDetection("Psi",userId);
+  if(autoCalib)
+    context.requestCalibrationSkeleton(userId,true);
+  else    
+    context.startPoseDetection("Psi",userId);
 }
 
 void onLostUser(int userId)
