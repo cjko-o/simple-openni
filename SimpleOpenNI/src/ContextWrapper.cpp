@@ -46,7 +46,7 @@
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	25		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	26		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -2490,7 +2490,6 @@ void ContextWrapper::stopPoseDetection(int user)
 
     _userGenerator.GetPoseDetectionCap().StopPoseDetection(user);
 }
-
 
 
 bool ContextWrapper::getJointPositionSkeleton(int user,int joint,XnSkeletonJointPosition* jointPos)

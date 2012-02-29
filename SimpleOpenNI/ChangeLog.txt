@@ -15,6 +15,19 @@ v0.xx , in planning:
 			- moveKinect(float angle) - tilts the kinect
 		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
+v0.26 , 02/29/2012,
+                - Added the autocalibration, now you can only enter the scene and get the skeleton data without the psi pose
+                - Updated the examples to enable autocalibration:
+                    - User
+                    - User3d
+                - Unified the SimpleOpenNI distribution library, from now there is only one library distribution for OSX,Windows and Linux.
+                  Had to make this change because of the Processing 2.0 autoinstaller.
+                - SimpleOpenNI tries on windows/linux to find automatically the valid architecture(32bit/64bit), depending on
+                  java machine you use. On OSX this works already through the universal libraries.
+                  SimpleOpenNI will print out which version it uses.
+                - Updated the wiki-install doc(thanks to Bradley Henke)
+
+
 v0.25 , 01/03/2012, 
 		- Fixed the bug which prevented the valid playback of a recorded file
 		- Added new functions to control the playback if recorded files

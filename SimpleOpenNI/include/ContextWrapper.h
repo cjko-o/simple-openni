@@ -209,9 +209,9 @@ public:
     int	userHeight();
 
     bool	getCoM(int user, XnPoint3D&  com);
-    int	getNumberOfUsers();
-    int	getUsers(std::vector<int>* userList);
-    int	getUserPixels(int user,int* userSceneData);
+    int     getNumberOfUsers();
+    int     getUsers(std::vector<int>* userList);
+    int     getUserPixels(int user,int* userSceneData);
 
     bool	getUserPostition(int user, XnBoundingBox3D*  pPosition );
 

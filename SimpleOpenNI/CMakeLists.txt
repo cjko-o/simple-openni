@@ -218,7 +218,6 @@ ELSE()
 ENDIF()	
 
 
-
 SET(SWIG_SOURCES 
 src/SimpleOpenNIMain.i
 src/ContextWrapper.cpp
@@ -236,6 +235,28 @@ MAKE_DIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 SWIG_ADD_MODULE(SimpleOpenNI Java ${SWIG_SOURCES})
 SWIG_LINK_LIBRARIES(SimpleOpenNI ${JAVA_LIBRARIES} ${JNI_LIBRARIES} ${Boost_LIBRARIES} ${LIBS})
+
+# set the arch extension for the lib
+IF(NOT APPLE)
+  IF(${MACH_ARCH} MATCHES "64")
+	#64bit
+	message("set 64bit extension") 
+	SET(NEW_SUFFIX "64")
+  ELSEIF()
+	# 32bit
+	message("set 32bit extension") 
+	SET(NEW_SUFFIX "64")
+  ENDIF()
+
+  IF(WIN32)
+	SET(NEW_SUFFIX ${NEW_SUFFIX}.dll)	
+  ELSE()
+	# unix linux
+	SET(NEW_SUFFIX ${NEW_SUFFIX}.so)	
+  ENDIF()
+
+  SET_TARGET_PROPERTIES(SimpleOpenNI PROPERTIES SUFFIX ${NEW_SUFFIX})
+ENDIF()
 
 
 ADD_CUSTOM_COMMAND(TARGET SimpleOpenNI
