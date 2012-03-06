@@ -1,8 +1,6 @@
 #summary Build Environments
 
 = Eclipse =
-[http://shop.oreilly.com/product/0636920020684.do *Making Things See: 3D vision with Kinect, Processing, Arduino, and MakerBot*]
-http://www.amazon.com/Making-Things-See-Processing-MakerBot/dp/1449307078
 
 == Importing Libraries into Eclipse Project ==
 
