@@ -33,7 +33,7 @@ If everything worked out, you should see the camera in your Device Manager(under
   * Copy the 'SimpleOpenNI.zip' into this folder:
       C:\Users\'your username'\Documents\Processing\libraries
   * If you don't have this folder then create it.
-  * If you use the 64bit version, verify if you run Processing with 64bit. Mainly you have to install a [http://www.oracle.com/technetwork/java/javase/downloads/jdk-7u2-download-1377129.html 64bit Java version], also you have to remove the Java folder in the Processing folder.
+  * If you use the *64bit* version, verify if you run Processing with 64bit. Mainly you have to install a [http://www.oracle.com/technetwork/java/javase/downloads/jdk-7u2-download-1377129.html 64bit Java version], also you have to remove the Java folder in the Processing folder.
 ----
 = OSX =
 
