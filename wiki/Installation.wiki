@@ -61,6 +61,7 @@ Those programs have to be on your system in order to install OpenNI:
   * [http://www.cmake.org/files/v2.8/cmake-2.8.3-Darwin-universal.dmg  CMake](only if you plan to build the SimpleOpenNI library by yourself)
 
   * Install OpenNI
+  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCountt SimpleOpenNI]
   Open the terminal and type in those commands:
 {{{
 > sudo port install git-core 
@@ -124,6 +125,7 @@ Those programs have to be on your system in order to install OpenNI:
 }}}
 
 * Install SimpleOpenNI (Processing < 2.0) *
+  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCountt SimpleOpenNI]
   * Copy the 'SimpleOpenNI.zip' into this folder:
       ~/sketchbook/libraries
   * If you don't have this folder then create it.
