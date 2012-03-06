@@ -2,6 +2,7 @@
 
 = Books =
 [http://shop.oreilly.com/product/0636920020684.do Making Things See: 3D vision with Kinect, Processing, Arduino, and MakerBot]
+
 Great book from Greg Borenstein, which gives you a nice overview of the possibilities of the kinect and how to use it for your own projects.The book also explains how to use SimpleOpenNI.
 
 = Java Doc =
