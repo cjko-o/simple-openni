@@ -29,7 +29,7 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 If everything worked out, you should see the camera in your Device Manager(under PrimeSensor : Kinect Camera, Kinect Motor).
 
 * Install SimpleOpenNI (Processing < 2.0) *
-  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=win64+SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount SimpleOpenNI-Win64], or [http://code.google.com/p/simple-openni/downloads/list?can=2&q=win32+SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount SimpleOpenNI-Win32]
+  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCountt SimpleOpenNI]
   * Copy the 'SimpleOpenNI.zip' into this folder:
       C:\Users\'your username'\Documents\Processing\libraries
   * If you don't have this folder then create it.
