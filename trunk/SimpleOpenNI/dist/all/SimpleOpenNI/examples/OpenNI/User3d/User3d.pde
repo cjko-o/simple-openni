@@ -21,6 +21,9 @@ float        rotX = radians(180);  // by default rotate the hole scene 180deg ar
 float        rotY = radians(0);
 boolean      autoCalib=true;
 
+PVector      bodyCenter = new PVector();
+PVector      bodyDir = new PVector();
+
 void setup()
 {
   size(1024,768,P3D);  // strange, get drawing error in the cameraFrustum if i use P3D, in opengl there is no problem
@@ -116,6 +119,16 @@ void drawSkeleton(int userId)
   drawLimb(userId, SimpleOpenNI.SKEL_TORSO, SimpleOpenNI.SKEL_RIGHT_HIP);
   drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_HIP, SimpleOpenNI.SKEL_RIGHT_KNEE);
   drawLimb(userId, SimpleOpenNI.SKEL_RIGHT_KNEE, SimpleOpenNI.SKEL_RIGHT_FOOT);  
+
+  // draw body direction
+  getBodyDirection(userId,bodyCenter,bodyDir);
+  
+  bodyDir.mult(200);  // 200mm length
+  bodyDir.add(bodyCenter);
+  
+  stroke(255,200,200);
+  line(bodyCenter.x,bodyCenter.y,bodyCenter.z,
+       bodyDir.x ,bodyDir.y,bodyDir.z);
 
   strokeWeight(1);
  
@@ -263,4 +276,35 @@ void keyPressed()
         rotX -= 0.1f;
       break;
   }
+}
+
+void getBodyDirection(int userId,PVector centerPoint,PVector dir)
+{
+  PVector jointL = new PVector();
+  PVector jointH = new PVector();
+  PVector jointR = new PVector();
+  float  confidence;
+  
+  // draw the joint position
+  confidence = context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_LEFT_SHOULDER,jointL);
+  confidence = context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_HEAD,jointH);
+  confidence = context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_SHOULDER,jointR);
+  
+  // take the neck as the center point
+  confidence = context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_NECK,centerPoint);
+  
+  /*  // manually calc the centerPoint
+  PVector shoulderDist = PVector.sub(jointL,jointR);
+  centerPoint.set(PVector.mult(shoulderDist,.5));
+  centerPoint.add(jointR);
+  */
+  
+  PVector up = new PVector();
+  PVector left = new PVector();
+  
+  up.set(PVector.sub(jointH,centerPoint));
+  left.set(PVector.sub(jointR,centerPoint));
+  
+  dir.set(up.cross(left));
+  dir.normalize();
 }

@@ -52,6 +52,7 @@ ELSE()
 	SET(JAVA_DOC	   javadoc)
 ENDIF()
 
+
 # -----------------------------------------------------------------------------
 # boost
 FIND_PACKAGE(Boost REQUIRED)

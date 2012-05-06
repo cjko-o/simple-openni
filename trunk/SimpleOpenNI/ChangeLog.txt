@@ -15,6 +15,11 @@ v0.xx , in planning:
 			- moveKinect(float angle) - tilts the kinect
 		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
+v0.27 , 05/06/2012,
+  - Added functions to set a virtual nullpoint to the scene
+  - Extended the User3d example. Show how to calculate the direction of the body based on the skeleton data. See the function
+	'getBodyDirection'.
+
 v0.26 , 02/29/2012,
                 - Added the autocalibration, now you can only enter the scene and get the skeleton data without the psi pose
                 - Updated the examples to enable autocalibration:
