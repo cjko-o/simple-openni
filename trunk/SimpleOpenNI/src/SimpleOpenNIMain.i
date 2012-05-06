@@ -293,7 +293,21 @@ public:
         // kinect motor
         void moveKinect(float angle);
 
-	///////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
+        // calibration
+        void setUserCoordsys(float centerX,float centerY,float centerZ,
+                             float xDirX,float xDirY,float xDirZ,
+                             float zDirX,float zDirY,float zDirZ);
+        void resetUserCoordsys();
+        bool hasUserCoordsys() const;
+        float* getUserCoordsysTransMat();	// returns the 4x4 matrix
+
+        bool getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
+                                 float* xAxisX,float* xAxisY,float* xAxisZ,
+                                 float* yAxisX,float* yAxisY,float* yAxisZ,
+                                 float* zAxisX,float* zAxisY,float* zAxisZ);
+
+        ///////////////////////////////////////////////////////////////////////////
 	// XnVSessionMananger
 	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
 											 xn::HandsGenerator*	pTracker = NULL, 

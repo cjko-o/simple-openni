@@ -37,16 +37,12 @@
 // openni
 #include <XnTypes.h>
 
-// eigen
-#include <Eigen/Geometry>
-
-
 #include "ContextWrapper.h"
 
 using namespace sOpenNI;
 using namespace xn;
 
-#define		SIMPLEOPENNI_VERSION	26		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	27		// 1234 = 12.24
 
 xn::DepthGenerator tempDepth;
 
@@ -96,7 +92,8 @@ ContextWrapper::ContextWrapper():
     _threadMode(RunMode_Default),
     _threadRun(false),
     _deviceIndex(0),
-    _playerRepeat(true)
+    _playerRepeat(true),
+    _userCoordsysFlag(false)
 {
    // _kinectMotors.open();
 
@@ -2893,7 +2890,7 @@ void ContextWrapper::update(XnVSessionManager* sessionManager)
     sessionManager->Update(&_globalContext);
 }
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // threading
 
 void ContextWrapper::run()
@@ -2908,4 +2905,112 @@ void ContextWrapper::run()
         //std::cout <<"." << std::flush;
     }
 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// calibration
+void ContextWrapper::setUserCoordsys(float centerX,float centerY,float centerZ,
+                                     float xDirX,float xDirY,float xDirZ,
+                                     float zDirX,float zDirY,float zDirZ)
+{
+ // _calibrationMat.identity();
+    _userCoordsysNullPoint << centerX,centerY,centerZ;
+
+    _userCoordsysXAxis << xDirX,xDirY,xDirZ;
+    _userCoordsysXAxis.normalize();
+
+    _userCoordsysZAxis << zDirX,zDirY,zDirZ;
+    _userCoordsysZAxis.normalize();
+
+    // calculate the up dir
+    _userCoordsysYAxis = _userCoordsysXAxis.cross(_userCoordsysZAxis);
+    _userCoordsysYAxis.normalize();
+
+    // calculate the clean zAxis
+    _userCoordsysZAxis = _userCoordsysYAxis.cross(_userCoordsysXAxis);
+
+    // calculate the xform
+    Eigen::Vector3f nullPointTrans(_userCoordsysNullPoint - Eigen::Vector3f(0.0f,0.0f,0.0f));
+
+    // set the nullPoint translation
+    //_userCoordsysMat.translate(nullPointTrans);
+
+    // set the coordinate system rotation
+    /*
+    Eigen::Vector3f rotAxis;
+    rotAxis = Eigen::Vector3f(0.0f,1.0f,0.0f).cross(_userCoordsysYAxis);
+
+//    float angle = _userCoordsysYAxis.dot(Eigen::Vector3f(0.0f,1.0f,0.0f));
+    float angle = Eigen::Vector3f(0.0f,1.0f,0.0f).dot(_userCoordsysYAxis);
+
+    _userCoordsysMat.rotate(Eigen::AngleAxis<float>(angle,rotAxis));
+    */
+
+    /*
+    Eigen::Matrix4f m;
+    m <<  1.0f,   2.0f,   3.0f,   4.0f,
+                                    5.0f,   6.0f,   7.0f,   8.0f,
+                                    9.0f,   10.0f,  11.0f,  12.0f,
+                                    13.0f,  14.0f,  15.0f,  16.0f;
+
+    /*
+    _userCoordsysMat.AffinePart.row(0) << 1,2,3,4;
+
+    _userCoordsysMat.Scalar<float> <<  1.0f,   2.0f,   3.0f,   4.0f,
+                                    5.0f,   6.0f,   7.0f,   8.0f,
+                                    9.0f,   10.0f,  11.0f,  12.0f,
+                                    13.0f,  14.0f,  15.0f,  16.0f;
+    */
+
+    _userCoordsysMat[0] = _userCoordsysXAxis.x();   _userCoordsysMat[1] = _userCoordsysXAxis.y();   _userCoordsysMat[2] =   _userCoordsysXAxis.z(); _userCoordsysMat[3] = -_userCoordsysNullPoint.x();
+    _userCoordsysMat[4] = _userCoordsysYAxis.x();   _userCoordsysMat[5] = _userCoordsysYAxis.y();   _userCoordsysMat[6] =   _userCoordsysYAxis.z(); _userCoordsysMat[7] = -_userCoordsysNullPoint.y();
+    _userCoordsysMat[8] = _userCoordsysZAxis.x();   _userCoordsysMat[9] = _userCoordsysZAxis.y();   _userCoordsysMat[10] =  _userCoordsysZAxis.z(); _userCoordsysMat[11] = -_userCoordsysNullPoint.z();
+    _userCoordsysMat[12] = 0;                       _userCoordsysMat[13] = 0;                       _userCoordsysMat[14] =  0;                      _userCoordsysMat[15] = 1;
+
+    _userCoordsysFlag = true;
+}
+
+void ContextWrapper::resetUserCoordsys()
+{
+	_userCoordsysFlag = false;
+}
+
+bool ContextWrapper::hasUserCoordsys() const
+{
+  return _userCoordsysFlag;  
+}
+
+float* ContextWrapper::getUserCoordsysTransMat()
+{
+  if(_userCoordsysFlag == false)
+	return NULL;
+  // return a float[16] , 4x4 transform mat
+  return _userCoordsysMat;
+}
+
+bool ContextWrapper::getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
+										 float* xAxisX,float* xAxisY,float* xAxisZ,
+										 float* yAxisX,float* yAxisY,float* yAxisZ,
+										 float* zAxisX,float* zAxisY,float* zAxisZ)
+{
+  if(_userCoordsysFlag == false)
+	return false;
+
+  *nullPointX = _userCoordsysNullPoint.x();
+  *nullPointY = _userCoordsysNullPoint.y();
+  *nullPointZ = _userCoordsysNullPoint.z();
+  
+  *xAxisX = _userCoordsysXAxis.x();
+  *xAxisY = _userCoordsysXAxis.y();
+  *xAxisZ = _userCoordsysXAxis.z();
+
+  *yAxisX = _userCoordsysYAxis.x();
+  *yAxisY = _userCoordsysYAxis.y();
+  *yAxisZ = _userCoordsysYAxis.z();
+  
+  *zAxisX = _userCoordsysZAxis.x();
+  *zAxisY = _userCoordsysZAxis.y();
+  *zAxisZ = _userCoordsysZAxis.z();
+  
+  return true;
 }
