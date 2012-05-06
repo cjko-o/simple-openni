@@ -39,6 +39,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/cstdint.hpp>
 
+// eigen
+#include <Eigen/Geometry>
+
 // OpenNI
 #include <XnOS.h>
 #include <XnCppWrapper.h>
@@ -309,7 +312,21 @@ public:
     ///////////////////////////////////////////////////////////////////////////
     // kinect motor
     void moveKinect(float angle);
-
+	
+    ///////////////////////////////////////////////////////////////////////////
+    // calibration
+    void setUserCoordsys(float centerX,float centerY,float centerZ,
+						float xDirX,float xDirY,float xDirZ,
+						float zDirX,float zDirY,float zDirZ);
+	void resetUserCoordsys();
+    bool hasUserCoordsys() const;
+	float* getUserCoordsysTransMat();	// returns the 4x4 matrix
+	
+	bool getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
+							 float* xAxisX,float* xAxisY,float* xAxisZ,
+							 float* yAxisX,float* yAxisY,float* yAxisZ,
+							 float* zAxisX,float* zAxisY,float* zAxisZ);
+	
     ///////////////////////////////////////////////////////////////////////////
     // callbacks
 
@@ -573,6 +590,16 @@ protected:
     unsigned long 	_updateTimeStamp;
     unsigned long 	_updateSubTimeStamp;
 
+    ///////////////////////////////////////////////////////////////////////////
+    // calibration
+	bool										_userCoordsysFlag;
+    //Eigen::Transform<float,3,Eigen::Affine> 	_userCoordsysMat;
+    float                                       _userCoordsysMat[16];
+	Eigen::Vector3f								_userCoordsysNullPoint;
+	Eigen::Vector3f								_userCoordsysXAxis;
+	Eigen::Vector3f								_userCoordsysYAxis;
+	Eigen::Vector3f								_userCoordsysZAxis;
+	
 public:
     inline unsigned long depthMapTimeStamp(){ return _depthMapTimeStamp; }
     inline unsigned long depthImageTimeStamp(){ return _depthImageTimeStamp; }
