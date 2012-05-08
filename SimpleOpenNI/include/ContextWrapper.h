@@ -318,15 +318,21 @@ public:
     void setUserCoordsys(float centerX,float centerY,float centerZ,
 						float xDirX,float xDirY,float xDirZ,
 						float zDirX,float zDirY,float zDirZ);
-	void resetUserCoordsys();
+    bool setUserCoordsys(XnPoint3D fromPoints[],
+                         XnPoint3D toPoints[]);
+    bool setUserCoordsys(float mat[]);
+
+    void resetUserCoordsys();
     bool hasUserCoordsys() const;
-	float* getUserCoordsysTransMat();	// returns the 4x4 matrix
-	
-	bool getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
-							 float* xAxisX,float* xAxisY,float* xAxisZ,
-							 float* yAxisX,float* yAxisY,float* yAxisZ,
-							 float* zAxisX,float* zAxisY,float* zAxisZ);
-	
+    float* getUserCoordsysTransMat();	// returns the 4x4 matrix
+    void getUserCoordsysTransMat(float* mat);	// needs a 4x4 float array
+
+    bool getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
+                             float* xAxisX,float* xAxisY,float* xAxisZ,
+                             float* yAxisX,float* yAxisY,float* yAxisZ,
+                             float* zAxisX,float* zAxisY,float* zAxisZ);
+    void calcUserCoordsys(XnPoint3D& point);
+
     ///////////////////////////////////////////////////////////////////////////
     // callbacks
 
@@ -506,13 +512,14 @@ protected:
     xn::DepthGenerator	_depth;
     xn::DepthMetaData	_depthMD;
     XnMapOutputMode		_depthMapOutputMode;
-    float			_pDepthHist[MAX_DEPTH];
-    float			_pDepthGamma[MAX_DEPTH];
+    float               _pDepthHist[MAX_DEPTH];
+    float               _pDepthGamma[MAX_DEPTH];
     XnRGB24Pixel*		_pDepthImage;
-    int			_depthBufSize;
-    float			_depthImageColor[3];
-    XnPoint3D*		_depthMapRealWorld;
-    int			_depthImageColorMode;
+    int                 _depthBufSize;
+    XnDepthPixel*       _depthMap;
+    float               _depthImageColor[3];
+    XnPoint3D*          _depthMapRealWorld;
+    int                 _depthImageColorMode;
 
     // cam image
     xn::ImageGenerator	_image;
@@ -593,7 +600,8 @@ protected:
     ///////////////////////////////////////////////////////////////////////////
     // calibration
 	bool										_userCoordsysFlag;
-    //Eigen::Transform<float,3,Eigen::Affine> 	_userCoordsysMat;
+    Eigen::Transform<float,3,Eigen::Affine> 	_userCoordsysForwardMat;
+    Eigen::Transform<float,3,Eigen::Affine> 	_userCoordsysRetMat;
     float                                       _userCoordsysMat[16];
 	Eigen::Vector3f								_userCoordsysNullPoint;
 	Eigen::Vector3f								_userCoordsysXAxis;

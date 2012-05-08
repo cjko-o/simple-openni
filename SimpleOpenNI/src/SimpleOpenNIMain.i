@@ -20,6 +20,7 @@
 %include "carrays.i"
 
 %apply int[] {int *};
+%apply float[] {float *};
 
 
 # ----------------------------------------------------------------------------
@@ -300,13 +301,15 @@ public:
                              float zDirX,float zDirY,float zDirZ);
         void resetUserCoordsys();
         bool hasUserCoordsys() const;
-        float* getUserCoordsysTransMat();	// returns the 4x4 matrix
+//        float* getUserCoordsysTransMat();	// returns the 4x4 matrix
+        void getUserCoordsysTransMat(float* mat);// needs a 4x4 float array
 
+/*
         bool getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
                                  float* xAxisX,float* xAxisY,float* xAxisZ,
                                  float* yAxisX,float* yAxisY,float* yAxisZ,
                                  float* zAxisX,float* zAxisY,float* zAxisZ);
-
+*/
         ///////////////////////////////////////////////////////////////////////////
 	// XnVSessionMananger
 	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
