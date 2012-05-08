@@ -78,6 +78,7 @@ KinectMotors ContextWrapper::_kinectMotors;
 
 ContextWrapper::ContextWrapper():
     _pDepthImage(NULL),
+    _depthMap(NULL),
     _pIrImage(NULL),
     _pSceneImage(NULL),
     _depthMapRealWorld(NULL),
@@ -169,6 +170,9 @@ void ContextWrapper::close()
     _initFlag = false;
     _generatingFlag = false;
 
+
+    if(_depthMap)
+        free(_depthMap);
     if(_pDepthImage)
         free(_pDepthImage);
     if(_pIrImage)
@@ -578,6 +582,7 @@ bool ContextWrapper::createDepth(bool force)
         _depth.GetMetaData(_depthMD);
 
         _depthBufSize       = _depthMD.XRes() * _depthMD.YRes();
+        _depthMap           = (XnDepthPixel*)malloc( _depthBufSize * sizeof(XnDepthPixel));
         _pDepthImage        = (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
         _depthMapRealWorld  = (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
 
@@ -603,6 +608,7 @@ bool ContextWrapper::createDepth(bool force)
                     _depth.GetMetaData(_depthMD);
 
                     _depthBufSize       = _depthMD.XRes() * _depthMD.YRes();
+                    _depthMap           = (XnDepthPixel*)malloc( _depthBufSize * sizeof(XnDepthPixel));
                     _pDepthImage        = (XnRGB24Pixel*)malloc( _depthBufSize * sizeof(XnRGB24Pixel));
                     _depthMapRealWorld  = (XnPoint3D*)malloc( _depthBufSize * sizeof(XnPoint3D));
 
@@ -1405,6 +1411,23 @@ bool ContextWrapper::updateDepthData()
     _depth.GetMetaData(_depthMD);
     _depthMapTimeStamp  = _updateTimeStamp;
 
+    // check if a user defined coordinate system is used
+    if(_userCoordsysFlag)
+    {
+        updateDepthRealWorldData();
+
+        // update depthMap according to the real world data
+        XnVector3D*     pVec    = _depthMapRealWorld;
+        XnDepthPixel*   pDepth  = _depthMap;
+        for(int i = 0; i < _depthBufSize; i++)
+        {
+            *pDepth = pVec->X;
+
+            pVec++;
+            pDepth++;
+        }
+    }
+
     //boost::mutex::scoped_lock l(_mainMutex);
     return true;
 }
@@ -1433,6 +1456,26 @@ bool ContextWrapper::updateDepthRealWorldData()
     // updtate the base data
     updateDepthData();
     calcDepthImageRealWorld();
+
+    // check if a user defined coordinate system is used
+    if(_userCoordsysFlag)
+    {
+        Eigen::Vector3f vec;
+        XnVector3D* pVec;
+
+        // transform all realworld 3d data to the user def coordinatesystem
+        for(int i = 0; i < _depthBufSize; i++)
+        {
+            pVec = &(_depthMapRealWorld[i]);
+
+            vec << pVec->X,pVec->Y,pVec->Z;
+            vec = _userCoordsysForwardMat * vec;
+
+            pVec->X = vec.x();
+            pVec->Y = vec.y();
+            pVec->Z = vec.z();
+        }
+    }
 
     _depthRealWorldTimeStamp = _updateTimeStamp;
 
@@ -1905,8 +1948,16 @@ int ContextWrapper::depthMap(int* map)
     else
         updateDepthData();
 
-    for(int i=0;i < _depthBufSize;i++)
-        map[i] = (int)(_depthMD.Data())[i];
+    if(_userCoordsysFlag)
+    {
+        for(int i=0;i < _depthBufSize;i++)
+            map[i] = (int)(_depthMap[i]);
+    }
+    else
+    {
+        for(int i=0;i < _depthBufSize;i++)
+            map[i] = (int)(_depthMD.Data())[i];
+    }
 
     return _depthBufSize;
 } 
@@ -2246,6 +2297,7 @@ bool ContextWrapper::getCoM(int user, XnPoint3D&  com)
         updateUser();
 
     _rc = _userGenerator.GetCoM(user,com);
+    calcUserCoordsys(com);
     return(_rc == XN_STATUS_OK);
 }
 
@@ -2917,17 +2969,20 @@ void ContextWrapper::setUserCoordsys(float centerX,float centerY,float centerZ,
     _userCoordsysNullPoint << centerX,centerY,centerZ;
 
     _userCoordsysXAxis << xDirX,xDirY,xDirZ;
+    _userCoordsysXAxis -= _userCoordsysNullPoint;
     _userCoordsysXAxis.normalize();
 
     _userCoordsysZAxis << zDirX,zDirY,zDirZ;
+    _userCoordsysZAxis -= _userCoordsysNullPoint;
     _userCoordsysZAxis.normalize();
 
     // calculate the up dir
-    _userCoordsysYAxis = _userCoordsysXAxis.cross(_userCoordsysZAxis);
+    _userCoordsysYAxis = _userCoordsysZAxis.cross(_userCoordsysXAxis);
     _userCoordsysYAxis.normalize();
 
     // calculate the clean zAxis
-    _userCoordsysZAxis = _userCoordsysYAxis.cross(_userCoordsysXAxis);
+    _userCoordsysZAxis = _userCoordsysXAxis.cross(_userCoordsysYAxis);
+    _userCoordsysZAxis.normalize();
 
     // calculate the xform
     Eigen::Vector3f nullPointTrans(_userCoordsysNullPoint - Eigen::Vector3f(0.0f,0.0f,0.0f));
@@ -2961,13 +3016,69 @@ void ContextWrapper::setUserCoordsys(float centerX,float centerY,float centerZ,
                                     9.0f,   10.0f,  11.0f,  12.0f,
                                     13.0f,  14.0f,  15.0f,  16.0f;
     */
-
+/*
     _userCoordsysMat[0] = _userCoordsysXAxis.x();   _userCoordsysMat[1] = _userCoordsysXAxis.y();   _userCoordsysMat[2] =   _userCoordsysXAxis.z(); _userCoordsysMat[3] = -_userCoordsysNullPoint.x();
     _userCoordsysMat[4] = _userCoordsysYAxis.x();   _userCoordsysMat[5] = _userCoordsysYAxis.y();   _userCoordsysMat[6] =   _userCoordsysYAxis.z(); _userCoordsysMat[7] = -_userCoordsysNullPoint.y();
     _userCoordsysMat[8] = _userCoordsysZAxis.x();   _userCoordsysMat[9] = _userCoordsysZAxis.y();   _userCoordsysMat[10] =  _userCoordsysZAxis.z(); _userCoordsysMat[11] = -_userCoordsysNullPoint.z();
     _userCoordsysMat[12] = 0;                       _userCoordsysMat[13] = 0;                       _userCoordsysMat[14] =  0;                      _userCoordsysMat[15] = 1;
+*/
+
+     // left hand coordsys matrix !!!!!!!!!!
+    _userCoordsysMat[0] = _userCoordsysXAxis.x();   _userCoordsysMat[1] = _userCoordsysYAxis.x();   _userCoordsysMat[2] =   _userCoordsysZAxis.x(); _userCoordsysMat[3] =   _userCoordsysNullPoint.x();
+    _userCoordsysMat[4] = _userCoordsysXAxis.y();   _userCoordsysMat[5] = _userCoordsysYAxis.y();   _userCoordsysMat[6] =   _userCoordsysZAxis.y(); _userCoordsysMat[7] =   _userCoordsysNullPoint.y();
+    _userCoordsysMat[8] = _userCoordsysXAxis.z();   _userCoordsysMat[9] = _userCoordsysYAxis.z();   _userCoordsysMat[10] =  _userCoordsysZAxis.z(); _userCoordsysMat[11] =  _userCoordsysNullPoint.z();
+    _userCoordsysMat[12] = 0;                       _userCoordsysMat[13] = 0;                       _userCoordsysMat[14] =  0;                      _userCoordsysMat[15] =  1;
 
     _userCoordsysFlag = true;
+
+    std::cout << "_userCoordsysXAxis.x():" << _userCoordsysXAxis.x() << "\t" << "_userCoordsysXAxis.y():" << _userCoordsysXAxis.y() << "\t" << "_userCoordsysXAxis.z():" << _userCoordsysXAxis.z() << std::endl;
+    std::cout << "_userCoordsysYAxis.x():" << _userCoordsysYAxis.x() << "\t" << "_userCoordsysYAxis.y():" << _userCoordsysYAxis.y() << "\t" << "_userCoordsysYAxis.z():" << _userCoordsysYAxis.z() << std::endl;
+    std::cout << "_userCoordsysZAxis.x():" << _userCoordsysZAxis.x() << "\t" << "_userCoordsysZAxis.y():" << _userCoordsysZAxis.y() <<"\t" <<  "_userCoordsysZAxis.z():" << _userCoordsysZAxis.z() << std::endl;
+
+    // calculate the transformation matrix
+    Eigen::Vector3f origNull(0,0,0);
+    Eigen::Vector3f origXAxis(1,0,0);
+    Eigen::Vector3f origYAxis(0,1,0);
+    Eigen::Vector3f origZAxis(0,0,1);
+
+    Eigen::Vector3f userDefNull(centerX,centerY,centerZ);
+    Eigen::Vector3f userDefXAxis(userDefNull + _userCoordsysXAxis);
+    Eigen::Vector3f userDefYAxis(userDefNull + _userCoordsysYAxis);
+    Eigen::Vector3f userDefZAxis(userDefNull + _userCoordsysZAxis);
+
+    Eigen::Matrix<float,3,4> start,end;
+    start.col(0)=origNull;
+    start.col(1)=origXAxis;
+    start.col(2)=origYAxis;
+    start.col(3)=origZAxis;
+
+
+    end.col(0)=userDefNull;
+    end.col(1)=userDefXAxis;
+    end.col(2)=userDefYAxis;
+    end.col(3)=userDefZAxis;
+
+    _userCoordsysRetMat = Eigen::umeyama(start,end,true);
+    _userCoordsysForwardMat = _userCoordsysRetMat.inverse();
+
+
+    Eigen::Matrix4f 	testMat;
+    testMat = Eigen::umeyama(start,end,true);
+
+    Eigen::Matrix4f testInvMat = testMat.inverse();
+
+    std::cout << "----- umeyama" << std::endl;
+    std::cout << testMat << std::endl;
+    std::cout << "----- invert" << std::endl;
+    std::cout << testInvMat << std::endl;
+
+    Eigen::Transform<float,3,Eigen::Affine> 	xform(testInvMat);
+
+    std::cout << "----- reverse test" << std::endl;
+    Eigen::Vector3f nullTest = xform * userDefNull;
+    std::cout << "userDefNull: " << userDefNull << std::endl;
+    std::cout << "nullTest: " << nullTest << std::endl;
+
 }
 
 void ContextWrapper::resetUserCoordsys()
@@ -2986,6 +3097,14 @@ float* ContextWrapper::getUserCoordsysTransMat()
 	return NULL;
   // return a float[16] , 4x4 transform mat
   return _userCoordsysMat;
+}
+
+void ContextWrapper::getUserCoordsysTransMat(float* mat)
+{
+    if(_userCoordsysFlag == false)
+      return;
+
+    memcpy(mat,_userCoordsysMat,sizeof(float)*16);
 }
 
 bool ContextWrapper::getOrigUserCoordsys(float* nullPointX,float* nullPointY,float* nullPointZ,
@@ -3013,4 +3132,15 @@ bool ContextWrapper::getOrigUserCoordsys(float* nullPointX,float* nullPointY,flo
   *zAxisZ = _userCoordsysZAxis.z();
   
   return true;
+}
+
+void ContextWrapper::calcUserCoordsys(XnPoint3D& point)
+{
+    if(!_userCoordsysFlag)
+        return;
+
+    Eigen::Vector3f vec = _userCoordsysForwardMat * Eigen::Vector3f(point.X,point.Y,point.Z);
+    point.X = vec.x();
+    point.Y = vec.y();
+    point.Z = vec.z();
 }

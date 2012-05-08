@@ -16,9 +16,26 @@ v0.xx , in planning:
 		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
 v0.27 , 05/06/2012,
-  - Added functions to set a virtual nullpoint to the scene
-  - Extended the User3d example. Show how to calculate the direction of the body based on the skeleton data. See the function
-	'getBodyDirection'.
+  New:
+	- Added functions to setup a user defined coordinate system. This can be helpfull in a lot of cases.
+	  For example if your camera is tilted but you want the camera depth data in a coordinate system which 
+	  is parallel to the floor. Another scenario could be that you have multiple cameras, but you want
+	  all cameras in the same coordinate system.
+	  From the moment that you setup a user defined coordinate system, all 3d related data from
+	  SimpleOpenNI will be transformed into the user defined coordinate system.
+	  New functions:
+		boolean hasUserCoordsys()
+		  returns true if a user coordinate system was defined
+		void setUserCoordsys(nullPoint3dX, nullPoint3dY, nullPoint3dZ, 
+							 xDirPoint3dX, xDirPoint3dY, xDirPoint3dZ, 
+                             zDirPoint3dX, zDirPoint3dY, zDirPoint3dZ);
+		  sets the user defined coordinate system. The system if defined by 3 realworld points.
+		boolean getUserCoordsysTransMat(PMatrix3D mat);
+		  returns the transformation matrix to 
+
+	- Added a new example to show the user defined coordinate system:
+	  extensions/NullPointCalib
+	- Extended the User3d example. Shows how to calculate the direction of the body based on the skeleton data. See the function 'getBodyDirection'.
 
 v0.26 , 02/29/2012,
                 - Added the autocalibration, now you can only enter the scene and get the skeleton data without the psi pose
