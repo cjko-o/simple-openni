@@ -2549,6 +2549,7 @@ bool ContextWrapper::getJointPositionSkeleton(int user,int joint,XnSkeletonJoint
         updateUser();
 
     _rc = _userGenerator.GetSkeletonCap().GetSkeletonJointPosition( user, (XnSkeletonJoint)joint, *jointPos);
+    calcUserCoordsys(jointPos->position);
 
     return(_rc == XN_STATUS_OK);
 }
@@ -2563,6 +2564,7 @@ bool ContextWrapper::getJointOrientationSkeleton(int user,
         updateUser();
 
     _rc = _userGenerator.GetSkeletonCap().GetSkeletonJointOrientation ( user, (XnSkeletonJoint)joint, *jointOrientation);
+    calcUserCoordsys(jointOrientation->orientation);
 
     return(_rc == XN_STATUS_OK);
 }
@@ -2572,7 +2574,14 @@ void ContextWrapper::convertRealWorldToProjective(XnVector3D* world,XnVector3D* 
 {
     if(!_depth.IsValid())
         return;
-    _depth.ConvertRealWorldToProjective(1, world, proj);
+
+    XnVector3D  localWc;
+    localWc.X = world->X;
+    localWc.Y = world->Y;
+    localWc.Z = world->Z;
+
+    calcUserCoordsysBack(localWc);
+    _depth.ConvertRealWorldToProjective(1, &localWc, proj);
 }
 
 void ContextWrapper::convertRealWorldToProjective(std::vector<XnVector3D>* worldArray,std::vector<XnVector3D>* projArray)
@@ -2595,7 +2604,8 @@ void ContextWrapper::convertProjectiveToRealWorld (XnVector3D* proj,XnVector3D* 
 {
     if(!_depth.IsValid())
         return;
-    _depth.ConvertProjectiveToRealWorld  (1, proj, world);
+    _depth.ConvertProjectiveToRealWorld (1, proj, world);
+    calcUserCoordsys(*world);
 }
 
 void ContextWrapper::convertProjectiveToRealWorld(std::vector<XnVector3D>* projArray,std::vector<XnVector3D>* worldArray)
@@ -2753,6 +2763,7 @@ void XN_CALLBACK_TYPE ContextWrapper::createHandsCb(xn::HandsGenerator& generato
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
         return;
+    //calcUserCoordsys(*pPosition);
     context->onCreateHandsCb(generator, nId, pPosition, fTime);
 }
 
@@ -2761,6 +2772,7 @@ void XN_CALLBACK_TYPE ContextWrapper::updateHandsCb(xn::HandsGenerator& generato
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
         return;
+    //calcUserCoordsys(*pPosition);
     context->onUpdateHandsCb(generator, nId, pPosition, fTime);
 }
 
@@ -2799,6 +2811,8 @@ void XN_CALLBACK_TYPE ContextWrapper::recognizeGestureCb(xn::GestureGenerator& g
     if(context == NULL)
         return;
 
+    //calcUserCoordsys(*pIdPosition);
+    //calcUserCoordsys(*pEndPosition);
     context->onRecognizeGestureCb(generator,strGesture,pIdPosition,pEndPosition);
 }
 
@@ -2807,6 +2821,8 @@ void XN_CALLBACK_TYPE ContextWrapper::progressGestureCb(xn::GestureGenerator& ge
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
         return;
+
+    //calcUserCoordsys(*pPosition);
     context->onProgressGestureCb(generator,strGesture,pPosition,fProgress);
 }
 
@@ -2880,6 +2896,8 @@ void XN_CALLBACK_TYPE ContextWrapper::onStartSessionCb(const XnPoint3D& ptPositi
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
         return;
+
+    //calcUserCoordsys(*ptPosition);
     context->onStartSessionCb(ptPosition);
 }
 
@@ -2896,6 +2914,8 @@ void XN_CALLBACK_TYPE ContextWrapper::onFocusSessionCb(const XnChar* strFocus, c
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
     if(context == NULL)
         return;
+
+    //calcUserCoordsys(*ptPosition);
     context->onFocusSessionCb(strFocus,ptPosition,fProgress);
 }
 
@@ -3140,6 +3160,36 @@ void ContextWrapper::calcUserCoordsys(XnPoint3D& point)
         return;
 
     Eigen::Vector3f vec = _userCoordsysForwardMat * Eigen::Vector3f(point.X,point.Y,point.Z);
+    point.X = vec.x();
+    point.Y = vec.y();
+    point.Z = vec.z();
+}
+
+void ContextWrapper::calcUserCoordsys(XnMatrix3X3& mat)
+{
+    if(!_userCoordsysFlag)
+        return;
+
+    Eigen::Matrix3f matOrg(mat.elements);
+    Eigen::Matrix3f res = _userCoordsysForwardMat * matOrg;
+
+    mat.elements[0] = res(0);
+    mat.elements[1] = res(1);
+    mat.elements[2] = res(2);
+    mat.elements[3] = res(3);
+    mat.elements[4] = res(4);
+    mat.elements[5] = res(5);
+    mat.elements[6] = res(6);
+    mat.elements[7] = res(7);
+    mat.elements[8] = res(8);
+}
+
+void ContextWrapper::calcUserCoordsysBack(XnPoint3D& point)
+{
+    if(!_userCoordsysFlag)
+        return;
+
+    Eigen::Vector3f vec = _userCoordsysRetMat * Eigen::Vector3f(point.X,point.Y,point.Z);
     point.X = vec.x();
     point.Y = vec.y();
     point.Z = vec.z();
