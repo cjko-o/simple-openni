@@ -332,6 +332,9 @@ public:
                              float* yAxisX,float* yAxisY,float* yAxisZ,
                              float* zAxisX,float* zAxisY,float* zAxisZ);
     void calcUserCoordsys(XnPoint3D& point);
+    void calcUserCoordsys(XnMatrix3X3& mat);
+
+    void calcUserCoordsysBack(XnPoint3D& point);
 
     ///////////////////////////////////////////////////////////////////////////
     // callbacks
