@@ -244,6 +244,16 @@ public class UserManager
     println("onLostUser - userId: " + userId);
   }
 
+  public void onExitUser(int userId)
+  {
+    println("onExitUser - userId: " + userId);
+  }
+
+  public void onReEnterUser(int userId)
+  {
+    println("onReEnterUser - userId: " + userId);
+  }
+
   public void onStartCalibration(int userId)
   {
     println("onStartCalibration - userId: " + userId);

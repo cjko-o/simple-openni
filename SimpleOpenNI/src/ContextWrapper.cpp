@@ -1008,6 +1008,8 @@ bool ContextWrapper::createUser(int flags,bool force)
 
     // set the callbacks
     _userGenerator.RegisterUserCallbacks(NewUserCb, LostUserCb, this, _hUserCb);
+    _userGenerator.RegisterToUserExit(ExitUserCb, this, _hUserExitCb);
+    _userGenerator.RegisterToUserReEnter(ReEnterUserCb, this, _hUserReEnterCb);
 
     // deprecated
     _userGenerator.GetSkeletonCap().RegisterCalibrationCallbacks(StartCalibrationCb, EndCalibrationCb, this, _hCalibrationCb);
@@ -2679,6 +2681,23 @@ void XN_CALLBACK_TYPE ContextWrapper::LostUserCb(xn::UserGenerator& generator, X
     context->onLostUserCb(generator,user);
 }
 
+
+void XN_CALLBACK_TYPE ContextWrapper::ExitUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
+{
+    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+    if(context == NULL)
+        return;
+    context->onExitUserCb(generator,user);
+}
+
+void XN_CALLBACK_TYPE ContextWrapper::ReEnterUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
+{
+    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
+    if(context == NULL)
+        return;
+    context->onReEnterUserCb(generator,user);
+}
+
 void XN_CALLBACK_TYPE ContextWrapper::StartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
 {
     ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
@@ -2722,6 +2741,16 @@ void ContextWrapper::onNewUserCb(xn::UserGenerator& generator, XnUserID user)
 void ContextWrapper::onLostUserCb(xn::UserGenerator& generator, XnUserID user)
 {
     onLostUserCb(user);
+}
+
+void ContextWrapper::onExitUserCb(xn::UserGenerator& generator, XnUserID user)
+{
+    onExitUserCb(user);
+}
+
+void ContextWrapper::onReEnterUserCb(xn::UserGenerator& generator, XnUserID user)
+{
+    onReEnterUserCb(user);
 }
 
 void ContextWrapper::onStartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user)
@@ -3194,3 +3223,6 @@ void ContextWrapper::calcUserCoordsysBack(XnPoint3D& point)
     point.Y = vec.y();
     point.Z = vec.z();
 }
+
+
+

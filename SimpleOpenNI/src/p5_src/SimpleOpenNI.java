@@ -100,6 +100,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 	protected Method 			_newUserMethod;
 	protected Method 			_lostUserMethod;
+	protected Method 			_exitUserMethod;
+	protected Method 			_reEnterUserMethod;
 	
 	protected Method 			_startCalibrationMethod;
 	protected Method 			_endCalibrationMethod;
@@ -287,7 +289,9 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 		_newUserMethod			= null;
 		_lostUserMethod 		= null;
-		
+		_exitUserMethod			= null;
+		_reEnterUserMethod 		= null;
+
 		_startCalibrationMethod = null;
 		_endCalibrationMethod	= null;
 		
@@ -301,6 +305,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		// user callbacks
 		_newUserMethod = getMethodRef("onNewUser",new Class[] { int.class });
 		_lostUserMethod = getMethodRef("onLostUser",new Class[] { int.class });
+		_exitUserMethod = getMethodRef("onExitUser",new Class[] { int.class });
+		_reEnterUserMethod = getMethodRef("onReEnterUser",new Class[] { int.class });
 
 		// calibrations callbacks
 		_startCalibrationMethod = getMethodRef("onStartCalibration",new Class[] { int.class });
@@ -601,6 +607,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		// user callbacks
 		_newUserMethod = getMethodRef(_userCbObject,"onNewUser",new Class[] { int.class });
 		_lostUserMethod = getMethodRef(_userCbObject,"onLostUser",new Class[] { int.class });
+		_exitUserMethod = getMethodRef(_userCbObject,"onExitUser",new Class[] { int.class });
+		_reEnterUserMethod = getMethodRef(_userCbObject,"onReEnterUser",new Class[] { int.class });
 
 		// calibrations callbacks
 		_startCalibrationMethod = getMethodRef(_calibrationCbObject,"onStartCalibration",new Class[] { int.class });
@@ -1111,7 +1119,13 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	public void drawCamFrustum()
 	{
 		_parent.g.pushStyle();
-		
+		_parent.g.pushMatrix();
+
+			if(hasUserCoordsys())
+			{	// move the camera to the real nullpoint
+			  
+			}
+
 			// draw cam case
 			_parent.stroke(200,200,0);  
 			_parent.noFill();
@@ -1170,6 +1184,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 				_parent.g.vertex(valueH,-valueV,distDepth);
 			_parent.g.endShape(PConstants.CLOSE);
 		
+		_parent.g.popMatrix();	
 		_parent.g.popStyle();	
 	}
 	
@@ -1189,6 +1204,24 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 	{
 		try {
 			_lostUserMethod.invoke(_userCbObject, new Object[] { (int)userId });		
+		} 
+		catch (Exception e) 
+		{
+		}	
+	}
+	protected void onExitUserCb(long userId)
+	{
+		try {
+			_exitUserMethod.invoke(_userCbObject, new Object[] { (int)userId });		
+		} 
+		catch (Exception e) 
+		{
+		}	
+	}
+	protected void onReEnterUserCb(long userId)
+	{
+		try {
+			_reEnterUserMethod.invoke(_userCbObject, new Object[] { (int)userId });		
 		} 
 		catch (Exception e) 
 		{
