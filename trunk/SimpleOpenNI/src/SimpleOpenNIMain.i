@@ -338,10 +338,13 @@ public:
 
 protected:
 
-	virtual void onNewUserCb(unsigned int userId);
-	virtual void onLostUserCb(unsigned int userId);
-	
-	virtual void onStartCalibrationCb(unsigned int userId);
+        virtual void onNewUserCb(unsigned int userId);
+        virtual void onLostUserCb(unsigned int userId);
+
+        virtual void onExitUserCb(unsigned int userId);
+        virtual void onReEnterUserCb(unsigned int userId);
+
+        virtual void onStartCalibrationCb(unsigned int userId);
 	virtual void onEndCalibrationCb(unsigned int userId,bool successFlag);
 
 	virtual void onStartPoseCb(const char* strPose, unsigned int user);

@@ -201,6 +201,17 @@ void onLostUser(int userId)
   println("onLostUser - userId: " + userId);
 }
 
+void onExitUser(int userId)
+{
+  println("onExitUser - userId: " + userId);
+}
+
+void onReEnterUser(int userId)
+{
+  println("onReEnterUser - userId: " + userId);
+}
+
+
 void onStartCalibration(int userId)
 {
   println("onStartCalibration - userId: " + userId);

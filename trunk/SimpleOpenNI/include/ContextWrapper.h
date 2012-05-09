@@ -353,6 +353,21 @@ public:
                       xn::UserGenerator& generator, XnUserID user)
     SOPENNI_CB_VIRTUAL(LostUser,
                        unsigned int user)
+
+    SOPENNI_CB_STATIC(ExitUser,
+                      xn::UserGenerator& generator, XnUserID user, void* cxt)
+    SOPENNI_CB_MEMBER(ExitUser,
+                      xn::UserGenerator& generator, XnUserID user)
+    SOPENNI_CB_VIRTUAL(ExitUser,
+                       unsigned int user)
+
+    SOPENNI_CB_STATIC(ReEnterUser,
+                      xn::UserGenerator& generator, XnUserID user, void* cxt)
+    SOPENNI_CB_MEMBER(ReEnterUser,
+                      xn::UserGenerator& generator, XnUserID user)
+    SOPENNI_CB_VIRTUAL(ReEnterUser,
+                       unsigned int user)
+
     // calibration
     SOPENNI_CB_STATIC(StartCalibration,
                       xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
@@ -548,6 +563,8 @@ protected:
     // user
     xn::UserGenerator	_userGenerator;
     XnCallbackHandle	_hUserCb;
+    XnCallbackHandle	_hUserExitCb;
+    XnCallbackHandle	_hUserReEnterCb;
     XnCallbackHandle	_hCalibrationCb;
     XnCallbackHandle	_hToCalibrationCompleteCb;
     XnCallbackHandle	_hToCalibrationStartCb;
