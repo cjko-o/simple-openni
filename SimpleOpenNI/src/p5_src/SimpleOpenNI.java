@@ -1262,7 +1262,6 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 			if(hasUserCoordsys())
 			{	// move the camera to the real nullpoint
 				PMatrix3D mat = new PMatrix3D();
-				//getUserCoordsysBack(mat);
 				getUserCoordsys(mat);
 				_parent.g.applyMatrix(mat);
 			}
