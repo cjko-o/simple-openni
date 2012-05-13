@@ -26,18 +26,23 @@ v0.27 , 05/06/2012,
 	  New functions:
 		boolean hasUserCoordsys()
 		  - returns true if a user coordinate system was defined
+		void resetUserCoordsys()
+		  - removes the user coordinate system
 		void setUserCoordsys(nullPoint3dX, nullPoint3dY, nullPoint3dZ, 
 							 xDirPoint3dX, xDirPoint3dY, xDirPoint3dZ, 
                              zDirPoint3dX, zDirPoint3dY, zDirPoint3dZ);
 		  - sets the user defined coordinate system. The system if defined by 3 realworld points.
-		boolean getUserCoordsysTransMat(PMatrix3D mat);
-		  - returns the transformation matrix to 
+		void getUserCoordsys(PMatrix3D mat)
+		  - returns the orig.coordinatesystem to user.coordinatesystem transformation matrix. 
+		void getUserCoordsysBack(PMatrix3D mat)
+		  - returns the user.coordinatesystem to orig.coordinatesystem transformation matrix. 
+
 	- Added a new example to show the user defined coordinate system:
 	  extensions/UserCoordsys
 	- Added 2 new callback functions for the skeleton tracking:
 	  onExitUser(int userId)		-	informs when a user gets out of view(onExitUser takes some time till it gives the call)
 	  onReEnterUser(int userId)		-	informs when a user reenters the view
-	  Those callback are implemented in all examples
+	  Those callback are implemented in all examples which use skeletontracking
 	- Extended the User3d example. Shows how to calculate the direction of the body based on the skeleton data. See the function 'getBodyDirection'.
 
 v0.26 , 02/29/2012,

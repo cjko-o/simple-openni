@@ -29,7 +29,8 @@ fi
 cd ./build
 
 echo "--- generate cmake ---"
-cmake -DOPEN_NI_INCLUDE=/usr/include/ni/ \
+cmake -DCMAKE_BUILD_TYPE=Release \
+	  -DOPEN_NI_INCLUDE=/usr/include/ni/ \
 	  -DOPEN_NI_LIB=/usr/lib/ \
 	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
 	  -DXN_NITE_LIB=/usr/lib/ \
