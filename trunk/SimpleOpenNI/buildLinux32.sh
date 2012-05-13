@@ -31,10 +31,13 @@ cd ./build32
 echo "--- generate cmake ---"
 # changes this according to your environment
 cmake -DCMAKE_BUILD_TYPE=Release \
+	  -DMACH_ARCH=32 \
 	  -DOPEN_NI_INCLUDE=/usr/include/ni/ \
 	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
 	  -DXN_NITE_LIB=/usr/lib/ \
-	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
+	  -DEIGEN3D_INCLUDE=/usr/include/eigen3/ \
+	  -DBOOST_ROOT=~/Documents/development/libs/boost/boost_1_46_1/ \
+	  -DBOOST_LIBRARYDIR=~/Documents/development/libs/boost/boost_1_46_1/stage/lib \
 	  -DP5_JAR=~/Documents/localApps/processing-1.5.1/lib/core.jar \
 	  ..
 
