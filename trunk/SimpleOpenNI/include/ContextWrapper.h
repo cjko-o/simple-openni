@@ -335,6 +335,10 @@ public:
     void calcUserCoordsys(XnMatrix3X3& mat);
 
     void calcUserCoordsysBack(XnPoint3D& point);
+    void calcUserCoordsysBack(XnMatrix3X3& mat);
+
+    void getUserCoordsys(float mat[]);	// needs a 4x4 float array
+    void getUserCoordsysBack(float mat[]);	// needs a 4x4 float array
 
     ///////////////////////////////////////////////////////////////////////////
     // callbacks

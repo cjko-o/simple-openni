@@ -64,7 +64,8 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
             }
             catch(UnsatisfiedLinkError e)
             {
-              System.out.println("Can't find the SimpleOpenNI library (" +  libName  + ") : " + e);
+              System.out.println("Can't load SimpleOpenNI library (" +  libName  + ") : " + e);
+			  System.out.println("Verify if you installed SimpleOpenNI correctly.\nhttp://code.google.com/p/simple-openni/wiki/Installation");
             }
 	}
 
@@ -1113,9 +1114,146 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 				   mat[12], mat[13], mat[14], mat[15]);
 
 	}
- 
+
+	/**
+	*  Calculates a point in the user defined coordinate system back to the 3d system of the 3d camera
+	* 
+	* @param point
+	*          PVector
+	*/	
+    public void calcUserCoordsys(PVector point)
+	{
+	  if(hasUserCoordsys() == false)
+		return;
+
+	  XnPoint3D p = new XnPoint3D();
+	  calcUserCoordsys(p);
+	  point.set(p.getX(),
+				p.getY(),
+				p.getZ());
+	}
+
+	/**
+	*  Applies only the rotation part of 'mat' to 
+	* 
+	* @param mat
+	*          PMatrix3D
+	*/	   
+    public void calcUserCoordsys(PMatrix3D mat)
+	{
+	  if(hasUserCoordsys() == false)
+		return;
+
+	  XnMatrix3X3 matRet = new XnMatrix3X3();
+	  float[] matRetArry = matRet.getElements();
+	  matRetArry[0] = mat.m00;
+	  matRetArry[1] = mat.m01;
+	  matRetArry[2] = mat.m02;
+
+	  matRetArry[3] = mat.m10;
+	  matRetArry[4] = mat.m11;
+	  matRetArry[5] = mat.m12;
+
+	  matRetArry[6] = mat.m20;
+	  matRetArry[7] = mat.m21;
+	  matRetArry[8] = mat.m22;
+
+	  calcUserCoordsys(matRet);
+	  matRetArry = matRet.getElements();
+
+	  mat.set(matRetArry[0], matRetArry[1], matRetArry[2], 0,
+			  matRetArry[3], matRetArry[4], matRetArry[5], 0,
+			  matRetArry[6], matRetArry[7], matRetArry[8], 0,
+			  0, 		0, 			0, 			1);
+	}
+
+	/**
+	*  Calculates a point in origninal 3d camera coordinate system to the coordinate system defined by the user
+	* 
+	* @param point
+	*          PVector
+	*/	
+    public void calcUserCoordsysBack(PVector point)
+	{
+	  if(hasUserCoordsys() == false)
+		return;
+
+	  XnPoint3D p = new XnPoint3D();
+	  calcUserCoordsysBack(p);
+	  point.set(p.getX(),
+				p.getY(),
+				p.getZ());
+	}
+
+	/**
+	*  Calculates a point in origninal 3d camera coordinate system to the coordinate system defined by the user
+	* 
+	* @param mat
+	*          PMatrix3D
+	*/	    
+	public void calcUserCoordsysBack(PMatrix3D mat)
+	{
+	  if(hasUserCoordsys() == false)
+		return;
+
+	  XnMatrix3X3 matRet = new XnMatrix3X3();
+	  float[] matRetArry = matRet.getElements();
+	  matRetArry[0] = mat.m00;
+	  matRetArry[1] = mat.m01;
+	  matRetArry[2] = mat.m02;
+
+	  matRetArry[3] = mat.m10;
+	  matRetArry[4] = mat.m11;
+	  matRetArry[5] = mat.m12;
+
+	  matRetArry[6] = mat.m20;
+	  matRetArry[7] = mat.m21;
+	  matRetArry[8] = mat.m22;
+
+	  calcUserCoordsysBack(matRet);
+	  matRetArry = matRet.getElements();
+
+	  mat.set(matRetArry[0], matRetArry[1], matRetArry[2], 0,
+			  matRetArry[3], matRetArry[4], matRetArry[5], 0,
+			  matRetArry[6], matRetArry[7], matRetArry[8], 0,
+			  0, 		0, 			0, 			1);
+	}
+
+    public void getUserCoordsys(PMatrix3D mat)
+	{
+	  if(hasUserCoordsys() == false)
+		return;
+
+	  float matRet[] = new float[16];
+	  getUserCoordsys(matRet);
+
+	  mat.set(matRet[0], matRet[1], matRet[2], matRet[3],
+			  matRet[4], matRet[5], matRet[6], matRet[7],
+			  matRet[8], matRet[9], matRet[10], matRet[11],
+			  matRet[12], matRet[13], matRet[14], matRet[15]);
+
+	}
+
+    public void getUserCoordsysBack(PMatrix3D mat)
+	{
+	  if(hasUserCoordsys() == false)
+		return;
+
+	  float matRet[] = new float[16];
+	  getUserCoordsysBack(matRet);
+
+	  mat.set(matRet[0], matRet[1], matRet[2], matRet[3],
+			  matRet[4], matRet[5], matRet[6], matRet[7],
+			  matRet[8], matRet[9], matRet[10], matRet[11],
+			  matRet[12], matRet[13], matRet[14], matRet[15]);
+	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// helper methods
+	/**
+	*  Helper method that draw the 3d camera and the frustum of the camera
+	* 
+	*/	    
 	public void drawCamFrustum()
 	{
 		_parent.g.pushStyle();
@@ -1123,7 +1261,10 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 
 			if(hasUserCoordsys())
 			{	// move the camera to the real nullpoint
-			  
+				PMatrix3D mat = new PMatrix3D();
+				//getUserCoordsysBack(mat);
+				getUserCoordsys(mat);
+				_parent.g.applyMatrix(mat);
 			}
 
 			// draw cam case
