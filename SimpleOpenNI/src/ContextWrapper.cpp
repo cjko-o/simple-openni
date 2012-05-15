@@ -3233,3 +3233,78 @@ void ContextWrapper::getUserCoordsysBack(float mat[])
     memcpy(mat,tranform.data(),sizeof(float)*16);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// helper function
+
+// this code is based on the paper from Tomas Möller and Ben Trumbore
+// 'Fast, minimum storage ray-triangle intersection.'
+// http://www.graphics.cornell.edu/pubs/1997/MT97.html
+
+bool rayTriangleIntersection(const Eigen::Vector3f& p,
+                             const Eigen::Vector3f& d,
+                             const Eigen::Vector3f& v0,
+                             const Eigen::Vector3f& v1,
+                             const Eigen::Vector3f& v2,
+                             Eigen::Vector3f* hit)
+{
+    float a,f,u,v;
+    Eigen::Vector3f e1 = v1 - v0;
+    Eigen::Vector3f e2 = v2 - v0;
+
+    Eigen::Vector3f h = d.cross(e2);
+    a = e1.dot(h);
+
+    if (a > -0.00001f && a < 0.00001f)
+        return false;
+
+    f = 1.0f / a;
+    Eigen::Vector3f s = p - v0;
+    u = f * s.dot(h);
+
+    if (u < 0.0f || u > 1.0f)
+        return false;
+
+    Eigen::Vector3f q = s.cross(e1);
+    v = f * d.dot(q);
+
+    if (v < 0.0f || u + v > 1.0f)
+        return false;
+
+    float t = f * e2.dot(q);
+
+    if (t > 0.00001f) // ray intersection
+    {
+        *hit = p + (d * t);
+        return true;
+    }
+    else
+        return false;
+
+}
+
+
+bool ContextWrapper::rayTriangleIntersection(float p[],
+                                             float dir[],
+                                             float vec0[],
+                                             float vec1[],
+                                             float vec2[],
+                                             float hit[])
+{
+    Eigen::Vector3f hitVec;
+
+    if(::rayTriangleIntersection(Eigen::Vector3f(p),
+                                 Eigen::Vector3f(dir),
+                                 Eigen::Vector3f(vec0),
+                                 Eigen::Vector3f(vec1),
+                                 Eigen::Vector3f(vec2),
+                                 &hitVec))
+    {
+        hit[0] = hitVec.x();
+        hit[1] = hitVec.y();
+        hit[2] = hitVec.z();
+        //memcpy(hit,hitVec.data(),sizeof(float) * 3);
+        return true;
+    }
+
+    return false;
+}

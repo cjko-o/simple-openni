@@ -341,6 +341,16 @@ public:
     void getUserCoordsysBack(float mat[]);	// needs a 4x4 float array
 
     ///////////////////////////////////////////////////////////////////////////
+    // geometry helper functions
+
+    static bool rayTriangleIntersection(float p[],
+                                        float dir[],
+                                        float vec0[],
+                                        float vec1[],
+                                        float vec2[],
+                                        float hit[]);
+
+    ///////////////////////////////////////////////////////////////////////////
     // callbacks
 
     // user

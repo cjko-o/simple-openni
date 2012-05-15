@@ -321,6 +321,16 @@ public:
                                  float* zAxisX,float* zAxisY,float* zAxisZ);
 */
         ///////////////////////////////////////////////////////////////////////////
+        // geometry helper functions
+
+        static bool rayTriangleIntersection(float p[],
+                                            float dir[],
+                                            float vec0[],
+                                            float vec1[],
+                                            float vec2[],
+                                            float hit[]);
+
+        ///////////////////////////////////////////////////////////////////////////
 	// XnVSessionMananger
 	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
 											 xn::HandsGenerator*	pTracker = NULL, 

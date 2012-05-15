@@ -136,72 +136,6 @@ void draw()
     tempVec2.x, tempVec2.y); 
 
     popStyle();
-    
-/*    
-    
-    context.getUserCoordsysTransMat(userCoordsysMat);
-    PVector temp = new PVector();
-    PVector nullPoint = new PVector();
-
-    pushStyle();
-
-    strokeWeight(3);
-    noFill();        
-
-
-    //userCoordsysMat.scale(-1,-1,-1);
-    userCoordsysMat.mult(new PVector(0, 0, 0), nullPoint);
-    //        println("orig nullPoint: " + nullPoint);
-    context.convertRealWorldToProjective(nullPoint, tempVec1); 
-
-    //context.convertRealWorldToProjective(nullPoint3d,tempVec1);        
-    stroke(255, 255, 255, 150);
-    ellipse(tempVec1.x, tempVec1.y, 10, 10); 
-
-    userCoordsysMat.mult(new PVector(500, 0, 0), temp);
-    context.convertRealWorldToProjective(temp, tempVec2);        
-
-    //context.convertRealWorldToProjective(xDirPoint3d,tempVec2);        
-    stroke(255, 0, 0, 150);
-    line(tempVec1.x, tempVec1.y, 
-    tempVec2.x, tempVec2.y); 
-
-    userCoordsysMat.mult(new PVector(0, 500, 0), temp);
-    context.convertRealWorldToProjective(temp, tempVec2);        
-    stroke(0, 255, 0, 150);
-    line(tempVec1.x, tempVec1.y, 
-    tempVec2.x, tempVec2.y); 
-
-    userCoordsysMat.mult(new PVector(0, 0, 500), temp);
-    context.convertRealWorldToProjective(temp, tempVec2);        
-    //context.convertRealWorldToProjective(zDirPoint3d,tempVec2);        
-    stroke(0, 0, 255, 150);
-    line(tempVec1.x, tempVec1.y, 
-    tempVec2.x, tempVec2.y); 
-
-    /*
-        // reverse test
-     strokeWeight(1);
-     userCoordsysMat.invert();
-     
-     stroke(255,255,0,150);
-     
-     userCoordsysMat.mult(nullPoint3d,nullPoint);
-     //     println("nullPoint: " + nullPoint);
-     context.convertRealWorldToProjective(nullPoint,tempVec1);        
-     ellipse(tempVec1.x,tempVec1.y,20,20); 
-     
-     userCoordsysMat.mult(xDirPoint3d,temp);
-     context.convertRealWorldToProjective(temp,tempVec2);        
-     line(tempVec1.x,tempVec1.y,
-     tempVec2.x,tempVec2.y); 
-     
-     userCoordsysMat.mult(zDirPoint3d,temp);
-     context.convertRealWorldToProjective(temp,tempVec2);        
-     line(tempVec1.x,tempVec1.y,
-     tempVec2.x,tempVec2.y);  
-     */
-//    popStyle();
   }
 }
 
@@ -288,22 +222,10 @@ void keyPressed()
       println("xDirPoint3d: " + xDirPoint3d);
       println("zDirPoint3d: " + zDirPoint3d);
 
+      /*
       // test
       context.getUserCoordsysTransMat(userCoordsysMat);
       PVector temp = new PVector();
-      PVector nullPoint = new PVector();
-
-      PMatrix3D   invertMat = new PMatrix3D(userCoordsysMat);                 
-
-      // test output
-
-        println("verify-------------");
-
-      /*
-        print("userCoordsysMat1: "); userCoordsysMat.print();
-       userCoordsysMat.preApply(flipMat);
-       print("userCoordsysMat2: "); userCoordsysMat.print();
-       */
 
       userCoordsysMat.mult(new PVector(0, 0, 0), temp);         
       println("PVector(0,0,0): " + temp);
@@ -316,19 +238,7 @@ void keyPressed()
 
       userCoordsysMat.mult(new PVector(0, 0, 500), temp);
       println("PVector(0,0,500): " + temp);
-
-      println("invert-------------");
-
-      if (invertMat.invert() == false)
-        println("can't invert ?");
-
-      invertMat.mult(nullPoint3d, temp);
-      println("nullPoint: " + temp);
-
-      println("mat"); 
-      userCoordsysMat.print();
-      println("invMat"); 
-      invertMat.print();
+      */
     }
 
     break;
@@ -362,5 +272,28 @@ void mousePressed()
 
     println("Point3d: " + realWorldMap[index].x + "," + realWorldMap[index].y + "," + realWorldMap[index].z);
   }
+}
+
+void mouseDragged() 
+{
+  if (mouseButton == LEFT)
+  {
+    PVector[] realWorldMap = context.depthMapRealWorld();
+    int index = mouseX + mouseY * context.depthWidth();
+
+    switch(calibMode)
+    {
+    case CALIB_NULLPOINT:
+      nullPoint3d.set(realWorldMap[index]);
+      break;
+    case CALIB_X_POINT:
+      xDirPoint3d.set(realWorldMap[index]);
+      break;
+    case CALIB_Z_POINT:
+      zDirPoint3d.set(realWorldMap[index]);
+      break;
+    }
+  }
+
 }
 

@@ -86,8 +86,12 @@ void draw()
   } 
   
   // draw the skeleton if it's available
-  if(context.isTrackingSkeleton(1))
-    drawSkeleton(1);
+  int[] userList = context.getUsers();
+  for(int i=0;i<userList.length;i++)
+  {
+    if(context.isTrackingSkeleton(userList[i]))
+      drawSkeleton(userList[i]);
+  }    
  
   // draw the kinect cam
   context.drawCamFrustum();
