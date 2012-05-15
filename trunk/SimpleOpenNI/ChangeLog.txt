@@ -43,7 +43,17 @@ v0.27 , 05/06/2012,
 	  onExitUser(int userId)		-	informs when a user gets out of view(onExitUser takes some time till it gives the call)
 	  onReEnterUser(int userId)		-	informs when a user reenters the view
 	  Those callback are implemented in all examples which use skeletontracking
-	- Extended the User3d example. Shows how to calculate the direction of the body based on the skeleton data. See the function 'getBodyDirection'.
+	- Added a new function to get the users for the skeleton tracking:
+	  int[] getUsers() - returns a list of all active users
+	- Extended the User3d example. Shows how to calculate the direction of the body based on the 
+	  skeleton data. See the function 'getBodyDirection'.
+	- Extended the skeleton tracking examples to show multiple tracked users
+	- Added ray/triangle intersection function and an example source at 'extensions/IntersectionTest'
+	  static boolean rayTriangleIntersection(PVector p, PVector dir, 
+		  								     PVector vec0,PVector vec1, PVector vec2,
+											 PVector hit) 
+	- Optimized the performance a little 
+	
 
 v0.26 , 02/29/2012,
                 - Added the autocalibration, now you can only enter the scene and get the skeleton data without the psi pose

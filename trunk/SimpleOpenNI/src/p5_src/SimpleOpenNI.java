@@ -687,6 +687,18 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return ret;
 	}
 	
+	public int[] getUsers() 
+	{
+	  IntVector intVec = new IntVector();
+	  getUsers(intVec);
+
+	  int[] userList = new int[(int)intVec.size()];
+	  for(int i=0;i < intVec.size();i++)
+		userList[i] = intVec.get(i);
+
+	  return userList;
+	}
+
 	private void setupHands()
 	{
 		// hands
@@ -1328,6 +1340,23 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		_parent.g.popStyle();	
 	}
 	
+	///////////////////////////////////////////////////////////////////////////
+    // geometry helper functions
+
+	public static boolean rayTriangleIntersection(PVector p, PVector dir, 
+												  PVector vec0,PVector vec1, PVector vec2,
+												  PVector hit) 
+	{	 
+	  float[] hitRet= new float[3];
+	  if(rayTriangleIntersection(p.array(), dir.array(), vec0.array(), vec1.array(), vec2.array(), hitRet))
+	  {
+		hit.set(hitRet);
+		return true;
+	  }
+	  else
+		return false;
+	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// callbacks
 	protected void onNewUserCb(long userId) 
