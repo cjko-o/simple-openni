@@ -1357,6 +1357,26 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
 		return false;
 	}
 
+	public static int raySphereIntersection(PVector p, PVector dir, 
+											PVector sphereCenter,float sphereRadius,
+										    PVector hit1,PVector hit2) 
+	{	 
+	  float[] hit1Ret= new float[3];
+	  float[] hit2Ret= new float[3];
+
+	  int ret = raySphereIntersection(p.array(), dir.array(), 
+									  sphereCenter.array(), sphereRadius, 
+									  hit1Ret, hit2Ret);
+
+	  if(ret > 0)
+	  {
+		hit1.set(hit1Ret);
+		
+		if(ret > 1)
+		  hit2.set(hit2Ret);
+	  }
+	  return ret;
+	}
 	///////////////////////////////////////////////////////////////////////////
 	// callbacks
 	protected void onNewUserCb(long userId) 

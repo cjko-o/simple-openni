@@ -3282,6 +3282,94 @@ bool rayTriangleIntersection(const Eigen::Vector3f& p,
 
 }
 
+// http://www.openprocessing.org/sketch/45539
+
+int raySphereIntersection(const Eigen::Vector3f& rayP,
+                          const Eigen::Vector3f& dir,
+                          const Eigen::Vector3f& sphereCenter,float sphereRadius,
+                          Eigen::Vector3f* hit1, Eigen::Vector3f* hit2)
+{
+  Eigen::Vector3f e = dir.normalized();
+  Eigen::Vector3f h = sphereCenter - rayP;
+  float lf = e.dot(h);                      // lf=e.h
+  float s = pow(sphereRadius,2) - h.dot(h) + pow(lf,2);   // s=r^2-h^2+lf^2
+  if(s < 0.0)
+      return 0;                    // no intersection points ?
+  s = sqrt(s);                              // s=sqrt(r^2-h^2+lf^2)
+
+  int result = 0;
+  if(lf < s)                               // S1 behind A ?
+  {
+      if (lf+s >= 0)                          // S2 before A ?}
+      {
+        s = -s;                               // swap S1 <-> S2}
+        result = 1;                           // one intersection point
+      }
+  }
+  else
+      result = 2;                          // 2 intersection points
+
+  *hit1 = e * (lf-s) + rayP;
+  *hit2 = e * (lf+s) + rayP;
+
+  return result;
+}
+
+/*
+// http://www.lighthouse3d.com/tutorials/maths/ray-sphere-intersection/
+int raySphereIntersection(const Eigen::Vector3f& origin,
+                          const Eigen::Vector3f& dir,
+                          const Eigen::Vector3f& sphereCenter,
+                          float sphereRadius,
+                          Eigen::Vector3f* hit1,
+                          Eigen::Vector3f* hit2,)
+{
+    Eigen::Vector3f vpc = sphereCenter - rayP;
+
+    if ((vpc . dir) < 0) // when the sphere is behind the origin p
+                        // note that this case may be dismissed if it is
+                        // considered that p is outside the sphere
+            if (fabs(vpc) > r)
+
+                       // there is no intersection
+
+        else if (|vpc| == r)
+
+            intersection = p
+
+        else // occurs when p is inside the sphere
+
+            pc = projection of c on the line
+                    // distance from pc to i1
+            dist = sqrt(radius^2 - |pc - c|^2)
+            di1 = dist - |pc - p|
+            intersection = p + d * di1
+
+    else // center of sphere projects on the ray
+
+        pc = projection of c on the line
+        if (| c - pc | > r)
+
+            // there is no intersection
+
+        else
+                    // distance from pc to i1
+            dist = sqrt(radius^2 - |pc - c|^2)
+
+                if (|vpc| > r) // origin is outside sphere
+
+                di1 = |pc - p| - dist
+
+            else // origin is inside sphere
+
+                di1 = |pc - p| + dist
+
+            intersection = p + d * di1
+
+
+    return false;
+}
+*/
 
 bool ContextWrapper::rayTriangleIntersection(float p[],
                                              float dir[],
@@ -3307,4 +3395,36 @@ bool ContextWrapper::rayTriangleIntersection(float p[],
     }
 
     return false;
+}
+
+
+int ContextWrapper::raySphereIntersection(float p[],
+                                          float dir[],
+                                          float sphereCenter[],
+                                          float sphereRadius,
+                                          float hit1[],float hit2[])
+{
+    Eigen::Vector3f hitVec1;
+    Eigen::Vector3f hitVec2;
+
+    int ret = ::raySphereIntersection(Eigen::Vector3f(p),
+                                      Eigen::Vector3f(dir),
+                                      Eigen::Vector3f(sphereCenter),sphereRadius,
+                                      &hitVec1,&hitVec2);
+
+    if(ret > 0)
+    {
+        hit1[0] = hitVec1.x();
+        hit1[1] = hitVec1.y();
+        hit1[2] = hitVec1.z();
+
+        if(ret > 1)
+        {
+            hit2[0] = hitVec2.x();
+            hit2[1] = hitVec2.y();
+            hit2[2] = hitVec2.z();
+        }
+    }
+
+    return ret;
 }
