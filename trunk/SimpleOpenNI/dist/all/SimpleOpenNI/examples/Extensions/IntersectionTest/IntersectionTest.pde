@@ -27,6 +27,9 @@ PVector      bodyDir = new PVector();
 PVector[]   triangle1 = new PVector[3];
 PVector[]   triangle2 = new PVector[3];
 
+PVector     sphere1;
+float       sphere1Radius;
+
 void setup()
 {
   size(1024,768,P3D);
@@ -61,6 +64,9 @@ void setup()
   triangle2[1] = new PVector(1000,0,3500);
   triangle2[2] = new PVector(1000,500,3000);
   
+  sphere1 = new PVector(-1000,500,3000);
+  sphere1Radius = 200;
+    
  }
 
 void draw()
@@ -238,18 +244,19 @@ void drawIntersection(int userId)
 
   
   // draw triangle
-  stroke(255,255,0);
   strokeWeight(1);
   
   if(intersection1)
   { // draw hit point
     strokeWeight(7);
+    stroke(255,0,255);   
     point(hit1.x,hit1.y,hit1.z);    
     strokeWeight(3);
   }    
   else
-    strokeWeight(1);
-    
+    strokeWeight(1); 
+  stroke(255,255,0);   
+  
   beginShape();
   for(int i=0; i < triangle1.length;i++)
     vertex(triangle1[i].x,triangle1[i].y,triangle1[i].z);
@@ -258,16 +265,47 @@ void drawIntersection(int userId)
   if(intersection2)
   { // draw hit point
     strokeWeight(7);
+    stroke(255,0,255);   
     point(hit2.x,hit2.y,hit2.z);    
     strokeWeight(3);
   }   
   else
     strokeWeight(1);
-    
+  stroke(255,255,0);   
+  
   beginShape();
   for(int i=0; i < triangle2.length;i++)
     vertex(triangle2[i].x,triangle2[i].y,triangle2[i].z);
   endShape(CLOSE);
+  
+  // draw sphere
+  int intersectionSphere = SimpleOpenNI.raySphereIntersection(jointPos2,dir, 
+      			    	                              sphere1,sphere1Radius,
+                                                              hit1,hit2);
+
+  
+  if(intersectionSphere > 0)
+  { // draw hit point
+    strokeWeight(7);
+
+    stroke(255,0,255);   
+    point(hit1.x,hit1.y,hit1.z);   
+ 
+    if(intersectionSphere > 1)
+      point(hit2.x,hit2.y,hit2.z);   
+    
+    strokeWeight(3);
+  }   
+  else
+    strokeWeight(1);
+  stroke(255,255,0);  
+  
+  pushMatrix();
+  translate(sphere1.x,sphere1.y,sphere1.z);
+  sphereDetail(10);
+  sphere(sphere1Radius);
+  popMatrix();
+  
   
   popStyle();
 }

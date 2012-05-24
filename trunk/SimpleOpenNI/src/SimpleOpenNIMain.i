@@ -330,6 +330,12 @@ public:
                                             float vec2[],
                                             float hit[]);
 
+        static int raySphereIntersection(float p[],
+                                         float dir[],
+                                         float sphereCenter[],
+                                         float sphereRadius,
+                                         float hit1[],float hit2[]);
+
         ///////////////////////////////////////////////////////////////////////////
 	// XnVSessionMananger
 	XnVSessionManager* createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
