@@ -3,6 +3,7 @@ mkdir build32
 cd build32
 cmake -G "Visual Studio 9 2008" ^
 -DMACH_ARCH="32" ^
+-DCMAKE_BUILD_TYPE=Release ^
 -DOPEN_NI_INCLUDE="C:\Program Files (x86)\OpenNI\Include" ^
 -DOPEN_NI_LIB="C:\Program Files (x86)\OpenNI\Lib" ^
 -DXN_NITE_INCLUDE="C:\Program Files (x86)\PrimeSense\NITE\Include" ^

@@ -2,6 +2,7 @@ rem "build SimpleOpenNI 64bit"
 mkdir build64
 cd build64
 cmake -G "Visual Studio 9 2008 Win64" ^
+-DCMAKE_BUILD_TYPE=Release ^
 -DOPEN_NI_INCLUDE="C:\Program Files\OpenNI\Include" ^
 -DOPEN_NI_LIB="C:\Program Files\OpenNI\Lib64" ^
 -DXN_NITE_INCLUDE="C:\Program Files\PrimeSense\NITE\Include" ^
