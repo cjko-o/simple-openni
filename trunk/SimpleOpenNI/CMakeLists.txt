@@ -175,7 +175,13 @@ IF(APPLE OR UNIX)
         FIND_LIBRARY(NITE_LIBRARY NAMES ${NITE_LIB}_${NITE_VERSION} PATHS ${XN_NITE_LIB})
         SET(LIBS ${LIBS} ${NITE_LIBRARY})
 ELSE()
-    SET(NITE_LIB XnVNITE64)
+    SET(NITE_LIB XnVNITE)
+
+	IF(${MACH_ARCH} MATCHES "64")
+		#64bit
+		SET(NITE_LIB ${NITE_LIB}${MACH_ARCH})
+	ENDIF()
+	
     # windows
 	# quite wired, cmake doesn't find the lib anymore, just delivers the path,
 	# setup the hole thing by hand(must be a problem with the backslash etc.)
