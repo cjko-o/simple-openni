@@ -243,10 +243,10 @@ IF(NOT APPLE)
 	#64bit
 	message("set 64bit extension") 
 	SET(NEW_SUFFIX "64")
-  ELSEIF()
+  ELSE()
 	# 32bit
 	message("set 32bit extension") 
-	SET(NEW_SUFFIX "64")
+	SET(NEW_SUFFIX "32")
   ENDIF()
 
   IF(WIN32)
