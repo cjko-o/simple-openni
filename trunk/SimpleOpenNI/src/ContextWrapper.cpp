@@ -96,7 +96,8 @@ ContextWrapper::ContextWrapper():
     _playerRepeat(true),
     _userCoordsysFlag(false)
 {
-   // _kinectMotors.open();
+    // still not working
+    //_kinectMotors.open();
 
     _depthImageColor[0] = 1.0f;
     _depthImageColor[1] = 1.0f;
