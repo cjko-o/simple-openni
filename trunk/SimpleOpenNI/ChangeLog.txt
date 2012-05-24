@@ -15,8 +15,7 @@ v0.xx , in planning:
 			- moveKinect(float angle) - tilts the kinect
 		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
-v0.27 , 05/06/2012,
-  New:
+v0.27 , 05/24/2012,
 	- Use the new OpenNI modules:
 	  OpenNI v1.5.4.0
 	  NITE v1.5.2.21
