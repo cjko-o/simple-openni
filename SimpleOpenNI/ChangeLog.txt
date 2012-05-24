@@ -17,6 +17,11 @@ v0.xx , in planning:
 
 v0.27 , 05/06/2012,
   New:
+	- Use the new OpenNI modules:
+	  OpenNI v1.5.4.0
+	  NITE v1.5.2.21
+	  Sensor v5.1.2.1
+	  Kinect Sensor v0.92-v5.1.2.1
 	- Added functions to setup a user defined coordinate system. This can be helpfull in a lot of cases.
 	  For example if your camera is tilted but you want the camera depth data in a coordinate system which 
 	  is parallel to the floor. Another scenario could be that you have multiple cameras, but you want
@@ -55,6 +60,7 @@ v0.27 , 05/06/2012,
 	  static int raySphereIntersection(PVector p, PVector dir, 
 									   PVector sphereCenter,float sphereRadius,
 									   PVector hit1,PVector hit2)  
+	- Fixed the application export for win32/64 and linux32/64
 	- Optimized the performance a little 
 	
 
