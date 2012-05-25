@@ -1,6 +1,6 @@
 #!/bin/sh
 # --------------------------------------------------------------------------
-# buildscript for linux 64bit
+# buildscript for linux 32bit
 # --------------------------------------------------------------------------
 # Processing Wrapper for the OpenNI/Kinect library
 # http://code.google.com/p/simple-openni
@@ -31,6 +31,7 @@ cd ./build32
 echo "--- generate cmake ---"
 # changes this according to your environment
 cmake -DCMAKE_BUILD_TYPE=Release \
+	  -DCMAKE_BUILD_ARCH=32 \
 	  -DMACH_ARCH=32 \
 	  -DOPEN_NI_INCLUDE=/usr/include/ni/ \
 	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
@@ -48,12 +49,12 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 echo "--- build ---"
 # build with 6 threads, verbose is optional, but otherwise you can't see the compiler directives
 # make -j 6 VERBOSE=1
-make -j 2
+make -j 6
 
 echo "--- copy ---"
 # copy the library
 cp SimpleOpenNI.jar ../dist/all/SimpleOpenNI/library
-cp libSimpleOpenNI.so ../dist/all/SimpleOpenNI/library
+cp libSimpleOpenNI*.so ../dist/all/SimpleOpenNI/library
 
 # copy the doc
 cp -r ./doc/* ../dist/all/SimpleOpenNI/documentation/
