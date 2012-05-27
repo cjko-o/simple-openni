@@ -61,7 +61,7 @@ v0.27 , 05/24/2012,
 									   PVector hit1,PVector hit2)  
 	- Fixed the application export for win32/64 and linux32/64
 	- Optimized the performance a little 
-	
+	- Added Linux32 to the release
 
 v0.26 , 02/29/2012,
                 - Added the autocalibration, now you can only enter the scene and get the skeleton data without the psi pose
