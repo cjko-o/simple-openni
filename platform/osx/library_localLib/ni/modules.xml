@@ -1,0 +1,9 @@
+<Modules>
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libnimMockNodes.dylib" />
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libnimCodecs.dylib" />
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libnimRecorder.dylib" />
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libXnDeviceSensorV2.dylib" configDir="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/primesense" />
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libXnDeviceFile.dylib" configDir="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/primesense" />
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libXnVFeatures.dylib" configDir="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/primesense/XnVFeatures" />
+    <Module path="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/libXnVHandGenerator.dylib" configDir="/Users/max/Documents/Processing/libraries/SimpleOpenNI/library/primesense/XnVHandGenerator" />
+</Modules>
