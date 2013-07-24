@@ -42,7 +42,7 @@
 using namespace sOpenNI;
 using namespace openni;
 
-#define		SIMPLEOPENNI_VERSION	191		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	193		// 1234 = 12.24
 
 float Colors[][3] =
 {
