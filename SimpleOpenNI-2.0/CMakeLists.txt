@@ -70,7 +70,8 @@ ELSE()
 		set(Boost_LIBRARIES  "boost_thread.a")
 	ELSEIF(UNIX)
 		# unix/linux,shared libs of boost should be installed
-		set(Boost_LIBRARIES  "boost_thread.a")
+		#set(Boost_LIBRARIES  "boost_thread.a")
+		set(Boost_LIBRARIES  "boost_thread")
 	ELSE()
 		# windows will find the right libs by itself
 	ENDIF()
@@ -194,7 +195,8 @@ MAKE_DIRECTORY(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 
 SWIG_ADD_MODULE(SimpleOpenNI Java ${SWIG_SOURCES})
-SWIG_LINK_LIBRARIES(SimpleOpenNI ${JAVA_LIBRARIES} ${Boost_LIBRARIES} ${LIBS})
+SWIG_LINK_LIBRARIES(SimpleOpenNI ${JAVA_LIBRARIES} ${Boost_LIBRARIES} ${LIBS} )
+SET(CMAKE_SHARED_LINKER_FLAGS "-fPIC")
 
 # set the arch extension for the lib
 IF(NOT APPLE)
