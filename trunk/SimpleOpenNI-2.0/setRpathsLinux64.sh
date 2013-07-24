@@ -1,31 +1,22 @@
 #!/bin/sh
 # --------------------------------------------------------------------------
-# buildscript for linux 64bit
+# rpathScript for linux 64bit
 # --------------------------------------------------------------------------
 # Processing Wrapper for the OpenNI/Kinect 2.0 library
 # http://code.google.com/p/simple-openni
 # --------------------------------------------------------------------------
 # prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
-# date:  06/11/2011 (m/d/y)
+# date:  07/251/2013 (m/d/y)
 # ----------------------------------------------------------------------------
-# Change those vars to the folders you have on your system:
-#	-DOPEN_NI_BASE 		= folder of OpenNI headers
-#	-DNITE_BASE	 	= folder of Nite headers
-#	-DEIGEN3D_INCLUDE 	= folder of Eigen3d headers
-#	-DBOOST_ROOT 		= folder of Boost root
-#	-DBOOST_LIBRARYDIR 	= folder of Boost library folder
-#	-DP5_JAR 		= filepath to your core.jar (Processing)
+# Set the rpaths for the libraries, the libs should have all the need shared
+# objects in their folder	
 # ----------------------------------------------------------------------------
 
-# optional, but gives a clean build
-rm -r build64
+cd ./dist/all/SimpleOpenNI/library
 
-# check if build folder exists
-if [ ! -d "build64" ]; then
-    mkdir build64
-fi
+echo "--- change rpath for libSimpleOpenNI.so ---"
 
-cd ./build64
+echo "--- change rpath for libSimpleOpenNI.so ---"
 
 echo "--- generate cmake ---"
 # changes this according to your environment
