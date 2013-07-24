@@ -12,10 +12,7 @@
 # objects in their folder	
 # ----------------------------------------------------------------------------
 
-cd ./dist/all/SimpleOpenNI/library
-
-echo "--- change rpath for libSimpleOpenNI.so ---"
-# boost_thread
+cd ./dist/all/SimpleOpenNI/library/linux64/OpenNI2/Drivers
 
 echo "--- change rpath for libFreenectDriver.so ---"
 patchelf --set-rpath ./ libFreenectDriver.so 
