@@ -30,10 +30,9 @@ cd ./build
 
 echo "--- generate cmake ---"
 cmake -DCMAKE_BUILD_TYPE=Release \
-	  -DOPEN_NI_INCLUDE=/usr/include/ni/ \
-	  -DOPEN_NI_LIB=/usr/lib/ \
-	  -DXN_NITE_INCLUDE=/usr/include/nite/ \
-	  -DXN_NITE_LIB=/usr/lib/ \
+      -DOPEN_NI_BASE=/usr/lib/ \
+	  -DOPEN_NI_LIBDIR=./dist/all/SimpleOpenNI/library/osx/ \
+	  -DNITE_BASE=/usr/lib/ \
 	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
 	  -DP5_JAR=/Applications/Processing.app/Contents/Resources/Java/core.jar \
 	  -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" \
