@@ -30,18 +30,19 @@ cd ./build
 
 echo "--- generate cmake ---"
 cmake -DCMAKE_BUILD_TYPE=Release \
-      -DOPEN_NI_BASE=/usr/lib/ \
+      -DOPEN_NI_BASE=/Users/max/Documents/pDev/openni/OpenNI-MacOSX-x64-2.2/ \
 	  -DOPEN_NI_LIBDIR=./dist/all/SimpleOpenNI/library/osx/ \
-	  -DNITE_BASE=/usr/lib/ \
+	  -DNITE_BASE=/Users/max/Documents/pDev/openni/NiTE-MacOSX-x64-2.2/ \
 	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
-	  -DP5_JAR=/Applications/Processing.app/Contents/Resources/Java/core.jar \
-	  -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" \
+	  -DP5_JAR=/Applications/Processing.app/Contents/Resources/Java/core/library/core.jar \
+	  -DCMAKE_OSX_ARCHITECTURES="x86_64" \
 	  ..
 
 
 echo "--- build ---"
 # build with 6 threads, verbose is optional, but otherwise you can't see the compiler directives
-make -j 6 VERBOSE=1
+#make -j 6 VERBOSE=1
+make -j6 
 
 
 echo "--- copy ---"
