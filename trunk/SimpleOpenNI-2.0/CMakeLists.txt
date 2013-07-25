@@ -67,7 +67,7 @@ ELSE()
   
 	IF(APPLE)
 		# osx
-		set(Boost_LIBRARIES  "boost_thread.a")
+		set(Boost_LIBRARIES  "boost_thread-mt" "boost_system-mt")
 	ELSEIF(UNIX)
 		# unix/linux,shared libs of boost should be installed
 		#set(Boost_LIBRARIES  "boost_thread.a")
@@ -153,7 +153,9 @@ SET(P5_WRAPPER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/p5_src/SimpleOpenNI.java)
 IF(WIN32)
 	SET(P5_JAR "C:/Program Files (x86)/processing-1.2.1/lib/core.jar")	
 ELSEIF(APPLE)
-	SET(P5_JAR "/Applications/Processing.app/Contents/Resources/Java/core.jar")
+	IF(NOT DEFINED P5_JAR)	
+		SET(P5_JAR "/Applications/Processing.app/Contents/Resources/Java/core.jar")
+	ENDIF()
 ELSE()
 	# unix/linux
 	# SET(P5_JAR "/?")

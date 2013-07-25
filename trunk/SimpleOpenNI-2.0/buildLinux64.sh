@@ -43,7 +43,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 echo "--- build ---"
 # build with 6 threads, verbose is optional, but otherwise you can't see the compiler directives
 #make -j 6 VERBOSE=1
-make -j 6
+make -j6
 
 echo "--- copy ---"
 # copy the library
