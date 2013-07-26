@@ -80,12 +80,45 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
             }
             else if(sysStr.indexOf("mac") >= 0)
             {     // mac
+                
+                libName = "lib" + libName + ".jnilib";
+                nativLibPath = getLibraryPathLinux() + "/SimpleOpenNI/library/";
+                nativDepLibPath = nativLibPath + "osx/";
+                
+                System.out.println("nativDepLibPath = " + nativDepLibPath);
+                
+                //System.setProperty("java.libray.path",nativLibPath);
+                
+                // load dependency libs
+                
+                /*
+                depLib = "libOpenNI2.dylib";
+                try
+                {
+                    System.out.println("load lib: " + nativDepLibPath + depLib);
+                    System.load(nativDepLibPath + depLib);
+                }
+                catch(UnsatisfiedLinkError e)
+                {
+                    System.out.println("Can't load libOpenNI2.so library (" +  depLib  + ") : " + e);
+                }
+                /*
+                depLib = "libNiTE2.dylib";
+                try
+                {
+                    System.load(nativDepLibPath + depLib);
+                }
+                catch(UnsatisfiedLinkError e)
+                {
+                    System.out.println("Can't load " +  depLib  + " : " + e);
+                }
+                 */
             }
 
             try
             {
                 //System.out.println("-- " + System.getProperty("user.dir"));
-                //System.loadLibrary(libName);
+                //System.loadLibrary("SimpleOpenNI");
                 System.load(nativLibPath + libName);
             }
             catch(UnsatisfiedLinkError e)
