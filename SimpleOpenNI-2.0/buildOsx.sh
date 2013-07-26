@@ -27,7 +27,7 @@ if [ ! -d "build" ]; then
 fi
 
 cd ./build
-
+ 
 echo "--- generate cmake ---"
 cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPEN_NI_BASE=/Users/max/Documents/pDev/openni/OpenNI-MacOSX-x64-2.2/ \
@@ -43,6 +43,15 @@ echo "--- build ---"
 # build with 6 threads, verbose is optional, but otherwise you can't see the compiler directives
 #make -j 6 VERBOSE=1
 make -j6 
+
+# change name path for a local library
+install_name_tool -change libOpenNI2.dylib @loader_path/osx/libOpenNI2.dylib libSimpleOpenNI.jnilib
+install_name_tool -change libNiTE2.dylib @loader_path/osx/libNiTE2.dylib libSimpleOpenNI.jnilib
+
+
+echo "Lib paths:"
+otool -L libSimpleOpenNI.jnilib
+
 
 
 echo "--- copy ---"

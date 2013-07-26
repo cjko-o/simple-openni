@@ -137,10 +137,14 @@ IF(UNIX)
     ELSE()
         SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./linux32")
     ENDIF()
+
+	message("qqqqqqqqqqq")
+	SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./osx")
 ELSEIF(WIN32)
     SET(CMAKE_INSTALL_RPATH "/$ORIGIN")
 ELSE()
-    SET(CMAKE_INSTALL_RPATH "/$ORIGIN")
+    SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./osx")
+	message("sssssssswwwww")
 ENDIF()
 
 # -----------------------------------------------------------------------------
