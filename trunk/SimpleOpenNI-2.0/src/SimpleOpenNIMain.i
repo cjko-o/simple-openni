@@ -301,6 +301,9 @@ public:
     void convertProjectiveToRealWorld(const float* pProjective,float* pRealWorld);
 
     bool alternativeViewPointDepthToImage();
+    bool setDepthToColor(bool enable);
+    bool depthToColor();
+
     bool setDepthColorSyncEnabled(bool enable);
 
     ///////////////////////////////////////////////////////////////////////////

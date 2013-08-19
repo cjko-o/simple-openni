@@ -332,6 +332,9 @@ public:
     void convertProjectiveToRealWorld(const float* pProjective,float* pRealWorld);
 
     bool alternativeViewPointDepthToImage();
+    bool setDepthToColor(bool enable);
+    bool depthToColor();
+
     bool setDepthColorSyncEnabled(bool enable);
 
     ///////////////////////////////////////////////////////////////////////////
@@ -356,9 +359,11 @@ public:
                              float* zAxisX,float* zAxisY,float* zAxisZ);
 
     void calcUserCoordsys(float* point);
+    void calcUserCoordsys(float* x,float* y,float* z);
     void calcUserCoordsysMat(float* mat);
 
     void calcUserCoordsysBack(float* point);
+    void calcUserCoordsysBack(float* x,float* y,float* z);
     void calcUserCoordsysBackMat(float* mat);
 
 
@@ -475,7 +480,7 @@ protected:
         else
             return NULL;
     }
-
+    bool copyRgbImage(int* map);
 
     bool                    _initFlag;
     bool                    _generatingFlag;
@@ -498,6 +503,7 @@ protected:
     openni::VideoStream**    _streams;
     openni::VideoFrameRef**  _streamsFrameRef;
     int                      _streamCount;
+    bool                     _mirrorFlag;
 
     // depth
     openni::VideoStream         _depthStream;
@@ -509,6 +515,7 @@ protected:
     float                       _pDepthGamma[MAX_DEPTH];
     int                         _depthBufSize;
     openni::DepthPixel*         _depthMap;
+    int*                        _depthMapBuffer;
     float*                      _depthMapRealWorld;
     int*                        _pDepthImage;
     float                       _depthImageColor[3];
@@ -521,6 +528,7 @@ protected:
     const openni::SensorInfo*   _imageSensorInfo;
     openni::VideoFrameRef       _imageFrame;
     int                         _imgBufSize;
+    int*                        _imgBuffer;
 
     // ir
     openni::VideoStream         _irStream;
@@ -542,6 +550,7 @@ protected:
     */
 
     // user
+    bool                                _niteFlag;
     nite::UserTracker                   _userTracker;
     nite::UserTrackerFrameRef           _userFrameRef;
     openni::VideoMode                   _userVideoMode;
@@ -640,13 +649,21 @@ public:
 private:
 
     void updateSub();
-    void updateOpenNI(bool force = false);
+    bool updateOpenNI(bool force = false);
     void run();
 
     boost::shared_ptr<boost::thread>	_thread;
     boost::mutex                        _mainMutex;
     bool                                _threadRun;
     int									_threadMode;
+
+    boost::mutex                        _dataMutex;
+
+    boost::mutex                        _depthMutex;
+    boost::mutex                        _imgMutex;
+    boost::mutex                        _irMutex;
+
+
 
 };
 
