@@ -122,6 +122,8 @@ SET(LIBS ${LIBS} ${NITE_LIBRARY})
 SET(CMAKE_SWIG_FLAGS -package SimpleOpenNI)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# only for debug
+# INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include/include_openni)
 
 ###############################################################################
 # set local libraries
@@ -131,20 +133,19 @@ SET(CMAKE_SKIP_RPATH NO)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
-IF(UNIX)
+
+IF(APPLE)
+    # osx
+    SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./osx")
+ELSEIF(UNIX)
     IF(${MACH_ARCH} MATCHES "64")
-        SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./linux64")
+        SET(CMAKE_INSTALL_RPATH "$ORIGIN/linux64")
     ELSE()
         SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./linux32")
     ENDIF()
-
-	message("qqqqqqqqqqq")
-	SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./osx")
 ELSEIF(WIN32)
-    SET(CMAKE_INSTALL_RPATH "/$ORIGIN")
-ELSE()
-    SET(CMAKE_INSTALL_RPATH "/$ORIGIN/./osx")
-	message("sssssssswwwww")
+    # no rpath on windows
+    #SET(CMAKE_INSTALL_RPATH "/$ORIGIN")
 ENDIF()
 
 # -----------------------------------------------------------------------------

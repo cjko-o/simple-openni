@@ -1,4 +1,5 @@
-/* ----------------------------------------------------------------------------
+/* 
+ *----------------------------------------------------------------------------
  * SimpleOpenNI
  * ----------------------------------------------------------------------------
  * Copyright (C) 2011 Max Rheiner / Interaction Design Zhdk
@@ -42,7 +43,12 @@
 using namespace sOpenNI;
 using namespace openni;
 
-#define		SIMPLEOPENNI_VERSION	193		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	195		// 1234 = 12.24
+
+// if you plan to debug on linux, don't forget to call the following commands, otherwise you want be able to
+// attacht to the shared library
+// echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+// http://www.deder.at/wordpress/?p=307
 
 float Colors[][3] =
 {
@@ -81,7 +87,6 @@ ContextWrapper::ContextWrapper():
     _depthMap(NULL),
     _depthMapRealWorld(NULL),
     _depthImageColorMode(DepthImgMode_Default),
-    _pIrImage(NULL),
     _irBufSize(0),
     _nodes(Node_None),
     _threadMode(RunMode_Default),
@@ -99,14 +104,12 @@ ContextWrapper::ContextWrapper():
     _player(NULL),
     _playerRepeat(true),
     _playerPlay(false),
-    _pUserImage(NULL)
-  /*
-
-  _pSceneImage(NULL),
-  _userWidth(0),
-  _userHeight(0),
-  _userSceneBufSize(0),
-  */
+    _pUserImage(NULL),
+    _niteFlag(false),
+    _mirrorFlag(false),
+    _depthMapBuffer(NULL),
+    _imgBuffer(NULL),
+    _pIrImage(NULL)
 {
     // still not working
     //_kinectMotors.open();
@@ -253,6 +256,12 @@ void ContextWrapper::close()
         _pDepthImage = NULL;
     }
 
+    if(_depthMapBuffer)
+    {
+        delete []_depthMapBuffer;
+        _depthMapBuffer = NULL;
+    }
+
     // image
     if(_imageStream.isValid())
         _imageStream.destroy();
@@ -260,6 +269,12 @@ void ContextWrapper::close()
     // ir
     if(_irStream.isValid())
         _irStream.destroy();
+
+    if(_imgBuffer)
+    {
+        delete []_imgBuffer;
+        _imgBuffer = NULL;
+    }
 
     if(_pIrImage)
     {
@@ -269,7 +284,11 @@ void ContextWrapper::close()
 
     // user
     if(_userTracker.isValid())
+    {
+        // crashes with the libFreenect driver, so kill the hole think later with
+        // nite::NiTE::shutdown();
         _userTracker.destroy();
+    }
 
     if(_pUserImage)
     {
@@ -331,6 +350,7 @@ void ContextWrapper::close()
     _playerPlay = false;
 
     nite::NiTE::shutdown();
+    _niteFlag = false;
     openni::OpenNI::shutdown();
 }
 
@@ -367,7 +387,7 @@ void ContextWrapper::logOut(int msgType,const char* msg,...)
 
 void ContextWrapper::logDeprecated(int msgType,const char* oldFunc,const char* newFunc)
 {
-    logOut(MsgNode_Deprecated,"%s is deprecated, please use %s.",oldFunc,newFunc);
+     logOut(MsgNode_Deprecated,"%s is deprecated, please use %s.",oldFunc,newFunc);
 }
 
 bool ContextWrapper::initContext()
@@ -392,11 +412,12 @@ bool ContextWrapper::initContext()
 
             _deviceCount = deviceInfoList.getSize();
 
-            // init NITE
+             // init NITE
             nite::Status niteRc = nite::NiTE::initialize();
             if(niteRc != nite::STATUS_OK)
                 // error;
                 logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
+
         }
 
         return _globalContextFlag;
@@ -453,19 +474,26 @@ bool ContextWrapper::init(int runMode)
         logOut(MsgNode_Error,"Can't open device:\t%s\n",openni::OpenNI::getExtendedError());
         return false;
     }
-/*
+
+    /*
     // init NITE
-    nite::Status niteRc = nite::NiTE::initialize();
-    if(niteRc != nite::STATUS_OK)
-        // error;
-        logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
+    if(_niteFlag == false)
+    {
+        nite::Status niteRc = nite::NiTE::initialize();
+        if(niteRc != nite::STATUS_OK)
+            // error;
+            logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
+        else
+            _niteFlag = true;
+    }
 */
+
     _initFlag = true;
 
     // read out all infos per sensor
-    _depthSensorInfo = _device.getSensorInfo(openni::SENSOR_DEPTH);
-    _imageSensorInfo = _device.getSensorInfo(openni::SENSOR_COLOR);
-    _irSensorInfo = _device.getSensorInfo(openni::SENSOR_IR);
+    _depthSensorInfo    = _device.getSensorInfo(openni::SENSOR_DEPTH);
+    _imageSensorInfo    = _device.getSensorInfo(openni::SENSOR_COLOR);
+    _irSensorInfo       = _device.getSensorInfo(openni::SENSOR_IR);
 
     // add to list
     _classList.push_back(this);
@@ -493,13 +521,19 @@ bool ContextWrapper::init(const char* record,int runMode)
     }
 
     _player = _device.getPlaybackControl();
-/*
+
     // init NITE
-    nite::Status niteRc = nite::NiTE::initialize();
-    if(niteRc != nite::STATUS_OK)
-        // error;
-        logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
-*/
+    /*
+    if(_niteFlag == false)
+    {
+        nite::Status niteRc = nite::NiTE::initialize();
+        if(niteRc != nite::STATUS_OK)
+            // error;
+            logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
+        else
+            _niteFlag = true;
+    }
+    */
     _initFlag = true;
     _nodes |= Node_Player;
 
@@ -541,10 +575,15 @@ bool ContextWrapper::init(int deviceIndex,int runMode)
         }
 /*
         // init NITE
-        nite::Status niteRc = nite::NiTE::initialize();
-        if(niteRc != nite::STATUS_OK)
-            // error;
-            logOut(MsgNode_Error,"ContextWrapper::init / nite::NiTE::initialize\n");
+        if(_niteFlag == false)
+        {
+            nite::Status niteRc = nite::NiTE::initialize();
+            if(niteRc != nite::STATUS_OK)
+                // error;
+                logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
+            else
+                _niteFlag = true;
+        }
 */
         _initFlag = true;
 
@@ -600,6 +639,184 @@ int ContextWrapper::deviceNames(std::vector<std::string>* nodeNames)
     return nodeNames->size();
 }
 
+#ifdef OPENNI2_DEBUG
+
+#include <PS1080.h>
+#include <cstring>
+#include <fstream>
+#include <iostream>
+
+void saveDataStream(const char* name,unsigned char* data,int dataSize)
+{
+    std::ofstream myfile;
+    myfile.open (name, std::ios::out | std::ios::binary | std::ios::trunc);
+    myfile.write((const char*)data,dataSize);
+    myfile.close();
+}
+
+void printAllProperties(openni::VideoStream* stream)
+{
+    unsigned char   data[50000];
+    int             dataSize;
+    float           fValue;
+    int             iValue;
+
+    std::cout << "printAllProperties--------------------------" << std::endl;
+
+    // ONI_STREAM_PROPERTY_HORIZONTAL_FOV
+    dataSize = sizeof(float);
+    stream->getProperty(ONI_STREAM_PROPERTY_HORIZONTAL_FOV,(void*)&fValue,&dataSize);
+    std::cout << "ONI_STREAM_PROPERTY_HORIZONTAL_FOV = " << fValue << std::endl;
+
+    // ONI_STREAM_PROPERTY_VERTICAL_FOV
+    dataSize = sizeof(float);
+    stream->getProperty(ONI_STREAM_PROPERTY_VERTICAL_FOV,(void*)&fValue,&dataSize);
+    std::cout << "ONI_STREAM_PROPERTY_VERTICAL_FOV = " << fValue << std::endl;
+
+    // ONI_STREAM_PROPERTY_MAX_VALUE
+    dataSize = sizeof(int);
+    stream->getProperty(ONI_STREAM_PROPERTY_MAX_VALUE,(void*)&iValue,&dataSize);
+    std::cout << "ONI_STREAM_PROPERTY_MAX_VALUE = " << iValue << std::endl;
+
+
+
+    // --------------------------
+    unsigned long long  ullValue;
+    XnDepthAGCBin       depthAGCBin;
+    double              dValue;
+    XnPixelRegistration pixelRegistration;
+
+
+    // XN_STREAM_PROPERTY_CLOSE_RANGE
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_CLOSE_RANGE,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_CLOSE_RANGE = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_PIXEL_REGISTRATION
+    dataSize = sizeof(XnPixelRegistration);
+    stream->getProperty(XN_STREAM_PROPERTY_PIXEL_REGISTRATION,(void*)&pixelRegistration,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nDepthX = " << pixelRegistration.nDepthX << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nDepthY = " << pixelRegistration.nDepthY << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nDepthValue = " << pixelRegistration.nDepthValue << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nImageXRes = " << pixelRegistration.nImageXRes << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nImageYRes = " << pixelRegistration.nImageYRes << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nImageX = " << pixelRegistration.nImageX << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_REGISTRATION.nImageY = " << pixelRegistration.nImageY << std::endl;
+
+    // XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_WHITE_BALANCE_ENABLED = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_GAIN
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_GAIN,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_GAIN = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_HOLE_FILTER
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_HOLE_FILTER,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_HOLE_FILTER = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_REGISTRATION_TYPE
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_REGISTRATION_TYPE,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_REGISTRATION_TYPE = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_AGC_BIN
+    dataSize = sizeof(XnDepthAGCBin);
+    stream->getProperty(XN_STREAM_PROPERTY_AGC_BIN,(void*)&depthAGCBin,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_AGC_BIN.nBin = " << depthAGCBin.nBin << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_AGC_BIN.nMin = " << depthAGCBin.nMin << std::endl;
+    std::cout << "XN_STREAM_PROPERTY_AGC_BIN.nMax = " << depthAGCBin.nMax << std::endl;
+
+    // XN_STREAM_PROPERTY_CONST_SHIFT
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_CONST_SHIFT,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_CONST_SHIFT = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_PIXEL_SIZE_FACTOR
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_PIXEL_SIZE_FACTOR,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_PIXEL_SIZE_FACTOR = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_MAX_SHIFT
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_MAX_SHIFT,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_MAX_SHIFT = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_PARAM_COEFF
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_PARAM_COEFF,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_PARAM_COEFF = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_SHIFT_SCALE
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_SHIFT_SCALE,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_SHIFT_SCALE = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE
+    dataSize = sizeof(unsigned long long);
+    stream->getProperty(XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE,(void*)&ullValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_ZERO_PLANE_DISTANCE = " << ullValue << std::endl;
+
+    // XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE
+    dataSize = sizeof(double);
+    stream->getProperty(XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE,(void*)&dValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_ZERO_PLANE_PIXEL_SIZE = " << dValue << std::endl;
+
+    // XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE
+    dataSize = sizeof(double);
+    stream->getProperty(XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE,(void*)&dValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_EMITTER_DCMOS_DISTANCE = " << dValue << std::endl;
+
+    // XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE
+    dataSize = sizeof(double);
+    stream->getProperty(XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE,(void*)&dValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_DCMOS_RCMOS_DISTANCE = " << dValue << std::endl;
+
+    //XN_STREAM_PROPERTY_S2D_TABLE
+    dataSize = 4096;
+    stream->getProperty(XN_STREAM_PROPERTY_S2D_TABLE,(void*)data,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_S2D_TABLE safed ! size=" << dataSize<< std::endl;
+    saveDataStream("S2D_table.bin",data,dataSize);
+
+    //XN_STREAM_PROPERTY_D2S_TABLE
+    dataSize = 20002;
+    stream->getProperty(XN_STREAM_PROPERTY_D2S_TABLE,(void*)data,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_D2S_TABLE safed ! size=" << dataSize << std::endl;
+    saveDataStream("D2S_table.bin",data,dataSize);
+
+    // XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO
+    dataSize = 50000;
+    stream->getProperty(XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO,(void*)data,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_DEPTH_SENSOR_CALIBRATION_INFO safed ! size=" << dataSize << std::endl;
+    saveDataStream("Calib_table.bin",data,dataSize);
+
+    // XN_STREAM_PROPERTY_GMC_MODE
+    bool bValue;
+    dataSize = sizeof(bool);
+    stream->getProperty(XN_STREAM_PROPERTY_GMC_MODE,(void*)&bValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_GMC_MODE = " << bValue << std::endl;
+
+    // XN_STREAM_PROPERTY_GMC_DEBUG
+    dataSize = sizeof(bool);
+    stream->getProperty(XN_STREAM_PROPERTY_GMC_DEBUG,(void*)&bValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_GMC_DEBUG = " << bValue << std::endl;
+
+    // XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION
+    dataSize = sizeof(bool);
+    stream->getProperty(XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION,(void*)&bValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION = " << bValue << std::endl;
+
+    // XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION_DEBUG
+    dataSize = sizeof(bool);
+    stream->getProperty(XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION_DEBUG,(void*)&bValue,&dataSize);
+    std::cout << "XN_STREAM_PROPERTY_WAVELENGTH_CORRECTION_DEBUG = " << bValue << std::endl;
+
+
+}
+#endif // OPENNI2_DEBUG
 
 bool ContextWrapper::createDepth(bool force)
 {
@@ -634,15 +851,21 @@ bool ContextWrapper::createDepth(bool force)
         }
     }
     _depthStream.start();
+    _depthStream.setMirroringEnabled(_mirrorFlag);
 
     _depthVideoMode = _depthStream.getVideoMode();
 
     _depthBufSize       = _depthVideoMode.getResolutionX() * _depthVideoMode.getResolutionY();
+    _depthMapBuffer     = new int[_depthBufSize];
+    memset(_depthMapBuffer,0,sizeof(int) * _depthBufSize);
+
     _depthMap           = new openni::DepthPixel[_depthBufSize];
     _pDepthImage        = new int[_depthBufSize];
     _depthMapRealWorld  = new float[_depthBufSize * 3];
 
     _nodes |= Node_Depth;
+
+    //printAllProperties(&_depthStream);
 
     return true;
 }
@@ -705,9 +928,12 @@ bool ContextWrapper::createRgb(bool force)
     }
 
     _imageStream.start();
+    _imageStream.setMirroringEnabled(_mirrorFlag);
 
     _imageVideoMode     = _imageStream.getVideoMode();
     _imgBufSize         = _imageVideoMode.getResolutionX() * _imageVideoMode.getResolutionY();
+    _imgBuffer          = new int[_imgBufSize];
+    memset(_imgBuffer,0,sizeof(int) * _imgBufSize);
 
     _nodes |= Node_Image;
     return true;
@@ -770,6 +996,7 @@ bool ContextWrapper::createIr(bool force)
         }
     }
     _irStream.start();
+    _irStream.setMirroringEnabled(_mirrorFlag);
 
     _irVideoMode = _irStream.getVideoMode();
 
@@ -934,6 +1161,9 @@ bool ContextWrapper::createHand(bool force)
 
     if (_handTracker.create(&_device) != nite::STATUS_OK)
         return false;
+
+    // print out all properties
+    //printAllProperties(&_depthStream);
 
     _nodes |= Node_Hand;
     return true;
@@ -1230,7 +1460,6 @@ void ContextWrapper::seekPlayer(int pos)
         {
             boost::mutex::scoped_lock l(_mainMutex);
             updateOpenNI(true);
-            updateOpenNI(true);
         }
     }
 
@@ -1256,16 +1485,19 @@ bool ContextWrapper::isEndPlayer()
 // depth
 bool ContextWrapper::updateDepthData()
 {
-    boost::mutex::scoped_lock l(_mainMutex);
-
     if(_depthMapTimeStamp == _updateTimeStamp)
         return false;
 
-    // read the data
-    if(_userTracker.isValid())
-        _depthFrame = _userFrameRef.getDepthFrame();
+    // copy the data
+    {
+        boost::mutex::scoped_lock l(_depthMutex);
+        //boost::mutex::scoped_lock l(_mainMutex);
 
-    //_depthStream.readFrame(&_depthFrame);
+        const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
+        for(int i=0;i < _depthBufSize;i++)
+            _depthMapBuffer[i] = (int)pDepth[i];
+    }
+
     _depthMapTimeStamp  = _updateTimeStamp;
 
     // check if a user defined coordinate system is used
@@ -1273,18 +1505,17 @@ bool ContextWrapper::updateDepthData()
     {
         updateDepthRealWorldData();
 
-        /*
         // update depthMap according to the real world data
-        XnVector3D*     pVec    = _depthMapRealWorld;
-        XnDepthPixel*   pDepth  = _depthMap;
+        float*  pVec    = _depthMapRealWorld;
+        int*    pDepth  = _depthMapBuffer;
         for(int i = 0; i < _depthBufSize; i++)
         {
-            *pDepth = pVec->X;
+            *pDepth = pVec[2];  // set z-value
 
-            pVec++;
+            pVec+=3;
             pDepth++;
         }
-        */
+
     }
 
     return true;
@@ -1292,20 +1523,19 @@ bool ContextWrapper::updateDepthData()
 
 bool ContextWrapper::updateDepthImageData()
 {
+  //  boost::mutex::scoped_lock l(_mainMutex);
+
     if(_depthImageTimeStamp == _updateTimeStamp)
         return false;
 
     // updtate the base data
     updateDepthData();
 
-    if(_depthFrame.isValid())
-    {
-        calcHistogram();
-        createDepthImage();
-    }
+    calcHistogram();
+    createDepthImage();
+
     _depthImageTimeStamp = _updateTimeStamp;
 
-    //boost::mutex::scoped_lock l(_mainMutex);
     return true;
 }
 
@@ -1317,26 +1547,6 @@ bool ContextWrapper::updateDepthRealWorldData()
     // updtate the base data
     updateDepthData();
     calcDepthImageRealWorld();
-
-    // check if a user defined coordinate system is used
-    if(_userCoordsysFlag)
-    {
-        Eigen::Vector3f vec;
-        float*          pVec;
-
-        // transform all realworld 3d data to the user def coordinatesystem
-        for(int i = 0; i < _depthBufSize; i++)
-        {
-            pVec = _depthMapRealWorld + (3 * i);
-
-            //vec << pVec, pVec+1, pVec+2;
-            vec = _userCoordsysForwardMat * Eigen::Vector3f(pVec[0], pVec[1], pVec[2]);
-
-            pVec[0] = vec.x();
-            pVec[1] = vec.y();
-            pVec[2] = vec.z();
-        }
-    }
 
     _depthRealWorldTimeStamp = _updateTimeStamp;
 
@@ -1350,12 +1560,11 @@ void ContextWrapper::updateRgbData()
     if(_imageTimeStamp == _updateTimeStamp)
         return;
 
-    boost::mutex::scoped_lock l(_mainMutex);
+    {
+        boost::mutex::scoped_lock l(_imgMutex);
+        copyRgbImage(_imgBuffer);
+    }
 
-    // get the new data
-    //_imageStream.readFrame(&_imageFrame);
-
-    //boost::mutex::scoped_lock l(_mainMutex);
     _imageTimeStamp = _updateTimeStamp;
 }
 
@@ -1365,12 +1574,10 @@ void ContextWrapper::updateIrData()
     if(_irTimeStamp == _updateTimeStamp)
         return;
 
-    boost::mutex::scoped_lock l(_mainMutex);
-
-    // get the new data
-    //_irStream.readFrame(&_irFrame);
-
-    createIrImage();
+    {
+        boost::mutex::scoped_lock l(_irMutex);
+        createIrImage();
+    }
 
     _irTimeStamp = _updateTimeStamp;
 }
@@ -1555,11 +1762,18 @@ void ContextWrapper::updateSub()
     // update NITE
     if(_userTracker.isValid())
     {
-        nite::Status rc = _userTracker.readFrame(&_userFrameRef);
-        if (rc != nite::STATUS_OK)
         {
-            printf("GetNextData failed\n");
-            return;
+            boost::mutex::scoped_lock l(_depthMutex);
+
+            nite::Status rc = _userTracker.readFrame(&_userFrameRef);
+            if (rc != nite::STATUS_OK)
+            {
+                printf("GetNextData failed\n");
+                return;
+            }
+
+            // read the data
+            _depthFrame = _userFrameRef.getDepthFrame();
         }
 
         // get the temp user list
@@ -1572,20 +1786,24 @@ void ContextWrapper::updateSub()
             // update callbacks
             doNiteUserCb(users[i]);
         }
+
     }
 
     if(_handTracker.isValid())
     {
-        //openni::VideoFrameRef depthFrame;
-
-        nite::Status rc = _handTracker.readFrame(&_handRefFrame);
-        if (rc != nite::STATUS_OK)
         {
-            printf("GetNextData failed\n");
-            return;
-        }
+            boost::mutex::scoped_lock l(_depthMutex);
 
-        //depthFrame = _handRefFrame.getDepthFrame();
+            nite::Status rc = _handTracker.readFrame(&_handRefFrame);
+            if (rc != nite::STATUS_OK)
+            {
+                printf("GetNextData failed\n");
+                return;
+            }
+
+            if(_userTracker.isValid() == false)
+                _depthFrame = _handRefFrame.getDepthFrame();
+        }
 
         // gesture
         _gestureIdTempList.clear();
@@ -1617,7 +1835,7 @@ void ContextWrapper::updateSub()
     _updateSubTimeStamp++;
 }
 
-void ContextWrapper::updateOpenNI(bool force)
+bool ContextWrapper::updateOpenNI(bool force)
 {
     // update openni
     if(_streamCount > 0)
@@ -1625,32 +1843,33 @@ void ContextWrapper::updateOpenNI(bool force)
         if(_player)
         {   // recorded scene
             if(_playerPlay == false && force == false)
-                return;
-
-            int changedIndex;
-            _rc = openni::OpenNI::waitForAnyStream(_streams, _streamCount, &changedIndex);
-            if (_rc != openni::STATUS_OK)
-            {
-                printf("Wait failed: %s\n",openni::OpenNI::getExtendedError());
-                return;
-            }
-            else
-                _streams[changedIndex]->readFrame(_streamsFrameRef[changedIndex]);
-
+                return false;
         }
-        else
+
+        // read out depthMap
+        if(_depthStream.isValid() && _userTracker.isValid() == false)
         {
-            int changedIndex;
-            _rc = openni::OpenNI::waitForAnyStream(_streams, _streamCount, &changedIndex);
-            if (_rc != openni::STATUS_OK)
-            {
-                printf("Wait failed: %s\n",openni::OpenNI::getExtendedError());
-                return;
-            }
-            else
-                _streams[changedIndex]->readFrame(_streamsFrameRef[changedIndex]);
+            boost::mutex::scoped_lock l(_depthMutex);
+            _depthStream.readFrame(&_depthFrame);
         }
+
+        // read out rgb image
+        if(_imageStream.isValid())
+        {
+            boost::mutex::scoped_lock l(_imgMutex);
+            _imageStream.readFrame(&_imageFrame);
+        }
+
+        // read out infrared image
+        if(_irStream.isValid())
+        {
+            boost::mutex::scoped_lock l(_irMutex);
+            _irStream.readFrame(&_irFrame);
+        }
+
+        return true;
     }
+    return false;
 }
 
 void ContextWrapper::doNiteUserCb(const nite::UserData& userData)
@@ -1808,16 +2027,16 @@ void ContextWrapper::doNiteGestureCb(const nite::GestureData& gestureData)
 
 void ContextWrapper::calcHistogram()
 {
-    const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
-
     memset(_pDepthHist, 0, MAX_DEPTH * sizeof(float));
+
+    int*   pDepth = _depthMapBuffer;
 
     unsigned int nNumberOfPoints = 0;
     for(int y = 0; y < _depthVideoMode.getResolutionY(); ++y)
     {
         for(int x = 0; x < _depthVideoMode.getResolutionX(); ++x, ++pDepth)
         {
-            if(*pDepth != 0)
+            if(*_depthMapBuffer != 0)
             {
                 _pDepthHist[*pDepth]++;
                 nNumberOfPoints++;
@@ -1840,33 +2059,41 @@ void ContextWrapper::calcHistogram()
 
 void ContextWrapper::calcDepthImageRealWorld()
 {
-    const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
-    float*                    map = _depthMapRealWorld;
+    boost::mutex::scoped_lock l(_depthMutex);
+
+    float*  map     = _depthMapRealWorld;
+    int*    pDepth  = _depthMapBuffer;
 
     for(int y = 0; y < _depthVideoMode.getResolutionY(); ++y)
     {
         for(int x = 0; x < _depthVideoMode.getResolutionX() ; ++x, ++pDepth,map+=3)
         {
+            convertProjectiveToRealWorld(x,y,*pDepth,
+                                         map, map + 1, map + 2);
+                    /*
             openni::CoordinateConverter::convertDepthToWorld(_depthStream,
                                                              x,y,*pDepth,
                                                              map, map + 1, map + 2);
+            calcUserCoordsys(map);
+                    */
         }
     }
+
 }
 
 void ContextWrapper::createDepthImage()
 {
     memset(_pDepthImage, 0, _depthBufSize * sizeof(int));
 
-    const openni::DepthPixel*   pDepth;
-    int*                        pPixel;
+    int*   pDepth;
+    int*   pPixel;
 
     for(int y = 0; y < _depthVideoMode.getResolutionY(); ++y)
     {
-        pDepth	= ((const openni::DepthPixel*)_depthFrame.getData()) + (y * _depthVideoMode.getResolutionX());
+        pDepth	= _depthMapBuffer + (y * _depthVideoMode.getResolutionX());
         pPixel	= _pDepthImage + (y * _depthVideoMode.getResolutionX());
 
-        for(int x = 0; x < _depthVideoMode.getResolutionX(); ++x, ++pDepth, ++pPixel)
+        for(int x = 0; x < _depthVideoMode.getResolutionX(); x++, pDepth++, pPixel++)
         {
             if(*pDepth != 0)
             {
@@ -1986,10 +2213,7 @@ int ContextWrapper::depthImage(int* map)
 
 int ContextWrapper::depthMap(int* map)
 {
-    if(_depthStream.isValid() == false)
-        return 0;
-    else
-        updateDepthData();
+    updateDepthData();
 
     if(_userCoordsysFlag)
     {
@@ -1998,10 +2222,13 @@ int ContextWrapper::depthMap(int* map)
     }
     else
     {
+        memcpy(map,_depthMapBuffer,_depthBufSize * sizeof(int));
+/*
         const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
 
         for(int i=0;i < _depthBufSize;i++)
             map[i] = (int)pDepth[i];
+            */
     }
 
     return _depthBufSize;
@@ -2084,36 +2311,39 @@ int	ContextWrapper::rgbHeight()
     return _imageVideoMode.getResolutionY();
 }
 
+bool ContextWrapper::copyRgbImage(int* map)
+{
+    if(_imageFrame.isValid() == false)
+        return false;
+
+    const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)_imageFrame.getData();
+    int rowSize = _imageFrame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
+    rowSize     = rgbWidth();
+    int* pMap   = map;
+
+    for(int y=0;y < rgbHeight();y++)
+    {
+        const openni::RGB888Pixel*  pPixel = pImageRow;
+      //  openni::RGB888Pixel*        pTex = pTexRow + m_colorFrame.getCropOriginX();
+
+        for(int x=0;x < rgbWidth();x++,pPixel++,pMap++)
+        {
+            *pMap = 0xff << 24 |
+                    ((int)(0xff & pPixel->r)) << 16|
+                    ((int)(0xff & pPixel->g)) << 8 |
+                    ((int)(0xff & pPixel->b)) ;
+        }
+
+        pImageRow += rowSize;
+    }
+    return true;
+}
+
 int ContextWrapper::rgbImage(int* map)
 {
-    if(_imageStream.isValid() == false)
-        return 0;
-    else
-        updateRgbData();
+    updateRgbData();
 
-    if(_imageFrame.isValid())
-    {
-        const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)_imageFrame.getData();
-        int rowSize = _imageFrame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
-        rowSize = rgbWidth();
-        int* pMap = map;
-
-        for(int y=0;y < rgbHeight();y++)
-        {
-            const openni::RGB888Pixel*  pPixel = pImageRow;
-          //  openni::RGB888Pixel*        pTex = pTexRow + m_colorFrame.getCropOriginX();
-
-            for(int x=0;x < rgbWidth();x++,pPixel++,pMap++)
-            {
-                *pMap = 0xff << 24 |
-                        ((int)(0xff & pPixel->r)) << 16|
-                        ((int)(0xff & pPixel->g)) << 8 |
-                        ((int)(0xff & pPixel->b)) ;
-            }
-
-            pImageRow += rowSize;
-        }
-    }
+    memcpy(map,_imgBuffer,sizeof(int) * _imgBufSize);
 
     return _imgBufSize;
 }
@@ -2164,19 +2394,44 @@ void ContextWrapper::createIrImage()
     if(_irFrame.isValid() == false)
         return;
 
-    const unsigned short*   pIrData = (const unsigned short*)_irFrame.getData();
-    int*                    pIrImage = _pIrImage;
-    unsigned char           val;
-    for(int i = 0;i < _irBufSize;i++)
+    switch(_irFrame.getVideoMode().getPixelFormat())
     {
-        val = (*pIrData) >> 2;
-        *pIrImage = ((int)0xff	<< 24) |
-                    ((int)val)	<< 16 |
-                    ((int)val)  << 8 |
-                    ((int)val) ;
-        pIrData++;
-        pIrImage++;
+        case ONI_PIXEL_FORMAT_GRAY8:
+            {
+                const unsigned char*   pIrData = (const unsigned char*)_irFrame.getData();
+                int*                   pIrImage = _pIrImage;
+                unsigned char          val;
+                for(int i = 0;i < _irBufSize;i++)
+                {
+                    val = *pIrData;
+                    *pIrImage = ((int)0xff	<< 24) |
+                                ((int)val)	<< 16 |
+                                ((int)val)  << 8 |
+                                ((int)val) ;
+                    pIrData++;
+                    pIrImage++;
+                }
+            }
+            break;
+        case ONI_PIXEL_FORMAT_GRAY16:
+            {
+                const unsigned short*   pIrData = (const unsigned short*)_irFrame.getData();
+                int*                    pIrImage = _pIrImage;
+                unsigned char           val;
+                for(int i = 0;i < _irBufSize;i++)
+                {
+                    val = (*pIrData) >> 2;
+                    *pIrImage = ((int)0xff	<< 24) |
+                                ((int)val)	<< 16 |
+                                ((int)val)  << 8 |
+                                ((int)val) ;
+                    pIrData++;
+                    pIrImage++;
+                }
+            }
+            break;
     }
+
 }
 
 /*
@@ -2239,6 +2494,9 @@ void ContextWrapper::calcUserData()
 {
     if(_depthStream.isValid())
     {	// calc with depth shades
+
+        if(_userFrameRef.isValid() == false)
+            return;
 
         // copy the image
         memcpy(_pUserImage,_pDepthImage,_depthBufSize * sizeof(int));
@@ -2330,6 +2588,7 @@ bool ContextWrapper::getCoM(int user, float*  com)
         com[1] = center.y;
         com[2] = center.z;
 
+        calcUserCoordsys(com);
         return true;
     }
     else
@@ -2358,6 +2617,8 @@ bool ContextWrapper::getBoundingBox(int user, float*  boundingbox)
         boundingbox[4] = boundingBox.max.y;
         boundingbox[5] = boundingBox.max.z;
 
+        calcUserCoordsys(boundingbox);
+        calcUserCoordsys(boundingbox + 3);
         return true;
     }
     else
@@ -2659,6 +2920,7 @@ float ContextWrapper::getJointPositionSkeleton(int user,int joint,float* jointPo
         jointPos[1] = point.y;
         jointPos[2] = point.z;
 
+        calcUserCoordsys(jointPos);
         return skelJoint.getPositionConfidence();
     }
     return 0.0f;
@@ -2685,6 +2947,7 @@ float ContextWrapper::getJointOrientationSkeleton(int user,
         // copy the data to the joint
 
 
+
         return skelJoint.getPositionConfidence();
     }
     return 0.0f;
@@ -2697,9 +2960,12 @@ void ContextWrapper::convertRealWorldToProjective(float x,float y,float z,float*
     if(!_depthStream.isValid())
         return;
 
+    float localWc[]={x,y,z};
+    calcUserCoordsysBack(localWc);
+
     openni::CoordinateConverter::convertWorldToDepth(_depthStream,
-                                                    x,y,z,
-                                                    xp,yp,zp);
+                                                     localWc[0],localWc[1],localWc[2],
+                                                     xp,yp,zp);
 }
 
 void ContextWrapper::convertRealWorldToProjective(const float* pRealWorld,float* pProjective)
@@ -2707,9 +2973,12 @@ void ContextWrapper::convertRealWorldToProjective(const float* pRealWorld,float*
     if(!_depthStream.isValid())
         return;
 
+    float localWc[]={pRealWorld[0],pRealWorld[1],pRealWorld[2]};
+    calcUserCoordsysBack(localWc);
+
     openni::CoordinateConverter::convertWorldToDepth(_depthStream,
-                                                    pRealWorld[0],pRealWorld[1],pRealWorld[2],
-                                                    &(pProjective[0]),&(pProjective[1]),&(pProjective[2]));
+                                                     localWc[0],localWc[1],localWc[2],
+                                                     &(pProjective[0]),&(pProjective[1]),&(pProjective[2]));
 }
 
 
@@ -2721,6 +2990,7 @@ void ContextWrapper::convertProjectiveToRealWorld(float x,float y,float z,float*
     openni::CoordinateConverter::convertDepthToWorld(_depthStream,
                                                     x,y,z,
                                                     xr,yr,zr);
+    calcUserCoordsys(xr,yr,zr);
 }
 
 void ContextWrapper::convertProjectiveToRealWorld(const float* pProjective,float* pRealWorld)
@@ -2731,6 +3001,7 @@ void ContextWrapper::convertProjectiveToRealWorld(const float* pProjective,float
     openni::CoordinateConverter::convertDepthToWorld(_depthStream,
                                                     pProjective[0],pProjective[1],pProjective[2],
                                                     &(pRealWorld[0]),&(pRealWorld[1]),&(pRealWorld[2]));
+    calcUserCoordsys(pRealWorld);
 }
 
 
@@ -2746,10 +3017,22 @@ bool ContextWrapper::alternativeViewPointDepthToImage()
     return (_device.setImageRegistrationMode(openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR) == openni::STATUS_OK);
 }
 
-/*
-bool ContextWrapper::setDepthColorSyncEnabled(bool enable)
-{}
-*/
+bool ContextWrapper::setDepthToColor(bool enable)
+{
+    if(!_device.isValid())
+        return false;
+
+    return (_device.setImageRegistrationMode(enable ? openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR : openni::IMAGE_REGISTRATION_OFF) == openni::STATUS_OK);
+
+}
+
+bool ContextWrapper::depthToColor()
+{
+    if(!_device.isValid())
+        return false;
+
+    return(_device.getImageRegistrationMode() == openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR);
+}
 
 bool ContextWrapper::setDepthColorSyncEnabled(bool enable)
 {
@@ -2774,10 +3057,13 @@ void ContextWrapper::moveKinect(float angle)
 // access methods
 void ContextWrapper::setMirror(bool flag)
 {
-    if(!_depthStream.isValid())
-        return;
-
-    _depthStream.setMirroringEnabled(flag);
+    _mirrorFlag = flag;
+    if(_depthStream.isValid())
+        _depthStream.setMirroringEnabled(flag);
+    if(_imageStream.isValid())
+        _imageStream.setMirroringEnabled(flag);
+    if(_irStream.isValid())
+        _irStream.setMirroringEnabled(flag);
 }
 
 bool ContextWrapper::mirror()
@@ -2787,327 +3073,6 @@ bool ContextWrapper::mirror()
 
     return _depthStream.getMirroringEnabled();
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// callbacks
-/*
-void XN_CALLBACK_TYPE ContextWrapper::NewUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onNewUserCb(generator,user);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::LostUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
-{	
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onLostUserCb(generator,user);
-}
-
-
-void XN_CALLBACK_TYPE ContextWrapper::ExitUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onExitUserCb(generator,user);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::ReEnterUserCb(xn::UserGenerator& generator, XnUserID user, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onReEnterUserCb(generator,user);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::StartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onStartCalibrationCb(skeleton,user);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::EndCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onEndCalibrationCb(skeleton,user,bSuccess);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::startPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onStartPoseCb(pose,strPose,user);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::endPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onEndPoseCb(pose,strPose,user);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// java virtual callbacks
-
-void ContextWrapper::onNewUserCb(xn::UserGenerator& generator, XnUserID user)
-{
-    onNewUserCb(user);
-}
-
-void ContextWrapper::onLostUserCb(xn::UserGenerator& generator, XnUserID user)
-{
-    onLostUserCb(user);
-}
-
-void ContextWrapper::onExitUserCb(xn::UserGenerator& generator, XnUserID user)
-{
-    onExitUserCb(user);
-}
-
-void ContextWrapper::onReEnterUserCb(xn::UserGenerator& generator, XnUserID user)
-{
-    onReEnterUserCb(user);
-}
-
-void ContextWrapper::onStartCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user)
-{
-    onStartCalibrationCb(user);
-}
-
-void ContextWrapper::onEndCalibrationCb(xn::SkeletonCapability& skeleton, XnUserID user, XnBool bSuccess)
-{
-    onEndCalibrationCb(user,bSuccess > 0);
-}
-
-void ContextWrapper::onStartPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user)
-{
-    onStartPoseCb(strPose,user);
-}
-
-void ContextWrapper::onEndPoseCb(xn::PoseDetectionCapability& pose, const XnChar* strPose, XnUserID user)
-{
-    onEndPoseCb(strPose,user);
-}
-
-// virtual methods for the java class which inherits this class
-
-void  ContextWrapper::onStartPoseCb(const char* strPose, unsigned int user){;}
-void  ContextWrapper::onEndPoseCb(const char* strPose, unsigned int user){;}
-
-// callback hands
-void XN_CALLBACK_TYPE ContextWrapper::createHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    //calcUserCoordsys(*pPosition);
-    context->onCreateHandsCb(generator, nId, pPosition, fTime);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::updateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    //calcUserCoordsys(*pPosition);
-    context->onUpdateHandsCb(generator, nId, pPosition, fTime);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::destroyHandsCb(xn::HandsGenerator& generator, XnUserID nId,XnFloat fTime, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onDestroyHandsCb(generator, nId, fTime);
-}
-
-
-void ContextWrapper::onCreateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime)
-{
-    onCreateHandsCb(nId,pPosition,fTime);
-}
-void ContextWrapper::onCreateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime){;}
-
-void ContextWrapper::onUpdateHandsCb(xn::HandsGenerator& generator, XnUserID nId, const XnPoint3D* pPosition, XnFloat fTime)
-{
-    onUpdateHandsCb(nId,pPosition,fTime);
-}
-void ContextWrapper::onUpdateHandsCb(unsigned int nId, const XnPoint3D* pPosition, float fTime){;}
-
-void ContextWrapper::onDestroyHandsCb(xn::HandsGenerator& generator, XnUserID nId, XnFloat fTime)
-{
-    onDestroyHandsCb(nId,fTime);
-}
-void ContextWrapper::onDestroyHandsCb(unsigned int nId, float fTime){;}
-
-
-// callback gesture
-void XN_CALLBACK_TYPE ContextWrapper::recognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-
-    //calcUserCoordsys(*pIdPosition);
-    //calcUserCoordsys(*pEndPosition);
-    context->onRecognizeGestureCb(generator,strGesture,pIdPosition,pEndPosition);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::progressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-
-    //calcUserCoordsys(*pPosition);
-    context->onProgressGestureCb(generator,strGesture,pPosition,fProgress);
-}
-
-
-void ContextWrapper::onRecognizeGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition)
-{
-    onRecognizeGestureCb(strGesture,pIdPosition,pEndPosition);
-}
-void ContextWrapper::onRecognizeGestureCb(const char* strGesture, const XnPoint3D* pIdPosition,const XnPoint3D* pEndPosition){;}
-
-void ContextWrapper::onProgressGestureCb(xn::GestureGenerator& generator,const XnChar* strGesture, const XnPoint3D* pPosition,XnFloat fProgress)
-{
-    onProgressGestureCb(strGesture,pPosition,fProgress);
-}
-void ContextWrapper::onProgressGestureCb(const char* strGesture, const XnPoint3D* pPosition,float fProgress){;}
-
-
-int ContextWrapper::getNodeType(int internalType)
-{
-    if(internalType & Node_Depth)
-        return XN_NODE_TYPE_DEPTH;
-    else if(internalType & Node_Image)
-        return XN_NODE_TYPE_IMAGE;
-    else if(internalType & Node_Ir)
-        return XN_NODE_TYPE_IR;
-    else if(internalType & Node_Scene)
-        return XN_NODE_TYPE_SCENE;
-    else if(internalType & Node_User)
-        return XN_NODE_TYPE_USER;
-    else if(internalType & Node_Hands)
-        return XN_NODE_TYPE_HANDS;
-    else if(internalType & Node_Gesture)
-        return XN_NODE_TYPE_GESTURE;
-    else if(internalType & Node_Recorder)
-        return XN_NODE_TYPE_RECORDER;
-    else if(internalType & Node_Player)
-        return XN_NODE_TYPE_PLAYER;
-    else
-        return 0;
-}
-
-xn::ProductionNode* ContextWrapper::getNode(int internalType)
-{
-    if(internalType & Node_Depth)
-        return &_depth;
-    else if(internalType & Node_Image)
-        return &_image;
-    else if(internalType & Node_Ir)
-        return &_ir;
-    else if(internalType & Node_Scene)
-        return &_sceneAnalyzer;
-    else if(internalType & Node_User)
-        return &_userGenerator;
-    else if(internalType & Node_Hands)
-        return &_handsGenerator;
-    else if(internalType & Node_Gesture)
-        return &_gestureGenerator;
-    else if(internalType & Node_Recorder)
-        return &_recorder;
-    else if(internalType & Node_Player)
-        return NULL;
-    else
-        return NULL;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// XnVSessionManager helper methods
-
-void XN_CALLBACK_TYPE ContextWrapper::onStartSessionCb(const XnPoint3D& ptPosition, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-
-    //calcUserCoordsys(*ptPosition);
-    context->onStartSessionCb(ptPosition);
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::onEndSessionCb(void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-    context->onEndSessionCb();
-}
-
-void XN_CALLBACK_TYPE ContextWrapper::onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* cxt)
-{
-    ContextWrapper* context = static_cast<ContextWrapper*>(cxt);
-    if(context == NULL)
-        return;
-
-    //calcUserCoordsys(*ptPosition);
-    context->onFocusSessionCb(strFocus,ptPosition,fProgress);
-}
-
-void ContextWrapper::onStartSessionCb(const XnPoint3D& ptPosition)
-{}
-
-void ContextWrapper::onEndSessionCb()
-{}
-
-void ContextWrapper::onFocusSessionCb(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress)
-{}
-
-
-XnVSessionManager* ContextWrapper::createSessionManager(const XnChar* strUseAsFocus, const XnChar* strUseAsQuickRefocus,
-                                                        xn::HandsGenerator*		pTracker,
-                                                        xn::GestureGenerator*	pFocusGenerator,
-                                                        xn::GestureGenerator*	pQuickRefocusGenerator)
-{
-    if(!_initFlag)
-        return NULL;
-
-    XnVSessionManager* ret = new XnVSessionManager();
-    _rc = ret->Initialize(&_globalContext,
-                          strUseAsFocus,strUseAsQuickRefocus,
-                          pTracker,
-                          pFocusGenerator,
-                          pQuickRefocusGenerator);
-
-    // set callbacks
-    ret->RegisterSession(this, onStartSessionCb, onEndSessionCb, onFocusSessionCb);
-
-    _sessionManagerList.push_back(ret);
-    return ret;
-}
-
-
-void ContextWrapper::update(XnVSessionManager* sessionManager)
-{
-    if((!_initFlag && sessionManager == NULL) )
-        // the session manager will be updated in the thread function
-        return;
-
-    sessionManager->Update(&_globalContext);
-}
-*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // threading
@@ -3204,7 +3169,11 @@ void ContextWrapper::setUserCoordsys(float centerX,float centerY,float centerZ,
     _userCoordsysForwardMat = _userCoordsysRetMat.inverse();
     _userCoordsysFlag = true;
 
-    /*
+    //Eigen::Matrix4f tranform = _userCoordsysRetMat.matrix().transpose();
+    Eigen::Matrix4f tranform = _userCoordsysRetMat.matrix();
+    memcpy(_userCoordsysMat,tranform.data(),sizeof(float)*16);
+
+/*
     // debug output
     Eigen::Matrix4f 	testMat;
     testMat = Eigen::umeyama(start,end,true);
@@ -3222,7 +3191,7 @@ void ContextWrapper::setUserCoordsys(float centerX,float centerY,float centerZ,
     Eigen::Vector3f nullTest = xform * userDefNull;
     std::cout << "userDefNull: " << userDefNull << std::endl;
     std::cout << "nullTest: " << nullTest << std::endl;
-    */
+*/
 }
 
 void ContextWrapper::resetUserCoordsys()
@@ -3290,6 +3259,17 @@ void ContextWrapper::calcUserCoordsys(float* point)
     point[2] = vec.z();
 }
 
+void ContextWrapper::calcUserCoordsys(float* x,float* y,float* z)
+{
+    if(!_userCoordsysFlag)
+        return;
+
+    Eigen::Vector3f vec = _userCoordsysForwardMat * Eigen::Vector3f(*x,*y,*z);
+    *x = vec.x();
+    *y = vec.y();
+    *z = vec.z();
+}
+
 void ContextWrapper::calcUserCoordsysMat(float* mat)
 {
     if(!_userCoordsysFlag)
@@ -3312,6 +3292,17 @@ void ContextWrapper::calcUserCoordsysBack(float* point)
     point[0] = vec.x();
     point[1] = vec.y();
     point[2] = vec.z();
+}
+
+void ContextWrapper::calcUserCoordsysBack(float* x,float* y,float* z)
+{
+    if(!_userCoordsysFlag)
+        return;
+
+    Eigen::Vector3f vec = _userCoordsysRetMat * Eigen::Vector3f(*x,*y,*z);
+    *x = vec.x();
+    *y = vec.y();
+    *z = vec.z();
 }
 
 
