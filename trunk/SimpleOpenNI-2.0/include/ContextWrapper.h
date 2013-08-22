@@ -514,7 +514,6 @@ protected:
     float                       _pDepthHist[MAX_DEPTH];
     float                       _pDepthGamma[MAX_DEPTH];
     int                         _depthBufSize;
-    openni::DepthPixel*         _depthMap;
     int*                        _depthMapBuffer;
     float*                      _depthMapRealWorld;
     int*                        _pDepthImage;

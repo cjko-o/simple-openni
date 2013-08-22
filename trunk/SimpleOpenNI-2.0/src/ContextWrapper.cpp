@@ -43,7 +43,7 @@
 using namespace sOpenNI;
 using namespace openni;
 
-#define		SIMPLEOPENNI_VERSION	195		// 1234 = 12.24
+#define		SIMPLEOPENNI_VERSION	196		// 1234 = 12.24
 
 // if you plan to debug on linux, don't forget to call the following commands, otherwise you want be able to
 // attacht to the shared library
@@ -84,7 +84,6 @@ std::vector<class ContextWrapper*> ContextWrapper::_classList;
 
 ContextWrapper::ContextWrapper():
     _pDepthImage(NULL),
-    _depthMap(NULL),
     _depthMapRealWorld(NULL),
     _depthImageColorMode(DepthImgMode_Default),
     _irBufSize(0),
@@ -232,17 +231,15 @@ void ContextWrapper::close()
 
     // end the recording
     if(_recorder.isValid())
+    {
+        std::cout << "end record" << std::endl;
+        _recorder.stop();
         _recorder.destroy();
+    }
 
     // depth
     if(_depthStream.isValid())
         _depthStream.destroy();
-
-    if(_depthMap != NULL)
-    {
-        delete []_depthMap;
-        _depthMap = NULL;
-    }
 
     if(_depthMapRealWorld != NULL)
     {
@@ -513,6 +510,7 @@ bool ContextWrapper::init(const char* record,int runMode)
 
     std::cout << "record: " << record << std::endl;
 
+
     // open the default device
     if(_device.open(record) != openni::STATUS_OK)
     {
@@ -522,18 +520,6 @@ bool ContextWrapper::init(const char* record,int runMode)
 
     _player = _device.getPlaybackControl();
 
-    // init NITE
-    /*
-    if(_niteFlag == false)
-    {
-        nite::Status niteRc = nite::NiTE::initialize();
-        if(niteRc != nite::STATUS_OK)
-            // error;
-            logOut(MsgNode_Error,"ContextWrapper::initContext / nite::NiTE::initialize\n");
-        else
-            _niteFlag = true;
-    }
-    */
     _initFlag = true;
     _nodes |= Node_Player;
 
@@ -543,7 +529,7 @@ bool ContextWrapper::init(const char* record,int runMode)
     createIr(false);
 
     _playerPlayFrame = 0;
-    _playerPlay = false;
+    _playerPlay = true;
 
     // add to list
     _classList.push_back(this);
@@ -859,7 +845,6 @@ bool ContextWrapper::createDepth(bool force)
     _depthMapBuffer     = new int[_depthBufSize];
     memset(_depthMapBuffer,0,sizeof(int) * _depthBufSize);
 
-    _depthMap           = new openni::DepthPixel[_depthBufSize];
     _pDepthImage        = new int[_depthBufSize];
     _depthMapRealWorld  = new float[_depthBufSize * 3];
 
@@ -1001,7 +986,7 @@ bool ContextWrapper::createIr(bool force)
     _irVideoMode = _irStream.getVideoMode();
 
     _irBufSize          = _irVideoMode.getResolutionX() * _irVideoMode.getResolutionY();
-    _pIrImage           = new int[_depthBufSize];
+    _pIrImage           = new int[_irBufSize];
 
     _nodes |= Node_Ir;
 
@@ -1491,11 +1476,13 @@ bool ContextWrapper::updateDepthData()
     // copy the data
     {
         boost::mutex::scoped_lock l(_depthMutex);
-        //boost::mutex::scoped_lock l(_mainMutex);
 
-        const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
-        for(int i=0;i < _depthBufSize;i++)
-            _depthMapBuffer[i] = (int)pDepth[i];
+        if(_depthFrame.isValid())
+        {
+            const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
+            for(int i=0;i < _depthBufSize;i++)
+                _depthMapBuffer[i] = (int)(pDepth[i]);
+        }
     }
 
     _depthMapTimeStamp  = _updateTimeStamp;
@@ -1503,8 +1490,8 @@ bool ContextWrapper::updateDepthData()
     // check if a user defined coordinate system is used
     if(_userCoordsysFlag)
     {
-        updateDepthRealWorldData();
-
+ //       updateDepthRealWorldData();
+/*
         // update depthMap according to the real world data
         float*  pVec    = _depthMapRealWorld;
         int*    pDepth  = _depthMapBuffer;
@@ -1515,7 +1502,7 @@ bool ContextWrapper::updateDepthData()
             pVec+=3;
             pDepth++;
         }
-
+        */
     }
 
     return true;
@@ -1523,8 +1510,6 @@ bool ContextWrapper::updateDepthData()
 
 bool ContextWrapper::updateDepthImageData()
 {
-  //  boost::mutex::scoped_lock l(_mainMutex);
-
     if(_depthImageTimeStamp == _updateTimeStamp)
         return false;
 
@@ -1718,10 +1703,10 @@ void ContextWrapper::genFirstTime()
         }
     }    
 
-
+/*
     if(_recorder.isValid())
         _recorder.start();
-
+*/
     _generatingFlag = true;
 }
 
@@ -1764,6 +1749,11 @@ void ContextWrapper::updateSub()
     {
         {
             boost::mutex::scoped_lock l(_depthMutex);
+/*
+            if(_player)
+            {   // recorded scene
+                if(_playerPlay == false && force == false)
+*/
 
             nite::Status rc = _userTracker.readFrame(&_userFrameRef);
             if (rc != nite::STATUS_OK)
@@ -1837,17 +1827,47 @@ void ContextWrapper::updateSub()
 
 bool ContextWrapper::updateOpenNI(bool force)
 {
+    static bool skipFlag = true;
+
     // update openni
     if(_streamCount > 0)
     {
         if(_player)
         {   // recorded scene
             if(_playerPlay == false && force == false)
+            {
                 return false;
+            }
+
+            /*
+            int changedIndex;
+            std::cout << "111" << std::endl;
+            _rc = openni::OpenNI::waitForAnyStream(_streams, _streamCount, &changedIndex);
+            std::cout << "222" << std::endl;
+            if (_rc != openni::STATUS_OK)
+            {
+                printf("Wait failed: %s\n",openni::OpenNI::getExtendedError());
+                return false;
+            }
+            else
+                _streams[changedIndex]->readFrame(_streamsFrameRef[changedIndex]);
+            std::cout << "333" << std::endl;
+
+            return true;
+            */
         }
 
+        if(skipFlag && _recorder.isValid())
+        {
+            skipFlag = false;
+            return true;
+        }
+
+
         // read out depthMap
-        if(_depthStream.isValid() && _userTracker.isValid() == false)
+        if(_depthStream.isValid() &&
+           _userTracker.isValid() == false &&
+           _handTracker.isValid() == false)
         {
             boost::mutex::scoped_lock l(_depthMutex);
             _depthStream.readFrame(&_depthFrame);
@@ -1867,8 +1887,17 @@ bool ContextWrapper::updateOpenNI(bool force)
             _irStream.readFrame(&_irFrame);
         }
 
+        static bool oneShot = true;
+        if(_recorder.isValid() && oneShot)
+        {
+            oneShot = false;
+            std::cout << "ddddddddddd" << std::endl;
+            _recorder.start();
+        }
+
         return true;
     }
+
     return false;
 }
 
@@ -2036,7 +2065,7 @@ void ContextWrapper::calcHistogram()
     {
         for(int x = 0; x < _depthVideoMode.getResolutionX(); ++x, ++pDepth)
         {
-            if(*_depthMapBuffer != 0)
+            if(*pDepth != 0)
             {
                 _pDepthHist[*pDepth]++;
                 nNumberOfPoints++;
@@ -2070,12 +2099,6 @@ void ContextWrapper::calcDepthImageRealWorld()
         {
             convertProjectiveToRealWorld(x,y,*pDepth,
                                          map, map + 1, map + 2);
-                    /*
-            openni::CoordinateConverter::convertDepthToWorld(_depthStream,
-                                                             x,y,*pDepth,
-                                                             map, map + 1, map + 2);
-            calcUserCoordsys(map);
-                    */
         }
     }
 
@@ -2215,21 +2238,7 @@ int ContextWrapper::depthMap(int* map)
 {
     updateDepthData();
 
-    if(_userCoordsysFlag)
-    {
-        for(int i=0;i < _depthBufSize;i++)
-            map[i] = (int)(_depthMap[i]);
-    }
-    else
-    {
-        memcpy(map,_depthMapBuffer,_depthBufSize * sizeof(int));
-/*
-        const openni::DepthPixel* pDepth = (const openni::DepthPixel*)_depthFrame.getData();
-
-        for(int i=0;i < _depthBufSize;i++)
-            map[i] = (int)pDepth[i];
-            */
-    }
+    memcpy(map,_depthMapBuffer,_depthBufSize * sizeof(int));
 
     return _depthBufSize;
 } 
@@ -3064,6 +3073,14 @@ void ContextWrapper::setMirror(bool flag)
         _imageStream.setMirroringEnabled(flag);
     if(_irStream.isValid())
         _irStream.setMirroringEnabled(flag);
+
+    /*
+    if(_userCoordsysFlag)
+    {   // mirror coordsys
+        _userCoordsysRetMat = _userCoordsysRetMat * Eigen::Scaling(-1.0f,1.0f,1.0f);
+        _userCoordsysForwardMat = _userCoordsysRetMat.inverse();
+    }
+    */
 }
 
 bool ContextWrapper::mirror()
