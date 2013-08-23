@@ -2937,7 +2937,7 @@ float ContextWrapper::getJointPositionSkeleton(int user,int joint,float* jointPo
 
 float ContextWrapper::getJointOrientationSkeleton(int user,
                                                  int joint,
-                                                 float* jointOrientation)
+                                                 float* jointOrientation)   // 3x3 matrix
 {
     if(!_userTracker.isValid())
         return 0.0f;
@@ -2951,11 +2951,13 @@ float ContextWrapper::getJointOrientationSkeleton(int user,
         nite::Quaternion orientation = skelJoint.getOrientation();
 
         // recalc quaternion to matrix
-        Eigen::Quaternion<float> quat(orientation.x,orientation.y,orientation.z,orientation.w);
-       // Eigen::Matrix3f mat = quat;
+        Eigen::Quaternion<float> quat(orientation.w,orientation.x,orientation.y,orientation.z);
+
         // copy the data to the joint
+        Eigen::Matrix3f     mat = quat.toRotationMatrix().transpose();
+        memcpy(jointOrientation,mat.data(),sizeof(float) * 9);
 
-
+        calcUserCoordsys(jointOrientation);
 
         return skelJoint.getPositionConfidence();
     }
