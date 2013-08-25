@@ -1210,7 +1210,7 @@ float ContextWrapper::getSmoothingHand()
     if(!_handTracker.isValid())
         return 0.0f;
 
-    _handTracker.getSmoothingFactor();
+    return _handTracker.getSmoothingFactor();
 }
 
 void ContextWrapper::startGesture(int gesture)
@@ -2438,6 +2438,8 @@ void ContextWrapper::createIrImage()
                     pIrImage++;
                 }
             }
+            break;
+        default:
             break;
     }
 
