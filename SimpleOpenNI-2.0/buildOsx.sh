@@ -45,6 +45,10 @@ echo "--- build ---"
 make -j6 
 
 # change name path for a local library
+# boost
+install_name_tool -change /usr/local/lib/libboost_thread-mt.dylib @loader_path/osx/libboost_thread-mt.dylib libSimpleOpenNI.jnilib
+install_name_tool -change /usr/local/lib/libboost_system-mt.dylib @loader_path/osx/libboost_system-mt.dylib libSimpleOpenNI.jnilib
+# nite
 install_name_tool -change libOpenNI2.dylib @loader_path/osx/libOpenNI2.dylib libSimpleOpenNI.jnilib
 install_name_tool -change libNiTE2.dylib @loader_path/osx/libNiTE2.dylib libSimpleOpenNI.jnilib
 
