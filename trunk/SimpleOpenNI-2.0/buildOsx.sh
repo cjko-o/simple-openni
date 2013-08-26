@@ -35,7 +35,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 	  -DNITE_BASE=/Users/max/Documents/pDev/openni/NiTE-MacOSX-x64-2.2/ \
 	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
 	  -DP5_JAR=/Applications/Processing.app/Contents/Resources/Java/core/library/core.jar \
-	  -DCMAKE_OSX_ARCHITECTURES="x86_64" \
+	  -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" \
 	  ..
 
 
