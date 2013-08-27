@@ -11,6 +11,9 @@
 
 cd ./dist/all/SimpleOpenNI/library/osx
 
+echo "--- change libpath for boost_thread ---"
+install_name_tool -change /usr/local/lib/libboost_system-mt.dylib @loader_path/./libboost_system-mt.dylib libboost_thread-mt.dylib
+
 echo "--- change libpath for libNiTE2 ---"
 install_name_tool -change libOpenNI2.dylib @loader_path/./libOpenNI2.dylib libNiTE2.dylib
 
