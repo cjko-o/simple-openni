@@ -1381,6 +1381,8 @@ int ContextWrapper::curFramePlayer()
         return  _depthFrame.getFrameIndex();
     else if(_imageFrame.isValid())
         return  _imageFrame.getFrameIndex();
+    else if(_irFrame.isValid())
+        return  _irFrame.getFrameIndex();
 
     return 0;
 }
@@ -1891,7 +1893,6 @@ bool ContextWrapper::updateOpenNI(bool force)
         if(_recorder.isValid() && oneShot)
         {
             oneShot = false;
-            std::cout << "ddddddddddd" << std::endl;
             _recorder.start();
         }
 
