@@ -27,28 +27,8 @@ void setup()
   if(recordFlag == false)
   {
      context = new SimpleOpenNI(this,recordPath);
-     //context.playbackPlay(true);
      
      println("curFramePlayer: " + context.curFramePlayer());
-    /*
-    // playing, this works without the camera
-    if ( context.openFileRecording("test.oni") == false)
-    {
-      println("can't find recording !!!!");
-      exit();
-    }
-
-    // it's possible to run the sceneAnalyzer over the recorded data strea   
-    /*
-    if ( context.enableScene() == false)
-    {
-      println("can't setup scene!!!!");
-      exit();
-      return;
-    }
-    
-    println("This file has " + context.framesPlayer() + " frames.");
-    */
   }
   else
   {  
@@ -96,10 +76,6 @@ void draw()
       image(context.depthImage(), 0, 0);
   }
 
-/*
-  if ((context.nodes() & SimpleOpenNI.NODE_SCENE) != 0)  
-    image(context.sceneImage(), 0, 0, context.sceneWidth()*.4, context.sceneHeight()*.4);
-    */
   // draw timeline
   if(recordFlag == false)
   {
@@ -157,10 +133,6 @@ void keyPressed()
     break;   
   case ' ':
     // toggle pause
-    /*
-    context.setRepeatPlayer(!context.repeatPlayer());
-    println("RepeatMode: " + context.repeatPlayer());
-    */
     context.playbackPlay(!context.isPlaybackPlay());
     break;    
   case BACKSPACE:
