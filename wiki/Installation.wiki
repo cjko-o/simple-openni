@@ -20,8 +20,8 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 
 = Windows =
 
-* Install OpenNI,NITE and the Sensor Driver *
-  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=OpenNI_NITE_Installer+win64&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount Installation Package Win64], or [http://code.google.com/p/simple-openni/downloads/list?can=2&q=OpenNI_NITE_Installer+win32&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount Installation Package Win32]
+* Install Kinect SDK
+  * Download [http://go.microsoft.com/fwlink/?LinkId=275588 Kinect SDK] from the [http://www.microsoft.com/en-us/kinectforwindows/develop/developer-downloads.aspx Developer Page]
   * Start the OpenNI Installer
   * Start the NITE Installer
   * Start the Sensor Installer (Driver for Primesense Devices: Asus Xtion Pro,etc.)
