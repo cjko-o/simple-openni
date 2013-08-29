@@ -62,9 +62,7 @@ IF(Boost_INCLUDE_DIRS MATCHES "Boost_INCLUDE_DIR-NOTFOUND")
 ELSE()
 	INCLUDE_DIRECTORIES ( ${Boost_INCLUDE_DIRS} )
 	LINK_DIRECTORIES ( ${Boost_LIBRARY_DIRS} )
-	message(${Boost_INCLUDE_DIRS})
-	message(${Boost_LIBRARY_DIRS})
-  
+
 	IF(APPLE)
 		# osx
 		set(Boost_LIBRARIES  "boost_thread-mt" "boost_system-mt")
@@ -74,6 +72,7 @@ ELSE()
 		set(Boost_LIBRARIES  "boost_thread")
 	ELSE()
 		# windows will find the right libs by itself
+		LINK_DIRECTORIES ( ${BOOST_LIBRARYDIR} )	
 	ENDIF()
 ENDIF()
 
@@ -108,7 +107,12 @@ INCLUDE_DIRECTORIES(${NITE_BASE}/Include)
 # openNI lib	
 SET(OPEN_LIBRARY_NAME NiTE2)
 
-FIND_LIBRARY(NITE_LIBRARY NAMES ${OPEN_LIBRARY_NAME} PATHS ${NITE_BASE}/Redist)
+IF(WIN32)
+	FIND_LIBRARY(NITE_LIBRARY NAMES ${OPEN_LIBRARY_NAME} PATHS ${NITE_BASE}/lib)
+ELSE()
+	FIND_LIBRARY(NITE_LIBRARY NAMES ${OPEN_LIBRARY_NAME} PATHS ${NITE_BASE}/Redist)
+ENDIF()
+
 IF(NOT NITE_LIBRARY)
 	# env is not set
 	MESSAGE("OPEN_NI_BASE should be set, for example:")
@@ -226,7 +230,6 @@ IF(NOT APPLE)
 
   SET_TARGET_PROPERTIES(SimpleOpenNI PROPERTIES SUFFIX ${NEW_SUFFIX})
   
-
 ENDIF()
 
 # only for linux

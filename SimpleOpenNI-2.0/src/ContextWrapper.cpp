@@ -25,6 +25,8 @@
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX	// eigen + windows.h will have conflict without this
+
+#include <direct.h>
 #endif
 
 #include <cmath>
@@ -165,8 +167,12 @@ ContextWrapper::~ContextWrapper()
 
 void ContextWrapper::chdir(const char* dir)
 {
+#ifdef WIN32
+    int ret = _chdir(dir);
+#else
     int ret = ::chdir(dir);
-/*
+#endif
+	/*
     char * pPath;
     pPath = getenv ("OPENNI2_REDIST");
     if (pPath!=NULL)
