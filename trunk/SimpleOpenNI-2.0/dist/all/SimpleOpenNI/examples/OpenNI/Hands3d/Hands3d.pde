@@ -52,8 +52,6 @@ void setup()
 
   // enable hands + gesture generation
   context.enableHand();
-  
-  // add focus gestures  / here i do have some problems on the mac, i only recognize raiseHand ? Maybe cpu performance ?
   context.startGesture(SimpleOpenNI.GESTURE_WAVE);
 
   // set how smooth the hand capturing should be

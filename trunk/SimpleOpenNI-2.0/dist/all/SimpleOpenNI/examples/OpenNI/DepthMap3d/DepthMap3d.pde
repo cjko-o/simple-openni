@@ -21,8 +21,7 @@ void setup()
 {
   size(1024,768,P3D);
 
-  context = new SimpleOpenNI(this,SimpleOpenNI.RUN_MODE_MULTI_THREADED);
-  //context = new SimpleOpenNI(this);
+  context = new SimpleOpenNI(this);
   if(context.isInit() == false)
   {
      println("Can't init SimpleOpenNI, maybe the camera is not connected!"); 
