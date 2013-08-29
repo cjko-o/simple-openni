@@ -44,10 +44,20 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
             if(sysStr.indexOf("win") >= 0)
             {   // windows
                 if(archStr.indexOf("86") >= 0)
-                    // 32bit
-                    libName += "32";
-                else if(archStr.indexOf("64") >= 0)
-                    libName += "64";
+                {    // 32bit
+                    libName += "32.dll";
+                    nativLibPath = getLibraryPathWin() + "/SimpleOpenNI/library/";
+                    nativDepLibPath = nativLibPath + "win64/";
+                }
+				else if(archStr.indexOf("64") >= 0)
+                {
+					libName += "64.dll";
+                    nativLibPath = getLibraryPathWin() + "/SimpleOpenNI/library/";
+                    nativDepLibPath = nativLibPath + "win64/";
+				}
+				// load dependencies
+				System.load(nativDepLibPath + "OpenNI2.dll");
+				System.load(nativDepLibPath + "NiTE2.dll");
              }
             else if(sysStr.indexOf("nix") >= 0 || sysStr.indexOf("linux") >=  0 )
             {   // unix
@@ -115,7 +125,7 @@ public class SimpleOpenNI extends ContextWrapper implements SimpleOpenNIConstant
     public static String getLibraryPathWin()
     {
         URL url = SimpleOpenNI.class.getResource("SimpleOpenNI.class");
-        System.out.println("url = " + url);
+        //System.out.println("url = " + url);
         if (url != null)
         {
             // Convert URL to string, taking care of spaces represented by the "%20"
