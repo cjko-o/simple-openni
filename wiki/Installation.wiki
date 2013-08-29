@@ -24,7 +24,9 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
   * Download [http://go.microsoft.com/fwlink/?LinkId=275588 Kinect SDK] from the [http://www.microsoft.com/en-us/kinectforwindows/develop/developer-downloads.aspx Developer Page]
   * Start the Kinect SDK Installer
 
-If everything worked out, you should see the camera in your Device Manager(under 'Kinect for Windows').
+If everything worked out, you should see the camera in your Device Manager(under 'Kinect for Windows') if you plugged it in.
+In case you have an error when you startup a processing sketch with SimpleOpenNI, try to install the [http://www.microsoft.com/en-us/download/details.aspx?id=29 Runtime Libraries] from Microsoft.
+
 
 ----
 = OSX =
