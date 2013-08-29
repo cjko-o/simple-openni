@@ -22,19 +22,10 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 
 * Install Kinect SDK
   * Download [http://go.microsoft.com/fwlink/?LinkId=275588 Kinect SDK] from the [http://www.microsoft.com/en-us/kinectforwindows/develop/developer-downloads.aspx Developer Page]
-  * Start the OpenNI Installer
-  * Start the NITE Installer
-  * Start the Sensor Installer (Driver for Primesense Devices: Asus Xtion Pro,etc.)
-  * Start the Kinect Installer (Driver for Kinect)
+  * Start the Kinect SDK Installer
 
-If everything worked out, you should see the camera in your Device Manager(under PrimeSensor : Kinect Camera, Kinect Motor).
+If everything worked out, you should see the camera in your Device Manager(under 'Kinect for Windows').
 
-* Install SimpleOpenNI (Processing < 2.0) *
-  * Download [http://code.google.com/p/simple-openni/downloads/list?can=2&q=SimpleOpenNI&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCountt SimpleOpenNI]
-  * Copy the 'SimpleOpenNI.zip' into this folder:
-      C:\Users\'your username'\Documents\Processing\libraries
-  * If you don't have this folder then create it.
-  * If you use the *64bit* version, verify if you run Processing with 64bit. Mainly you have to install a [http://www.oracle.com/technetwork/java/javase/downloads/jdk-7u2-download-1377129.html 64bit Java version], also you have to remove the Java folder in the Processing folder.
 ----
 = OSX =
 
