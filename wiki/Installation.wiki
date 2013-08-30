@@ -20,8 +20,9 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 or Download as file:
  * Download [https://simple-openni.googlecode.com/svn/trunk/SimpleOpenNI-2.0/dist/all/SimpleOpenNI.zip SimpleOpenNI]
  * Copy the extracted folder in your Processing library folder
-   * Windows
-
+   * Windows: C:\Users\'your username'\Documents\Processing\libraries
+   * Linux: ~/sketchbook/libraries
+   * OSX: /Users/'your username'/Documents/Processing/libraries
 ----
 
 = Windows =
