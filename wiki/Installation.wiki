@@ -16,6 +16,12 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
   * Download [http://processing.org/download/ Processing >= 2.0] for your platform and install it
   * Go to the menu: Tools-> Add Tool...
   * Select and install SimpleOpenNI
+
+or Download as file:
+ * Download [https://simple-openni.googlecode.com/svn/trunk/SimpleOpenNI-2.0/dist/all/SimpleOpenNI.zip SimpleOpenNI]
+ * Copy the extracted folder in your Processing library folder
+   * Windows
+
 ----
 
 = Windows =
