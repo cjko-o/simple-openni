@@ -5,17 +5,17 @@ http://code.google.com/p/simple-openni/
 vx.xx status, mm/dd/yyyy
 
 v0.xx , in planning:
-		- *Remove all XML init. functions:
 		- *Added methods for highperformance drawing of the depthMap pointcloud (Opengl VBO)
 		- *Multiple sensors with the generators
 		- *Remove all deprecated functions, some callbacks will change
-		- *Should make an example for calibration file
-		- *Added support for Processing 2.0, still some open questions, but it works roughly
 		- *Added Kinect motor support(thanks to BitGriff):
 			- moveKinect(float angle) - tilts the kinect
-		  Does not work with the newest kinect drivers(5.1.02,Linux64)
 
-v2.00 , 12/01/2012,
+v1.96 , 30/08/2013,
+        - Support for Win32/64, OSX32/64, Linux64
+        - Installation is now much simpler, see https://code.google.com/p/simple-openni/wiki/Installation?ts=1377782923&updated=Installation
+
+v1.91 , 12/01/2012,
         - OpenNI 2.0
 
 v0.27 , 05/24/2012,
