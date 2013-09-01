@@ -14,7 +14,7 @@ Before you can use SimpleOpenNI you have to install Processing and OpenNI.
 = Processing =
 
   * Download [http://processing.org/download/ Processing >= 2.0] for your platform and install it
-  * Go to the menu: Tools-> Add Tool...
+  * Go to the menu: Sketch-> Import Library...-> Add Library...
   * Select and install SimpleOpenNI
 
 or Download as file:
